@@ -34,3 +34,5 @@ build/
 
 ### databases ###
 application.properties
+
+.gitignore
