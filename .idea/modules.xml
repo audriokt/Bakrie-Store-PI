@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/backend-bakrie/backend-bakrie.iml" filepath="$PROJECT_DIR$/backend-bakrie/backend-bakrie.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/bakrie-store.iml" filepath="$PROJECT_DIR$/.idea/bakrie-store.iml" />
     </modules>
   </component>
