@@ -1,5 +1,3 @@
----
-
 # Development Database Backups
 
 ## Tujuan
