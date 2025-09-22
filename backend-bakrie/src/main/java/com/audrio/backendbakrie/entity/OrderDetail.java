@@ -1,4 +1,4 @@
-package com.audrio.backendbakrie.model;
+package com.audrio.backendbakrie.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +8,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "order_details")
 @Data
@@ -15,13 +17,13 @@ public class OrderDetail {
 
     @Id
     @Column(name = "id_order_detail", length = 100, nullable = false)
-    private String idOrderDetail;
+    private UUID idOrderDetail;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
     @ManyToOne
-    @JoinColumn(name = "id_order", nullable = false)
+    @JoinColumn(name = "id_order",nullable = false)
     private Orders order;
 
     @ManyToOne

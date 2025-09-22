@@ -1,4 +1,4 @@
-package com.audrio.backendbakrie.model;
+package com.audrio.backendbakrie.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

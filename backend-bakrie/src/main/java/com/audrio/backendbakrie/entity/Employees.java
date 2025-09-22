@@ -1,4 +1,4 @@
-package com.audrio.backendbakrie.model;
+package com.audrio.backendbakrie.entity;
 import java.util.UUID;
 
 import jakarta.persistence.*;

@@ -1,27 +1,28 @@
-package com.audrio.backendbakrie.model;
+package com.audrio.backendbakrie.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.hibernate.validator.constraints.UUID;
+import java.util.UUID;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "item_carts")
 @Data
-
 public class Item_Carts {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id_item_carts;
+    @Column(name = "id_item_carts")
+    private UUID idItemCarts;
 
     @ManyToOne
-    @JoinColumn(name = "id_cart")
-    private Carts id_cart;
+    @JoinColumn(name = "id_cart", nullable = false)
+    private Carts cart;
 
     @ManyToOne
-    @JoinColumn(name = "id_product")
-    private Products id_product;
+    @JoinColumn(name = "id_product", nullable = false)
+    private Products product;
 
     @NotNull
     @Column(name = "quantity")
@@ -29,6 +30,5 @@ public class Item_Carts {
 
     @NotNull
     @Column(name = "added_at")
-    private LocalDateTime added_at;
-
+    private LocalDateTime addedAt;
 }
