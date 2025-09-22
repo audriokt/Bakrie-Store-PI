@@ -31,10 +31,4 @@ public class Item_Carts {
     @Column(name = "added_at")
     private LocalDateTime added_at;
 
-
-
-
-
-
-
 }
