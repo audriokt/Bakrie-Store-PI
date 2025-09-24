@@ -37,5 +37,8 @@ public class Products {
     @Column(name="product_stock")
     private int product_stock;
 
-
+    @NotNull
+    @Min(0)
+    @Column(name="image_url")
+    private String image_url;
     }
