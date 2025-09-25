@@ -46,7 +46,7 @@ public class Orders {
     private String orderNumber;
 
     @NotNull
-    @Column(name = "order_date")
+    @Column(name = "order_date", updatable = false)
     private Timestamp orderDate;
 
     @NotNull

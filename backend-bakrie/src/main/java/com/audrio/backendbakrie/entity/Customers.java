@@ -51,6 +51,7 @@ public class Customers {
 
     @NotNull
     @CreationTimestamp
+    @Column(updatable = false)
     private Timestamp created_at;
 
     @NotNull
