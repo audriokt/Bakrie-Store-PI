@@ -1,4 +1,5 @@
 package com.audrio.backendbakrie.entity;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -8,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "employees")
@@ -34,6 +37,14 @@ public class Employees {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
+
+    @NotNull
+    @CreationTimestamp
+    private Timestamp created_at;
+
+    @NotNull
+    @UpdateTimestamp
+    private Timestamp updated_at;
 
     public enum Role {
         admin,
