@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -44,4 +45,8 @@ public class Customers {
     @Size(max = 200)
     @Column(name = "password", unique = true)
     private String password;
+
+    @OneToMany(mappedBy = "customer")
+    private List<Orders> orders;
+
 }
