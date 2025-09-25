@@ -2,6 +2,7 @@ package com.audrio.backendbakrie.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 import java.util.UUID;
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "item_carts")
 @Data
+@Builder
 public class Item_Carts {
 
     @Id

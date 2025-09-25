@@ -1,5 +1,6 @@
 package com.audrio.backendbakrie.entity;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -7,11 +8,14 @@ import java.util.UUID;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "orders")
 @Data
+@Builder
 public class Orders {
 
     @Id
@@ -39,9 +43,10 @@ public class Orders {
 
     @NotNull
     @Column(name = "order_date")
-    private LocalDate orderDate;
+    private Timestamp orderDate;
 
     @NotNull
+    @CreationTimestamp
     @Size(max = 20)
     @Column(name = "order_status")
     private String orderStatus;

@@ -6,11 +6,13 @@ import java.util.UUID;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Table(name = "carts")
 @Data
+@Builder
 public class Carts {
 
     @Id

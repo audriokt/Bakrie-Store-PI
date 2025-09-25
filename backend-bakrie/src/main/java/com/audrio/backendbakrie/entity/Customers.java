@@ -40,5 +40,4 @@ public class Customers {
     @Size(max = 200)
     @Column(name = "password", unique = true)
     private String password;
-
 }

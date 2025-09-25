@@ -4,11 +4,13 @@ import java.util.UUID;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Table(name = "employees")
 @Data
+@Builder
 public class Employees {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
