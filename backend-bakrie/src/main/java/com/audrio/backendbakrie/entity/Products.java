@@ -4,13 +4,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "products")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Products {
 
     @Id
@@ -41,4 +47,4 @@ public class Products {
     @Min(0)
     @Column(name="image_url")
     private String image_url;
-    }
+}

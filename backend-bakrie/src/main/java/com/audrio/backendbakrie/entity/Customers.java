@@ -3,13 +3,23 @@ package com.audrio.backendbakrie.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "customers")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Customers {
 
     @Id
@@ -40,5 +50,15 @@ public class Customers {
     @Size(max = 200)
     @Column(name = "password", unique = true)
     private String password;
+
+    @NotNull
+    @CreationTimestamp
+    private Timestamp created_at;
+    @NotNull
+    @UpdateTimestamp
+    private Timestamp updated_at;
+
+    @OneToMany(mappedBy = "customer")
+    private List<Orders> orders;
 
 }

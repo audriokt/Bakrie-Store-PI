@@ -3,16 +3,24 @@ package com.audrio.backendbakrie.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "transactions")
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Transactions {
 
     @Id
@@ -39,8 +47,9 @@ public class Transactions {
     private String paymentMethod;
 
     @NotNull
+    @CreationTimestamp
     @Column(name = "payment_date")
-    private LocalDate paymentDate;
+    private Timestamp paymentDate;
 
     @NotNull
     @Column(name = "total", precision = 10, scale = 2)
