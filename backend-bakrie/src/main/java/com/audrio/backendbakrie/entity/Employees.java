@@ -51,13 +51,4 @@ public class Employees {
         admin,
         cashier
     }
-
-
-
-
-
-
-
-
-
 }
