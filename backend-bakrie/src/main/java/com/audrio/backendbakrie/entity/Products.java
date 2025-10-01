@@ -47,4 +47,10 @@ public class Products {
     @Min(0)
     @Column(name="image_url")
     private String image_url;
-    }
+
+    @CreationTimestamp
+    private Timestamp created_at;
+
+    @UpdateTimestamp
+    private Timestamp updated_at;
+}
