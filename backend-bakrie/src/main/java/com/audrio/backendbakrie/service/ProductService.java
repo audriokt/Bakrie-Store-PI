@@ -1,4 +1,14 @@
-package com.audrio.backendbakrie.service.impl;
+package com.audrio.backendbakrie.service;
+
+import com.audrio.backendbakrie.io.ProductRequest;
+import com.audrio.backendbakrie.io.ProductResponse;
+
+import java.util.List;
+import java.util.UUID;
 
 public interface ProductService {
+    ProductResponse add(ProductRequest request);
+    List<ProductResponse> getAll();
+    void delete(UUID product_id);
+    ProductResponse update(UUID product_id, ProductRequest request);
 }

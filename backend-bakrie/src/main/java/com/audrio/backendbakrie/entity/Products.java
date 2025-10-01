@@ -8,7 +8,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
@@ -21,7 +24,7 @@ public class Products {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id_product;
+    private UUID idProduct;
 
     @NotNull
     @Size(min = 2, max = 100)
@@ -43,8 +46,12 @@ public class Products {
     @Column(name="product_stock")
     private int product_stock;
 
-    @NotNull
-    @Min(0)
     @Column(name="image_url")
     private String image_url;
+
+    @CreationTimestamp
+    private Timestamp created_at;
+
+    @UpdateTimestamp
+    private Timestamp updated_at;
 }
