@@ -6,6 +6,7 @@ import com.audrio.backendbakrie.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,19 +32,23 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public CustomerResponse getCustomerById(@PathVariable UUID id) {
-        return customerService.findById(id);
+    public CustomerResponse getCustomerById(@PathVariable String id) {
+        return customerService.findById(UUID.fromString(id));
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public CustomerResponse updateCustomer(@PathVariable UUID id, @RequestBody CustomerRequest customerRequest) {
-        return customerService.update(id, customerRequest);
+    public CustomerResponse updateCustomer(@PathVariable String id, @RequestBody CustomerRequest customerRequest) {
+        return customerService.update(UUID.fromString(id), customerRequest);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteCustomer(@PathVariable UUID id) {
-        customerService.delete(id);
+    public void deleteCustomer(@PathVariable String id) {
+        try {
+            customerService.delete(UUID.fromString(id));
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 }

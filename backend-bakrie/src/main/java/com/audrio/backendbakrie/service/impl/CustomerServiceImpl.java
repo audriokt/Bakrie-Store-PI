@@ -5,6 +5,7 @@ import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;
 import com.audrio.backendbakrie.service.CustomerService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,35 +26,32 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public CustomerResponse update(UUID id, CustomerRequest request) {
-        // Cari data customer berdasarkan ID
-        Customers existingCustomer = customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        customerRepository.updateCustomerFields(
+                id,
+                request.getUsername(),
+                request.getPassword(),
+                request.getAddress(),
+                request.getEmail(),
+                request.getPhone_num()
+        );
 
-        // Update field sesuai data request
-        existingCustomer.setUsername(request.getUsername());
-        existingCustomer.setEmail(request.getEmail());
-        existingCustomer.setPhone_num(request.getPhone_num());
-        existingCustomer.setAddress(request.getAddress());
+        Customers updated = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found after update"));
 
-        // Simpan update ke database
-        Customers updatedCustomer = customerRepository.save(existingCustomer);
-        return convertToResponse(updatedCustomer);
+        return convertToResponse(updated);
     }
 
     @Override
     public void delete(UUID id) {
-        // Cari customer by ID
         Customers existingCustomer = customerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        // Hapus dari database
         customerRepository.delete(existingCustomer);
     }
 
     @Override
     public CustomerResponse findById(UUID id) {
-        // Ambil customer berdasarkan ID
         Customers customer = customerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
@@ -62,10 +60,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<CustomerResponse> getAll() {
-        // Ambil semua customer dari database
         List<Customers> customers = customerRepository.findAll();
-
-        // Convert ke response
         return customers.stream()
                 .map(this::convertToResponse)
                 .toList();
