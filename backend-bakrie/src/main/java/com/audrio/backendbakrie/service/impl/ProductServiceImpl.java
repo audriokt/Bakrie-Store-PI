@@ -46,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
 
     private ProductResponse convertToResponse(Products newProduct) {
         return ProductResponse.builder()
-                .id_product(newProduct.getIdProduct().toString())
+                .idProduct(newProduct.getIdProduct().toString())
                 .product_name(newProduct.getProduct_name())
                 .description(newProduct.getDescription())
                 .image_url(newProduct.getImage_url())
