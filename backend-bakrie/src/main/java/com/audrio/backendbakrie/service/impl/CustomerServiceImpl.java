@@ -68,7 +68,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
         return CustomerResponse.builder()
-                .customer_id(newCustomer.getId_customer().toString())
+                .customer_id(newCustomer.getIdCustomer().toString())
                 .phone_num(newCustomer.getPhone_num())
                 .address(newCustomer.getAddress())
                 .email(newCustomer.getEmail())
@@ -80,7 +80,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private Customers convertToEntity(CustomerRequest request) {
         return Customers.builder()
-                .id_customer(UUID.randomUUID())
+                .idCustomer(UUID.randomUUID())
                 .username(request.getUsername())
                 .address(request.getAddress())
                 .email(request.getEmail())

@@ -24,7 +24,7 @@ public class Customers {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private UUID id_customer;
+    private UUID idCustomer;
 
     @NotNull
     @Size(max = 100)
