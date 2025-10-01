@@ -8,6 +8,7 @@ import com.audrio.backendbakrie.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -21,6 +22,53 @@ public class CustomerServiceImpl implements CustomerService {
         Customers newCustomer =  convertToEntity(request);
         newCustomer = customerRepository.save(newCustomer);
         return convertToResponse(newCustomer);
+    }
+
+    @Override
+    public CustomerResponse update(UUID id, CustomerRequest request) {
+        // Cari data customer berdasarkan ID
+        Customers existingCustomer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        // Update field sesuai data request
+        existingCustomer.setUsername(request.getUsername());
+        existingCustomer.setEmail(request.getEmail());
+        existingCustomer.setPhone_num(request.getPhone_num());
+        existingCustomer.setAddress(request.getAddress());
+
+        // Simpan update ke database
+        Customers updatedCustomer = customerRepository.save(existingCustomer);
+        return convertToResponse(updatedCustomer);
+    }
+
+    @Override
+    public void delete(UUID id) {
+        // Cari customer by ID
+        Customers existingCustomer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        // Hapus dari database
+        customerRepository.delete(existingCustomer);
+    }
+
+    @Override
+    public CustomerResponse findById(UUID id) {
+        // Ambil customer berdasarkan ID
+        Customers customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        return convertToResponse(customer);
+    }
+
+    @Override
+    public List<CustomerResponse> getAll() {
+        // Ambil semua customer dari database
+        List<Customers> customers = customerRepository.findAll();
+
+        // Convert ke response
+        return customers.stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
     private CustomerResponse convertToResponse(Customers newCustomer) {

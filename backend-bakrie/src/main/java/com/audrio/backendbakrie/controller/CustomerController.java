@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/customers")
 @RequiredArgsConstructor
@@ -20,8 +23,27 @@ public class CustomerController {
         return customerService.add(customerRequest);
     }
 
-    @GetMapping("/coba")
-    public String sayHello(){
-        return "Hello World";
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<CustomerResponse> fetchAllCustomers() {
+        return customerService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public CustomerResponse getCustomerById(@PathVariable UUID id) {
+        return customerService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public CustomerResponse updateCustomer(@PathVariable UUID id, @RequestBody CustomerRequest customerRequest) {
+        return customerService.update(id, customerRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteCustomer(@PathVariable UUID id) {
+        customerService.delete(id);
     }
 }
