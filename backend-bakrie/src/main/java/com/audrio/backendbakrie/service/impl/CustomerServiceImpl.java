@@ -37,7 +37,7 @@ public class CustomerServiceImpl implements CustomerService {
                 request.getPhone_num()
         );
 
-        Customers updated = customerRepository.findById(id)
+        Customers updated = customerRepository.findByIdCustomer(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found after update"));
 
         return convertToResponse(updated);
@@ -45,14 +45,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void delete(UUID id) {
-        Customers existingCustomer = customerRepository.findById(id)
+        Customers existingCustomer = customerRepository.findByIdCustomer(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
         customerRepository.delete(existingCustomer);
     }
 
     @Override
     public CustomerResponse findById(UUID id) {
-        Customers customer = customerRepository.findById(id)
+        Customers customer = customerRepository.findByIdCustomer(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         return convertToResponse(customer);
