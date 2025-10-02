@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CustomerService {
-    CustomerResponse add(CustomerRequest request);
+    CustomerResponse Add(CustomerRequest request);
     CustomerResponse update(UUID id, CustomerRequest request);
     void delete(UUID id);
-    CustomerResponse findById(UUID id);
     List<CustomerResponse> getAll();
 }

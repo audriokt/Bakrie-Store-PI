@@ -3,6 +3,7 @@ package com.audrio.backendbakrie.controller;
 import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;
 import com.audrio.backendbakrie.service.CustomerService;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -13,27 +14,21 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/customers")
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CustomerResponse addCustomer(@RequestBody CustomerRequest customerRequest){
-        return customerService.add(customerRequest);
+    public CustomerResponse createCustomer(@RequestBody CustomerRequest customerRequest){
+        return customerService.Add(customerRequest);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<CustomerResponse> fetchAllCustomers() {
         return customerService.getAll();
-    }
-
-    @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public CustomerResponse getCustomerById(@PathVariable String id) {
-        return customerService.findById(UUID.fromString(id));
     }
 
     @PutMapping("/{id}")
@@ -43,7 +38,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCustomer(@PathVariable String id) {
         try {
             customerService.delete(UUID.fromString(id));

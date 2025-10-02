@@ -19,7 +19,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
 
     @Override
-    public CustomerResponse add(CustomerRequest request) {
+    public CustomerResponse Add(CustomerRequest request) {
         Customers newCustomer =  convertToEntity(request);
         newCustomer = customerRepository.save(newCustomer);
         return convertToResponse(newCustomer);
@@ -51,14 +51,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public CustomerResponse findById(UUID id) {
-        Customers customer = customerRepository.findByIdCustomer(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        return convertToResponse(customer);
-    }
-
-    @Override
     public List<CustomerResponse> getAll() {
         List<Customers> customers = customerRepository.findAll();
         return customers.stream()
@@ -80,8 +72,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     private Customers convertToEntity(CustomerRequest request) {
         return Customers.builder()
-                .idCustomer(UUID.randomUUID())
                 .username(request.getUsername())
+                .password(request.getPassword())
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .phone_num(request.getPhone_num())

@@ -5,6 +5,7 @@ import com.audrio.backendbakrie.entity.Products;
 import com.audrio.backendbakrie.io.ProductRequest;
 import com.audrio.backendbakrie.io.ProductResponse;
 import com.audrio.backendbakrie.service.ProductService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse update(UUID product_id,ProductRequest request) {
-        return null;
+            Products existingProduct = productRepository.findByIdProduct(product_id)
+                    .orElseThrow(() -> new EntityNotFoundException("product not found"));
+            productRepository.updateProductFields(
+                    product_id,
+                    request.getProduct_name(),
+                    request.getDescription(),
+                    request.getProduct_price(),
+                    request.getProduct_stock(),
+                    request.getImage_url()
+            );
+            return convertToResponse(existingProduct);
     }
 
     private ProductResponse convertToResponse(Products newProduct) {
