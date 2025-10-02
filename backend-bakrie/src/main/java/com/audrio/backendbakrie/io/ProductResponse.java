@@ -2,7 +2,6 @@ package com.audrio.backendbakrie.io;
 
 import lombok.Builder;
 import lombok.Data;
-
 import java.sql.Timestamp;
 
 @Builder

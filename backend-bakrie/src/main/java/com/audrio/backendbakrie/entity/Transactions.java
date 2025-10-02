@@ -54,5 +54,4 @@ public class Transactions {
     @NotNull
     @Column(name = "total", precision = 10, scale = 2)
     private BigDecimal total;
-
 }
