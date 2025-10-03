@@ -24,7 +24,7 @@ public class Products {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id_product;
+    private UUID idProduct;
 
     @NotNull
     @Size(min = 2, max = 100)
@@ -46,12 +46,11 @@ public class Products {
     @Column(name="product_stock")
     private int product_stock;
 
-    @NotNull
-    @Min(0)
     @Column(name="image_url")
     private String image_url;
 
     @CreationTimestamp
+    @Column(name="created_at", updatable = false)
     private Timestamp created_at;
 
     @UpdateTimestamp

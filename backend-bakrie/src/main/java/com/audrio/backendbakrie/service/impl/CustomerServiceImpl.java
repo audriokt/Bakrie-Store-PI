@@ -4,10 +4,13 @@ import com.audrio.backendbakrie.Repository.CustomerRepository;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;
+import com.audrio.backendbakrie.service.CloudinaryService;
 import com.audrio.backendbakrie.service.CustomerService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.audrio.backendbakrie.utils.ExceptionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,12 +18,15 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
-
     private final CustomerRepository customerRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Override
-    public CustomerResponse Add(CustomerRequest request) {
+    public CustomerResponse Add(CustomerRequest request, MultipartFile file) {
+        String id =  UUID.randomUUID().toString();
+        String imgUrl = cloudinaryService.uploadFile(file, id).getUrl();
         Customers newCustomer =  convertToEntity(request);
+        newCustomer.setImg_url(imgUrl);
         newCustomer = customerRepository.save(newCustomer);
         return convertToResponse(newCustomer);
     }
@@ -38,7 +44,7 @@ public class CustomerServiceImpl implements CustomerService {
         );
 
         Customers updated = customerRepository.findByIdCustomer(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found after update"));
+                .orElseThrow(() -> new ExceptionUtils(ExceptionUtils.CUSTOMER_NOT_FOUND));
 
         return convertToResponse(updated);
     }
@@ -46,7 +52,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void delete(UUID id) {
         Customers existingCustomer = customerRepository.findByIdCustomer(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ExceptionUtils(ExceptionUtils.CUSTOMER_NOT_FOUND));
         customerRepository.delete(existingCustomer);
     }
 
@@ -65,6 +71,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .address(newCustomer.getAddress())
                 .email(newCustomer.getEmail())
                 .username(newCustomer.getUsername())
+                .img_url(newCustomer.getImg_url())
                 .created_at(newCustomer.getCreated_at())
                 .updated_at(newCustomer.getUpdated_at())
                 .build();
@@ -77,6 +84,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .phone_num(request.getPhone_num())
+                .img_url(request.getImg_url())
                 .build();
     }
 }

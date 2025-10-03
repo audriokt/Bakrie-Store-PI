@@ -42,10 +42,14 @@ public class Customers {
     private String phone_num;
 
     @NotNull
-    @Column(name = "password", unique = true)
+    @Column(name = "password")
     private String password;
 
+    @Column(name="image_url")
+    private String img_url;
+
     @CreationTimestamp
+    @Column(name="created_at", updatable = false)
     private Timestamp created_at;
 
     @UpdateTimestamp
