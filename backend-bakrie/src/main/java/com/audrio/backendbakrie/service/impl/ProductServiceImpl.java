@@ -6,7 +6,6 @@ import com.audrio.backendbakrie.io.ProductRequest;
 import com.audrio.backendbakrie.io.ProductResponse;
 import com.audrio.backendbakrie.service.CloudinaryService;
 import com.audrio.backendbakrie.service.ProductService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.audrio.backendbakrie.utils.ExceptionUtils;
