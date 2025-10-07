@@ -5,9 +5,11 @@ import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;
 import com.audrio.backendbakrie.service.CustomerService;
+import com.audrio.backendbakrie.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -15,13 +17,37 @@ import java.util.UUID;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final EmailService emailService;
 
     @Override
     public CustomerResponse add(CustomerRequest request) {
+        String token = UUID.randomUUID().toString();
         Customers newCustomer =  convertToEntity(request);
+        // Tambahkan token dan status verifikasi
+        newCustomer.setVerification_token(token);
+        newCustomer.setIs_verified(false);
+
         newCustomer = customerRepository.save(newCustomer);
+        // Kirim email verifikasi
+        emailService.sendVerificationEmail(newCustomer.getEmail(), token);
+
         return convertToResponse(newCustomer);
     }
+
+    @Override
+    public boolean verifyEmail(String token) {
+        Optional<Customers> optionalCustomer = customerRepository.findByVerification_token(token);
+        if (optionalCustomer.isPresent()) {
+            Customers customer = optionalCustomer.get();
+            customer.setIs_verified(true);
+            customer.setVerification_token(null);
+            customerRepository.save(customer);
+            return true;
+        }
+        return false;
+    }
+
+
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
         return CustomerResponse.builder()

@@ -51,14 +51,23 @@ public class Customers {
     @Column(name = "password", unique = true)
     private String password;
 
+    @Column(name = "verification_token")
+    private String verification_token;
+
+    @Column(name = "reset_token")
+    private String reset_token;
+
+    @Column(name = "is_verified")
+    private Boolean is_verified;
+
     @NotNull
     @CreationTimestamp
     private Timestamp created_at;
+
     @NotNull
     @UpdateTimestamp
     private Timestamp updated_at;
 
     @OneToMany(mappedBy = "customer")
     private List<Orders> orders;
-
 }

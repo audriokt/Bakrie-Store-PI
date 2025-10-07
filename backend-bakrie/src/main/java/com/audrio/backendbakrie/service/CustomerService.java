@@ -5,4 +5,5 @@ import com.audrio.backendbakrie.io.CustomerResponse;
 
 public interface CustomerService {
     CustomerResponse add(CustomerRequest request);
+    boolean verifyEmail(String token);
 }
