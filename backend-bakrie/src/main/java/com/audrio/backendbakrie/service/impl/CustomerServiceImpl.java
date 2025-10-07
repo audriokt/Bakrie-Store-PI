@@ -1,6 +1,6 @@
 package com.audrio.backendbakrie.service.impl;
 
-import com.audrio.backendbakrie.Repository.CustomerRepository;
+import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;

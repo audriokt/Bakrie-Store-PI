@@ -16,13 +16,12 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/products")
 @AllArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping
+    @PostMapping("/admin/products")
     @ResponseStatus(HttpStatus.CREATED)
     public ProductResponse addProduct(@RequestPart("product") String productString,
                                       @RequestPart("file") MultipartFile file) {
@@ -42,7 +41,7 @@ public class ProductController {
         return productService.getAll();
     }
 
-    @DeleteMapping("/{productId}")
+    @DeleteMapping("/admin/products/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable String productId){
         try {
