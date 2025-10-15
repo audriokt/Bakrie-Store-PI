@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,15 +26,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
-        Customers customer = customerRepository.findByIdCustomer(request.getIdCustomer())
+        Customers customer = customerRepository.findByIdCustomer(request.getId_customer())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Orders order = Orders.builder()
                 .customer(customer)
-                .deliverAddress(request.getDeliverAddress())
-                .orderNumber(request.getOrderNumber())
-                .orderDate(request.getOrderDate())
-                .orderStatus(request.getOrderStatus())
+                .deliverAddress(request.getDeliver_address())
+                .orderNumber(request.getOrder_number())
+                .orderDate(request.getOrder_date())
+                .orderStatus(request.getOrder_status())
                 .build();
 
         Orders saved = orderRepository.save(order);
@@ -60,10 +61,10 @@ public class OrderServiceImpl implements OrderService {
         Orders order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        order.setDeliverAddress(request.getDeliverAddress());
-        order.setOrderNumber(request.getOrderNumber());
-        order.setOrderDate(request.getOrderDate());
-        order.setOrderStatus(request.getOrderStatus());
+        order.setDeliverAddress(request.getDeliver_address());
+        order.setOrderNumber(request.getOrder_number());
+        order.setOrderDate(request.getOrder_date());
+        order.setOrderStatus(request.getOrder_status());
 
         Orders updated = orderRepository.save(order);
         return toResponse(updated);
@@ -80,12 +81,12 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderResponse toResponse(Orders order) {
         return OrderResponse.builder()
-                .idOrder(order.getId_order())
-                .orderNumber(order.getOrderNumber())
-                .deliverAddress(order.getDeliverAddress())
-                .orderDate(order.getOrderDate())
-                .orderStatus(order.getOrderStatus())
-                .customerId(order.getCustomer().getIdCustomer())
+                .id_order(order.getId_order())
+                .order_number(order.getOrderNumber())
+                .deliver_address(order.getDeliverAddress())
+                .order_date(order.getOrderDate())
+                .order_status(order.getOrderStatus())
+                .id_customer(order.getCustomer().getIdCustomer())
                 .build();
     }
 }

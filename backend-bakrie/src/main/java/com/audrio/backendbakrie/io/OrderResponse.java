@@ -9,11 +9,11 @@ import java.util.UUID;
 @Data
 @Builder
 public class OrderResponse {
-    private UUID idOrder;
-    private String orderNumber;
-    private String deliverAddress;
-    private Timestamp orderDate;
-    private String orderStatus;
-    private UUID customerId;
-    private UUID employeeId;
+    private UUID id_customer;
+    private UUID id_order;
+    private String id_employee;
+    private String deliver_address;
+    private String order_number;
+    private Timestamp order_date;
+    private String order_status;
 }

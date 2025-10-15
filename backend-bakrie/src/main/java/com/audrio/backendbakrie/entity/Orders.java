@@ -1,7 +1,6 @@
 package com.audrio.backendbakrie.entity;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,4 +59,8 @@ public class Orders {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails;
+
+    public void setOrderStatus(String orderStatus) {
+
+    }
 }
