@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customers, Long> {
     Optional<Customers> findByVerification_token(String token);
+    Optional<Customers> findByEmail(String email);
 }

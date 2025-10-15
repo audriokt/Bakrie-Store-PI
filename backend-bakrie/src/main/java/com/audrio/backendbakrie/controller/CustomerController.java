@@ -26,6 +26,8 @@ public class CustomerController {
         return "Hello World";
     }
 
+
+
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         boolean verified = customerService.verifyEmail(token);
