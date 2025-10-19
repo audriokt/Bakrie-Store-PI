@@ -47,9 +47,11 @@ public class Customers {
     private String phone_num;
 
     @NotNull
-    @Size(max = 200)
-    @Column(name = "password", unique = true)
+    @Column(name = "password")
     private String password;
+
+    @Column(name="image_url")
+    private String img_url;
 
     @Column(name = "verification_token")
     private String verification_token;
@@ -62,12 +64,13 @@ public class Customers {
 
     @NotNull
     @CreationTimestamp
+    @Column(name="created_at", updatable = false)
     private Timestamp created_at;
 
-    @NotNull
     @UpdateTimestamp
     private Timestamp updated_at;
 
     @OneToMany(mappedBy = "customer")
     private List<Orders> orders;
+
 }

@@ -50,6 +50,7 @@ public class Products {
     private String image_url;
 
     @CreationTimestamp
+    @Column(name="created_at", updatable = false)
     private Timestamp created_at;
 
     @UpdateTimestamp
