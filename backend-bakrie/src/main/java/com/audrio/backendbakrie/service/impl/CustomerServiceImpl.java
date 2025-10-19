@@ -1,6 +1,6 @@
 package com.audrio.backendbakrie.service.impl;
 
-import com.audrio.backendbakrie.Repository.CustomerRepository;
+import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;
@@ -9,6 +9,8 @@ import com.audrio.backendbakrie.service.CustomerService;
 import com.audrio.backendbakrie.service.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.audrio.backendbakrie.utils.ExceptionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,15 +26,29 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final CloudinaryService cloudinaryService;
     private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public CustomerResponse add(CustomerRequest request, MultipartFile file) {
         String idImg =  UUID.randomUUID().toString();
         String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
         String token = UUID.randomUUID().toString();
+
+        Customers existingCustomer = customerRepository.findByEmail(request.getEmail());
+        if(existingCustomer != null){
+            if(existingCustomer.getIs_verified()){
+                throw new ExceptionUtils(ExceptionUtils.CUSTOMER_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
+            }else{
+                existingCustomer.setVerification_token(token);
+                customerRepository.save(existingCustomer);
+                //Send email
+                return convertToResponse(existingCustomer);
+            }
+        }
         Customers newCustomer =  convertToEntity(request);
+
+        newCustomer.setPassword(passwordEncoder.encode(request.getPassword()));
         newCustomer.setImg_url(imgUrl);
-        // Tambahkan token dan status verifikasi
         newCustomer.setVerification_token(token);
         newCustomer.setIs_verified(false);
 
@@ -93,7 +109,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
         return CustomerResponse.builder()
-                .customer_id(newCustomer.getIdCustomer().toString())
+                .customer_id(newCustomer.getId_customer().toString())
                 .phone_num(newCustomer.getPhone_num())
                 .address(newCustomer.getAddress())
                 .email(newCustomer.getEmail())

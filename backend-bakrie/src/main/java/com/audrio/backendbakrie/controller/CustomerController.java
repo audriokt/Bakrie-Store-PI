@@ -32,7 +32,7 @@ public class CustomerController {
         CustomerRequest request = null;
         try{
             request = mapper.readValue(customerString,CustomerRequest.class);
-            return customerService.Add(request, file);
+            return customerService.add(request, file);
         }catch(JsonProcessingException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to customer request"+e.getMessage());
         }
