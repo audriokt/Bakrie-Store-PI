@@ -1,6 +1,6 @@
 package com.audrio.backendbakrie.service.impl;
 
-import com.audrio.backendbakrie.Repository.ProductRepository;
+import com.audrio.backendbakrie.repository.ProductRepository;
 import com.audrio.backendbakrie.entity.Products;
 import com.audrio.backendbakrie.io.ProductRequest;
 import com.audrio.backendbakrie.io.ProductResponse;
