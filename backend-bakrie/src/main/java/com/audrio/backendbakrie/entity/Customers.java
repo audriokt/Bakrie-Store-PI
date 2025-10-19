@@ -24,7 +24,7 @@ public class Customers {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private UUID id_customer;
+    private UUID idCustomer;
 
     @NotNull
     @Size(max = 100)
@@ -42,7 +42,6 @@ public class Customers {
     private String address;
 
     @NotNull
-    @Size(max = 14)
     @Column(name = "phone_num")
     private String phone_num;
 
@@ -54,7 +53,7 @@ public class Customers {
     private String img_url;
 
     @Column(name = "verification_token")
-    private String verification_token;
+    private String verificationToken;
 
     @Column(name = "reset_token")
     private String reset_token;
@@ -62,7 +61,6 @@ public class Customers {
     @Column(name = "is_verified")
     private Boolean is_verified;
 
-    @NotNull
     @CreationTimestamp
     @Column(name="created_at", updatable = false)
     private Timestamp created_at;

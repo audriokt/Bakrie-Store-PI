@@ -7,6 +7,7 @@ import com.audrio.backendbakrie.io.CustomerResponse;
 import com.audrio.backendbakrie.service.CloudinaryService;
 import com.audrio.backendbakrie.service.CustomerService;
 import com.audrio.backendbakrie.service.EmailService;
+import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,14 +33,14 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse add(CustomerRequest request, MultipartFile file) {
         String idImg =  UUID.randomUUID().toString();
         String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
-        String token = UUID.randomUUID().toString();
+        String token = JwtUtils.generateToken(request.getEmail());
 
         Customers existingCustomer = customerRepository.findByEmail(request.getEmail());
         if(existingCustomer != null){
             if(existingCustomer.getIs_verified()){
                 throw new ExceptionUtils(ExceptionUtils.CUSTOMER_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
             }else{
-                existingCustomer.setVerification_token(token);
+                existingCustomer.setVerificationToken(token);
                 customerRepository.save(existingCustomer);
                 //Send email
                 emailService.sendVerificationEmail(existingCustomer.getEmail(), token);
@@ -50,7 +51,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         newCustomer.setPassword(passwordEncoder.encode(request.getPassword()));
         newCustomer.setImg_url(imgUrl);
-        newCustomer.setVerification_token(token);
+        newCustomer.setVerificationToken(token);
         newCustomer.setIs_verified(false);
 
         newCustomer = customerRepository.save(newCustomer);
@@ -95,11 +96,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public boolean verifyEmail(String token) {
-        Optional<Customers> optionalCustomer = customerRepository.findByVerification_token(token);
+        Optional<Customers> optionalCustomer = customerRepository.findByVerificationToken(token);
         if (optionalCustomer.isPresent()) {
             Customers customer = optionalCustomer.get();
             customer.setIs_verified(true);
-            customer.setVerification_token(null);
+            customer.setVerificationToken(null);
             customerRepository.save(customer);
             return true;
         }
@@ -110,7 +111,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
         return CustomerResponse.builder()
-                .customer_id(newCustomer.getId_customer().toString())
+                .customer_id(newCustomer.getIdCustomer().toString())
                 .phone_num(newCustomer.getPhone_num())
                 .address(newCustomer.getAddress())
                 .email(newCustomer.getEmail())
