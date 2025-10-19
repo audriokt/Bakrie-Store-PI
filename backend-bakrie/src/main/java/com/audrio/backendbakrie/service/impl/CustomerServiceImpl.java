@@ -42,6 +42,7 @@ public class CustomerServiceImpl implements CustomerService {
                 existingCustomer.setVerification_token(token);
                 customerRepository.save(existingCustomer);
                 //Send email
+                emailService.sendVerificationEmail(existingCustomer.getEmail(), token);
                 return convertToResponse(existingCustomer);
             }
         }
