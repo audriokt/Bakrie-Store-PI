@@ -1,4 +1,4 @@
-package com.audrio.backendbakrie.Repository;
+package com.audrio.backendbakrie.repository;
 
 import com.audrio.backendbakrie.entity.Products;
 import org.springframework.data.jpa.repository.JpaRepository;
