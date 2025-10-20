@@ -9,7 +9,7 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="flex justify-between items-center w-screen h-28 bg-none margin-0 px-10 auto fixed top-0 left-0 right-0">
+    <nav className="flex justify-between items-center w-screen h-28 bg-none margin-0 px-10 auto fixed top-0 left-0 right-0 z-[999]">
       {/* Hamburger Menu */}
       <button className="flex justify-center items-center gap-2 w-auto relative z-[999]" onClick={ handleClick }>
         <div className="flex flex-col gap-1">
