@@ -9,16 +9,18 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="flex justify-between items-center w-screen h-28 bg-none margin-0 px-10 auto relative">
+    <nav className="flex justify-between items-center w-screen h-28 bg-none margin-0 px-10 auto fixed top-0 left-0 right-0">
       {/* Hamburger Menu */}
-      <button className="flex justify-center items-center gap-2 w-auto relative z-50" onClick={ handleClick }>
+      <button className="flex justify-center items-center gap-2 w-auto relative z-[999]" onClick={ handleClick }>
         <div className="flex flex-col gap-1">
           <span className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${isOpen && "rotate-45 translate-y-2"}`}></span>
           <span className={`w-7 h-[3px] bg-yes rounded-s transition-[width] ${isOpen && "w-auto m-auto"}`}></span>
           <span className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${isOpen && "-rotate-45 -translate-y-1.5"}`}></span>
         </div>
       </button>
-      <img src="./logo/Patteserie.svg" alt="Patteserie" className="w-48" />
+      <div className="w-full">
+        <img src="./logo/Patteserie.svg" alt="Patteserie" className="w-48" />
+      </div>
       <a href="/" className=""><i className="bx bx-shopping-bag text-2xl text-yes"></i></a>
       
       {/* sidebar menu section */}
@@ -28,12 +30,12 @@ const Navbar = () => {
             initial={{ x: "-100%" }}
             whileInView={{ x: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="absolute top-0 left-0 min-h-screen min-w-80 bg-ookay z-40">
-            <div className="flex flex-col justify-center absolute left-10 pt-28 gap-10 text-lg font-semibold text-yes">
+            className="absolute top-0 left-0 min-h-screen min-w-80 bg-ookay z-[899]">
+            <div className="flex flex-col items-start text-left absolute left-10 pt-28 gap-10 text-lg font-semibold text-yes">
               {/* sign in */}
-              <Link to="/">Home</Link>
-              <Link to="/products">Products</Link>
-              <Link to="/about">About Us</Link>
+              <Link to="/" className="w-full">Home</Link>
+              <Link to="/products" className="w-full">Products</Link>
+              <Link to="/about" className="w-full">About Us</Link>
               {/* <a href="/"><p>Home</p></a>
               <a href="/products"><p>Products</p></a>
               <a href="/about"><p>About Us</p></a> */}

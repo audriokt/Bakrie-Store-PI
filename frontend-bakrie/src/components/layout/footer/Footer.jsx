@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="flex justify-center items-center w-screen h-40 bg-ookay">
+    <footer className="flex justify-center items-center w-full h-40 bg-ookay">
       <div>
         <img src="./logo/Patteserie.svg" alt="Patteserie" className="w-48" />
         {/* Copyright */}
