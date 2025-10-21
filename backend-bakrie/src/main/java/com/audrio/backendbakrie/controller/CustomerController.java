@@ -60,17 +60,4 @@ public class CustomerController {
         }
     }
 
-
-
-    @GetMapping("/verify")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        boolean verified = customerService.verifyEmail(token);
-        if (verified) {
-            return ResponseEntity.ok("Email berhasil diverifikasi.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Token tidak valid atau sudah kadaluarsa.");
-        }
-    }
-
 }

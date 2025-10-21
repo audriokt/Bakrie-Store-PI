@@ -11,12 +11,12 @@ import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.audrio.backendbakrie.utils.ExceptionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Optional;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,12 +28,13 @@ public class CustomerServiceImpl implements CustomerService {
     private final CloudinaryService cloudinaryService;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     @Override
     public CustomerResponse add(CustomerRequest request, MultipartFile file) {
         String idImg =  UUID.randomUUID().toString();
         String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
-        String token = JwtUtils.generateToken(request.getEmail());
+        String token = jwtUtils.generateToken(request.getEmail());
 
         Customers existingCustomer = customerRepository.findByEmail(request.getEmail());
         if(existingCustomer != null){
@@ -95,16 +96,25 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public boolean verifyEmail(String token) {
-        Optional<Customers> optionalCustomer = customerRepository.findByVerificationToken(token);
-        if (optionalCustomer.isPresent()) {
-            Customers customer = optionalCustomer.get();
-            customer.setIs_verified(true);
-            customer.setVerificationToken(null);
-            customerRepository.save(customer);
-            return true;
+    public ResponseEntity <String> verifyEmail(String token) {
+        String emailString = jwtUtils.extractEmail(token);
+        if (emailString == null || emailString.isEmpty()) {
+            return new ResponseEntity("Customer Email is Empty", HttpStatus.BAD_REQUEST);
         }
-        return false;
+
+        Customers customer = customerRepository.findByEmail(emailString);
+        if (customer == null || customer.getVerificationToken() == null) {
+            return new ResponseEntity("Customer Verification Token is Empty", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!jwtUtils.validateToken(token) || !token.equals(customer.getVerificationToken())) {
+            return new ResponseEntity("Customer Verification Token is not valid", HttpStatus.BAD_REQUEST);
+        }
+
+        customer.setIs_verified(true);
+        customerRepository.save(customer);
+
+        return new  ResponseEntity("Email terverifikasi", HttpStatus.OK);
     }
 
 
