@@ -17,22 +17,27 @@ html {
 .card-shadow {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
+
+/* ===== Infinite Scroll ===== */
 @keyframes scroll-horizontal {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100%));
+  }
 }
 
-@keyframes scroll-vertical {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-50%); }
-}
-
+/* Gunakan variable kecepatan (speed) agar tidak glitch saat hover */
 .animate-scroll-horizontal {
-  animation: scroll-horizontal var(--duration, 40000ms) linear infinite;
+  animation: scroll-horizontal linear infinite;
+  animation-duration: calc(var(--speed, 1) * 30000ms);
+  will-change: transform;
   animation-direction: var(--direction, normal);
+  transition: --speed 0.5s ease;
 }
 
-.animate-scroll-vertical {
-  animation: scroll-vertical var(--duration, 40000ms) linear infinite;
-  animation-direction: var(--direction, normal);
+/* Saat hover, ubah speed */
+.slider-hover-area:hover .animate-scroll-horizontal {
+  --speed: 5; /* makin besar = makin lambat (karena durasi = *speed) */
 }

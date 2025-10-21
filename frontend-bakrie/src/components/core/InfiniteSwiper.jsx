@@ -1,54 +1,60 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { imageData } from '../layout/itemsCard/ItemsCard';
 
-const InfiniteSlider = ({
-  children,
-  direction = 'horizontal',
-  reverse = false,
-  duration = 40000,
-  gap = 24,
-}) => {
+const InfiniteSlider = ({ children, speed = 0.5, gap = 24 }) => {
   const sliderRef = useRef(null);
+  const [isHover, setIsHover] = useState(false);
 
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider) return;
 
-    // Duplicate items sekali biar bisa looping halus
+    // Duplikat isi supaya seamless
     const items = Array.from(slider.children);
-    const totalWidth = slider.scrollWidth;
     items.forEach(item => {
       const clone = item.cloneNode(true);
       clone.setAttribute('aria-hidden', 'true');
       slider.appendChild(clone);
     });
 
-    // Set CSS variables untuk animasi
-    slider.style.setProperty('--duration', `${duration}ms`);
-    slider.style.setProperty('--direction', reverse ? 'reverse' : 'normal');
-  }, [duration, reverse, children]);
+    let position = 0;
+    let currentSpeed = speed;
+    let animationFrame;
 
-  const directionClass = direction === 'vertical' ? 'flex-col' : 'flex-row';
-  const animationClass =
-    direction === 'vertical' ? 'animate-scroll-vertical' : 'animate-scroll-horizontal';
+    const animate = () => {
+      // Ubah kecepatan kalau di-hover
+      const targetSpeed = isHover ? speed * 0.25 : speed; // melambat 75% saat hover
+      currentSpeed += (targetSpeed - currentSpeed) * 0.05; // transisi halus
+
+      position -= currentSpeed;
+      slider.style.transform = `translateX(${position}px)`;
+
+      // reset posisi biar loop terus
+      if (Math.abs(position) >= slider.scrollWidth / 2) {
+        position = 0;
+      }
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [children, speed, isHover]);
 
   return (
     <div
-      className="overflow-hidden"
+      className="overflow-hidden relative"
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
       style={{
-        maskImage:
-          direction === 'vertical'
-            ? 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)'
-            : 'linear-gradient(to right, transparent, black 20%, black 80%, transparent)',
-        WebkitMaskImage:
-          direction === 'vertical'
-            ? 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)'
-            : 'linear-gradient(to right, transparent, black 20%, black 80%, transparent)',
+        maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
       }}
     >
       <div
         ref={sliderRef}
-        className={`flex ${directionClass} w-max ${animationClass}`}
+        className="flex w-max will-change-transform transition-transform"
         style={{ gap: `${gap}px` }}
       >
         {children}
@@ -59,12 +65,12 @@ const InfiniteSlider = ({
 
 const InfiniteSwiper = () => {
   return (
-    <div className="w-full bg-gray-100 py-10">
-      <InfiniteSlider duration={30000}>
+    <div className="w-full bg-ookay">
+      <InfiniteSlider speed={0.6} gap={32}>
         {imageData.map((item, index) => (
           <div
             key={index}
-            className="min-w-[220px] h-[280px] bg-white shadow-md rounded-2xl flex flex-col items-center justify-center"
+            className="min-w-[220px] h-[280px] bg-ookay rounded-l flex flex-col items-center justify-center"
           >
             <img
               src={item.src}
@@ -72,7 +78,7 @@ const InfiniteSwiper = () => {
               className="w-48 h-48 object-cover rounded-xl mb-3"
             />
             <h3 className="font-semibold text-lg text-yes">{item.name}</h3>
-            <p className="text-gray-600 text-sm">{item.price}</p>
+            <p className="text-yes text-sm">{item.price}</p>
           </div>
         ))}
       </InfiniteSlider>
