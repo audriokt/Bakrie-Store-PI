@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const LoginPage = () => {
   return (
     <div className="flex h-screen bg-ookay">
-      {/* Panel kiri (Form Login) */}
+      {/* form login */}
       <motion.div
         className="flex flex-col justify-center items-center bg-white rounded-r-[40px] w-[40%]"
         initial={{ x: -100, opacity: 0 }}
@@ -19,20 +19,30 @@ const LoginPage = () => {
         </p>
 
         {/* Form login */}
-        <form className="flex flex-col space-y-4 w-3/4">
+        <form className="space-y-5 w-full max-w-sm mx-auto">
           <div>
-            <label className="block text-sm text-red-700 mb-1">Email</label>
+            <label className="block text-sm text-red-700 mb-2 font-medium">
+              Email
+            </label>
             <input
               type="email"
-              className="w-full border border-red-500 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full border border-red-500 rounded-md py-3 px-4 
+                        focus:outline-none focus:ring-2 focus:ring-red-400 
+                        text-gray-700 placeholder-gray-400"
+              placeholder="Email"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-red-700 mb-1">Password</label>
+            <label className="block text-sm text-red-700 mb-2 font-medium">
+              Password
+            </label>
             <input
               type="password"
-              className="w-full border border-red-500 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full border border-red-500 rounded-md py-3 px-4 
+                        focus:outline-none focus:ring-2 focus:ring-red-400 
+                        text-gray-700 placeholder-gray-400"
+              placeholder="Password"
             />
           </div>
 
@@ -40,8 +50,10 @@ const LoginPage = () => {
             whileFocus={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="submit"
-            className="bg-red-600 text-white rounded-full py-2 mt-2 hover:bg-red-700 transition"
-          >
+            className="w-full bg-red-600 text-white py-3 rounded-full 
+               hover:bg-red-700 transition-all duration-200 font-semibold"
+
+           >
             Login
           </motion.button>
         </form>
@@ -51,7 +63,7 @@ const LoginPage = () => {
         </Link>
       </motion.div>
       
- {/* Panel kanan (Video Animasi Kecil) */}
+ {/* untuk animasi yang samping  */}
       <div className="relative w-[45%] flex justify-center items-center">
         <motion.video
           className="w-[70%] h-auto object-contain drop-shadow-lg rounded-xl"
@@ -66,7 +78,7 @@ const LoginPage = () => {
           <source src="/logo/baker-animation.mp4" type="video/mp4" />
         </motion.video>
 
-        {/* Overlay lembut agar menyatu dengan pink */}
+        {/* biar nyatu sama background */}
         <div className="absolute inset-0 bg-pink-100/60 mix-blend-soft-light rounded-xl"></div>
       </div>
 

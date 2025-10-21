@@ -10,7 +10,7 @@ const CartsPage = () => {
       price: 35000,
       quantity: 2,
       image:
-        "https://tse2.mm.bing.net/th/id/OIP.9XAX5sYQx5GDtvFiSatzcAHaHa?cb=12&pid=ImgDet&w=178&h=178&c=7&dpr=1,5&o=7&rm=3"
+        "https://tse2.mm.bing.net/th/id/OIP.9XAX5sYQx5GDtvFiSatzcAHaHa?cb=12&pid=ImgDet&w=178&h=178&c=7&dpr=1,5&o=7&rm=3",
     },
     {
       id: 2,
@@ -46,24 +46,27 @@ const CartsPage = () => {
     price.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
 
   return (
-    <motion.div
+  <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="max-w-4xl mx-auto px-4 py-10 text-red-700"
+      className="max-w-4xl mx-auto px-4 pt-20 md:pt-28 pb-10 text-red-700"
     >
-      <h1 className="text-xl font-bold mb-1">Your Cart</h1>
-      <p className="text-sm mb-4">
-        Unready to checkout?{" "}
-        <Link to="/" className="underline hover:text-red-800">
+
+
+      {/* Heading */}
+      <h1 className="text-2xl font-bold mb-2">Your Cart</h1>
+      <p className="text-sm mb-6">
+        Not ready to checkout?{" "}
+        <Link to="/about" className="underline hover:text-red-800">
           Continue Shopping
         </Link>
       </p>
 
       {/* Header */}
-      <div className="grid grid-cols-12 border-t border-red-300 text-sm font-medium pb-1">
-        <div className="col-span-6 pl-2">Products</div>
+      <div className="grid grid-cols-12 border-b border-red-300 text-sm font-semibold pb-2">
+        <div className="col-span-5 pl-2">Products</div>
         <div className="col-span-2 text-center">Price</div>
-        <div className="col-span-2 text-center">Quantity</div>
+        <div className="col-span-3 text-center">Quantity</div>
         <div className="col-span-2 text-center">Total</div>
       </div>
 
@@ -75,17 +78,26 @@ const CartsPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="border-t border-red-200 py-5"
+            className="border-b border-red-200 py-5"
           >
-            <div className="grid grid-cols-12 items-center">
-              {/* Product */}
-              <div className="col-span-6 flex items-center">
-                <div className="w-20 h-20 bg-red-50 rounded-md flex items-center justify-center overflow-hidden">
+            <div className="grid grid-cols-12 items-center gap-3">
+              {/* Product Info */}
+              <div className="col-span-5 flex items-center gap-4">
+                <div className="w-20 h-20 rounded-md overflow-hidden border border-red-100 shadow-sm">
                   <img
                     src={item.image}
                     alt={item.name}
                     className="object-cover w-full h-full"
                   />
+                </div>
+                <div>
+                  <h3 className="font-medium text-red-800">{item.name}</h3>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="text-xs text-red-600 underline hover:text-red-800 mt-1"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
 
@@ -95,13 +107,13 @@ const CartsPage = () => {
               </div>
 
               {/* Quantity */}
-              <div className="col-span-2 flex justify-center items-center gap-2">
+              <div className="col-span-3 flex justify-center items-center gap-2">
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() =>
                     handleQuantityChange(item.id, item.quantity - 1)
                   }
-                  className="border border-red-400 px-2 rounded-sm"
+                  className="border border-red-400 px-2 rounded-sm hover:bg-red-50"
                 >
                   −
                 </motion.button>
@@ -111,31 +123,23 @@ const CartsPage = () => {
                   onClick={() =>
                     handleQuantityChange(item.id, item.quantity + 1)
                   }
-                  className="border border-red-400 px-2 rounded-sm"
+                  className="border border-red-400 px-2 rounded-sm hover:bg-red-50"
                 >
                   +
                 </motion.button>
               </div>
 
               {/* Total */}
-              <div className="col-span-2 text-center text-sm">
+              <div className="col-span-2 text-center text-sm font-medium">
                 {formatPrice(item.price * item.quantity)}
               </div>
             </div>
-
-            {/* Delete */}
-            <button
-              onClick={() => handleDelete(item.id)}
-              className="text-xs text-red-600 underline ml-24 mt-1"
-            >
-              Delete
-            </button>
           </motion.div>
         ))}
       </AnimatePresence>
 
       {/* Subtotal Box */}
-      <div className="border border-red-300 rounded-lg p-5 mt-8">
+      <div className="border border-red-300 rounded-lg p-6 mt-10 shadow-sm">
         <div className="flex justify-between text-sm font-medium">
           <span>Subtotal</span>
           <span className="font-bold">{formatPrice(subtotal)}</span>
@@ -180,7 +184,7 @@ const CartsPage = () => {
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.95 }}
-          className="w-full bg-red-700 text-white font-medium py-3 rounded-full"
+          className="w-full bg-red-700 text-white font-medium py-3 rounded-full hover:bg-red-800 transition-colors"
         >
           Checkout
         </motion.button>

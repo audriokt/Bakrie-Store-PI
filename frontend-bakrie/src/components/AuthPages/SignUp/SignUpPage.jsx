@@ -17,7 +17,7 @@ const SignUpPage = () => {
        
         <p className="text-red-600 text-sm mb-6">Create your account here!</p>
 
-        <form className="flex flex-col space-y-4 w-3/4">
+        <form className="flex flex-col space-y-4 w-3/4">  
           <input
             type="text"
             placeholder="Username"
@@ -54,7 +54,7 @@ const SignUpPage = () => {
           </motion.button>
         </form>
 
-        <Link to="/" className="text-red-700 text-sm underline mt-4">
+        <Link to="/login" className="text-red-700 text-sm underline mt-4">
           Back to Login
         </Link>
       </motion.div>
