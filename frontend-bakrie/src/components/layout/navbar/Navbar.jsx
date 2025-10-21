@@ -1,15 +1,41 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 const Navbar = () => {
+  // atur hamburger menu
   const [isOpen, setIsOpen] = useState(false);
   const handleClick = () => {
     setIsOpen(!isOpen);
   }
 
+  // atur sliding navbar
+  const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
+  useEffect(() => {
+    const handleScroll = () => {
+      // jika scroll nya sudah lebih dari 10 px maka muncul bg nya
+      if (window.scrollY > 10) setIsScrolled(true);
+      else setIsScrolled(false);
+    }
+
+    // hanya di homepage bg navbar nya yang hilang timbul sesuai scroll
+    if (location.pathname === "/") {
+      window.addEventListener("scroll", handleScroll);
+      setIsScrolled(false);
+    } else {
+      setIsScrolled(true); // selain di homepage bg nya selalu muncul
+    }
+
+    return () => window.removeEventListener("scroll", handleScroll)}, [location])
+
   return (
-    <nav className="flex justify-between items-center w-screen h-28 bg-none margin-0 px-10 auto fixed top-0 left-0 right-0 z-[999]">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-[999] flex justify-between items-center w-full h-28 px-10 ${
+        location.pathname === "/" ? "transition-all duration-500" : "" } 
+        ${isScrolled ? "bg-ookay shadow-md backdrop-blur-sm" : "bg-transparent"
+      }`}
+    >
       {/* Hamburger Menu */}
       <button className="flex justify-center items-center gap-2 w-auto relative z-[999]" onClick={ handleClick }>
         <div className="flex flex-col gap-1">
@@ -21,7 +47,7 @@ const Navbar = () => {
       <div className="w-full">
         <img src="./logo/Patteserie.svg" alt="Patteserie" className="w-48" />
       </div>
-      <a href="/" className=""><i className="bx bx-shopping-bag text-2xl text-yes"></i></a>
+      <Link to="/carts" className=""><i className="bx bx-shopping-bag text-2xl text-yes"></i></Link>
       
       {/* sidebar menu section */}
       {isOpen && (
@@ -32,13 +58,14 @@ const Navbar = () => {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="absolute top-0 left-0 min-h-screen min-w-80 bg-ookay z-[899]">
             <div className="flex flex-col items-start text-left absolute left-10 pt-28 gap-10 text-lg font-semibold text-yes">
-              {/* sign in */}
               <Link to="/" className="w-full">Home</Link>
               <Link to="/products" className="w-full">Products</Link>
               <Link to="/about" className="w-full">About Us</Link>
-              {/* <a href="/"><p>Home</p></a>
-              <a href="/products"><p>Products</p></a>
-              <a href="/about"><p>About Us</p></a> */}
+              <div className="flex w-56">
+                <Link to="/login" className="flex items-center gap-2 text-yes absolute"><svg width="24px" height="24px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#C31D1D"><path d="M19 12H12M12 12L15 15M12 12L15 9" stroke="#C31D1D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 6V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V18" stroke="#C31D1D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>Login</span>
+                </Link>
+              </div>
             </div>
           </motion.div> 
 
