@@ -2,6 +2,9 @@ import React from 'react'
 import Carousel from '../../layout/swiperComponent/Carousel'
 import ItemsCard from '../../layout/itemsCard/ItemsCard'
 import InfiniteSwiper from '../../core/InfiniteSwiper'
+import DisclosureCard from '../../core/DisclosureCard'
+import { aboutData } from '../about/AboutPage'
+
 const HomePage = () => {
   return (
     <div className='min-h-[800px] w-full border border-red-500'>
@@ -29,8 +32,14 @@ const HomePage = () => {
       </div>
 
       {/* about us */}
-      <div>
-        
+      
+       <div className="flex justify-center items-center min-h-screen bg-white-100">
+      <DisclosureCard
+        title={aboutData.title}
+        description={aboutData.description}
+        image={aboutData.image}
+        details={aboutData.details}
+      />
       </div>
     </div>
   )
