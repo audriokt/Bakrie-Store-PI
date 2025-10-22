@@ -68,7 +68,7 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.updateCustomerFields(
                 id,
                 request.getUsername(),
-                request.getPassword(),
+                passwordEncoder.encode(request.getPassword()),
                 request.getAddress(),
                 request.getEmail(),
                 request.getPhone_num(),
@@ -111,6 +111,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (!jwtUtils.validateToken(token) || !token.equals(customer.getVerificationToken())) {
             return new ResponseEntity("Customer Verification Token is not valid", HttpStatus.BAD_REQUEST);
         }
+
         customer.setVerificationToken(token);
         customer.setIs_verified(true);
         customerRepository.save(customer);

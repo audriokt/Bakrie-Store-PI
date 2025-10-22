@@ -20,7 +20,7 @@ public interface CustomerRepository extends JpaRepository<Customers, Long> {
             "c.email = :email, " +
             "c.phone_num = :phoneNum, " +
             "c.img_url = :imgUrl " +
-            "WHERE c.idCustomer = :id_customer")
+            "WHERE c.idCustomer = :idCustomer")
     void updateCustomerFields(
             @Param("idCustomer") UUID idCustomer,
             @Param("username") String username,
