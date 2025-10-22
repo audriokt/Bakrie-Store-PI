@@ -49,7 +49,7 @@ const CartsPage = () => {
   <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="max-w-4xl mx-auto px-4 pt-20 md:pt-28 pb-10 text-red-700"
+      className="max-w-4xl mx-auto px-4 pt-32 md:pb-10 text-red-700"
     >
 
 
