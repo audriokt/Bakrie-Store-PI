@@ -6,8 +6,13 @@ import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;
 import com.audrio.backendbakrie.service.CloudinaryService;
 import com.audrio.backendbakrie.service.CustomerService;
+import com.audrio.backendbakrie.service.EmailService;
+import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.audrio.backendbakrie.utils.ExceptionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,16 +23,42 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
+
     private final CustomerRepository customerRepository;
     private final CloudinaryService cloudinaryService;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     @Override
-    public CustomerResponse Add(CustomerRequest request, MultipartFile file) {
-        String id =  UUID.randomUUID().toString();
-        String imgUrl = cloudinaryService.uploadFile(file, id).getUrl();
+    public CustomerResponse add(CustomerRequest request, MultipartFile file) {
+        String idImg =  UUID.randomUUID().toString();
+        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
+        String token = jwtUtils.generateToken(request.getEmail());
+
+        Customers existingCustomer = customerRepository.findByEmail(request.getEmail());
+        if(existingCustomer != null){
+            if(existingCustomer.getIs_verified()){
+                throw new ExceptionUtils(ExceptionUtils.CUSTOMER_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
+            }else{
+                existingCustomer.setVerificationToken(token);
+                customerRepository.save(existingCustomer);
+                //Send email
+                emailService.sendVerificationEmail(existingCustomer.getEmail(), token);
+                return convertToResponse(existingCustomer);
+            }
+        }
         Customers newCustomer =  convertToEntity(request);
+
+        newCustomer.setPassword(passwordEncoder.encode(request.getPassword()));
         newCustomer.setImg_url(imgUrl);
+        newCustomer.setVerificationToken(token);
+        newCustomer.setIs_verified(false);
+
         newCustomer = customerRepository.save(newCustomer);
+        // Kirim email verifikasi
+        emailService.sendVerificationEmail(newCustomer.getEmail(), token);
+
         return convertToResponse(newCustomer);
     }
 
@@ -63,6 +94,30 @@ public class CustomerServiceImpl implements CustomerService {
                 .map(this::convertToResponse)
                 .toList();
     }
+
+    @Override
+    public ResponseEntity <String> verifyEmail(String token) {
+        String emailString = jwtUtils.extractEmail(token);
+        if (emailString == null || emailString.isEmpty()) {
+            return new ResponseEntity("Customer Email is Empty", HttpStatus.BAD_REQUEST);
+        }
+
+        Customers customer = customerRepository.findByEmail(emailString);
+        if (customer == null || customer.getVerificationToken() == null) {
+            return new ResponseEntity("Customer Verification Token is Empty", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!jwtUtils.validateToken(token) || !token.equals(customer.getVerificationToken())) {
+            return new ResponseEntity("Customer Verification Token is not valid", HttpStatus.BAD_REQUEST);
+        }
+
+        customer.setIs_verified(true);
+        customerRepository.save(customer);
+
+        return new  ResponseEntity("Email terverifikasi", HttpStatus.OK);
+    }
+
+
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
         return CustomerResponse.builder()

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,7 +32,7 @@ public class CustomerController {
         CustomerRequest request = null;
         try{
             request = mapper.readValue(customerString,CustomerRequest.class);
-            return customerService.Add(request, file);
+            return customerService.add(request, file);
         }catch(JsonProcessingException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to customer request"+e.getMessage());
         }
@@ -58,4 +59,5 @@ public class CustomerController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
+
 }
