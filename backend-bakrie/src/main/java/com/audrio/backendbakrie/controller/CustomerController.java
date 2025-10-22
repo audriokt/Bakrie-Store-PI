@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/customers")
+@RequestMapping()
 @AllArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
 
-    @PostMapping
+    @PostMapping("/public/register")
     @ResponseStatus(HttpStatus.CREATED)
     public CustomerResponse createCustomer(@RequestPart("customer") String customerString,
                                            @RequestPart("file")MultipartFile file){
@@ -38,7 +38,7 @@ public class CustomerController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/admin/fetchCustomer")
     @ResponseStatus(HttpStatus.OK)
     public List<CustomerResponse> fetchAllCustomers() {
         return customerService.getAll();
@@ -50,7 +50,7 @@ public class CustomerController {
         return customerService.update(UUID.fromString(id), customerRequest);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCustomer(@PathVariable String id) {
         try {
