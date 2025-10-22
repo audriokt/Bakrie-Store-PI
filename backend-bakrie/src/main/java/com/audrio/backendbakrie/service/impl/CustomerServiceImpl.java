@@ -32,8 +32,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerResponse add(CustomerRequest request, MultipartFile file) {
-        String idImg =  UUID.randomUUID().toString();
-        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
+        String imgUrl = createImgUrl(file);
         String token = jwtUtils.generateToken(request.getEmail());
 
         Customers existingCustomer = customerRepository.findByEmail(request.getEmail());
@@ -52,7 +51,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         newCustomer.setPassword(passwordEncoder.encode(request.getPassword()));
         newCustomer.setImg_url(imgUrl);
-        newCustomer.setVerificationToken(token);
+        newCustomer.setVerificationToken(null);
         newCustomer.setIs_verified(false);
 
         newCustomer = customerRepository.save(newCustomer);
@@ -64,14 +63,16 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public CustomerResponse update(UUID id, CustomerRequest request) {
+    public CustomerResponse update(UUID id, CustomerRequest request, MultipartFile file) {
+        String imgUrl = createImgUrl(file);
         customerRepository.updateCustomerFields(
                 id,
                 request.getUsername(),
                 request.getPassword(),
                 request.getAddress(),
                 request.getEmail(),
-                request.getPhone_num()
+                request.getPhone_num(),
+                imgUrl
         );
 
         Customers updated = customerRepository.findByIdCustomer(id)
@@ -110,7 +111,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (!jwtUtils.validateToken(token) || !token.equals(customer.getVerificationToken())) {
             return new ResponseEntity("Customer Verification Token is not valid", HttpStatus.BAD_REQUEST);
         }
-
+        customer.setVerificationToken(token);
         customer.setIs_verified(true);
         customerRepository.save(customer);
 
@@ -142,4 +143,9 @@ public class CustomerServiceImpl implements CustomerService {
                 .img_url(request.getImg_url())
                 .build();
     }
+   private String createImgUrl(MultipartFile file) {
+        String idImg =  UUID.randomUUID().toString();
+        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
+        return imgUrl;
+   }
 }

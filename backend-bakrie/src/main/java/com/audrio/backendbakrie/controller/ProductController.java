@@ -39,6 +39,7 @@ public class ProductController {
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public List<ProductResponse> fetchAllProducts(){
+
         return productService.getAll();
     }
 

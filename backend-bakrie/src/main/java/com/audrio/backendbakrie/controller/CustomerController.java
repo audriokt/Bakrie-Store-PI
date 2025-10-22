@@ -46,8 +46,18 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public CustomerResponse updateCustomer(@PathVariable String id, @RequestBody CustomerRequest customerRequest) {
-        return customerService.update(UUID.fromString(id), customerRequest);
+    public CustomerResponse updateCustomer(@PathVariable UUID id,
+                                           @RequestPart("updateCustomer") String customerString,
+                                           @RequestPart("file") MultipartFile file) {
+        ObjectMapper mapper = new ObjectMapper();
+        CustomerRequest request = null;
+        try{
+            request = mapper.readValue(customerString, CustomerRequest.class);
+            return customerService.update(id,
+                    request, file);
+        } catch (JsonProcessingException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to CustomerRequest"+e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
