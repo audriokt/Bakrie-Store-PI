@@ -1,5 +1,6 @@
 package com.audrio.backendbakrie.entity;
 
+import com.audrio.backendbakrie.roles.Roles;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -10,8 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +25,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Customers {
+public class Customers implements UserDetails {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -73,4 +77,11 @@ public class Customers {
     @OneToMany(mappedBy = "customer")
     private List<Orders> orders;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+    @ManyToOne
+    @JoinColumn(name = "roles_id", nullable = false)
+    private Roles roles;
 }

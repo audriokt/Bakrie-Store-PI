@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.audrio.backendbakrie.utils.ExceptionUtils;
@@ -36,7 +37,8 @@ public class CustomerServiceImpl implements CustomerService {
         String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
         String token = jwtUtils.generateToken(request.getEmail());
 
-        Customers existingCustomer = customerRepository.findByEmail(request.getEmail());
+        Customers existingCustomer = customerRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ExceptionUtils(ExceptionUtils.CUSTOMER_NOT_FOUND));
         if(existingCustomer != null){
             if(existingCustomer.getIs_verified()){
                 throw new ExceptionUtils(ExceptionUtils.CUSTOMER_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
@@ -102,7 +104,8 @@ public class CustomerServiceImpl implements CustomerService {
             return new ResponseEntity("Customer Email is Empty", HttpStatus.BAD_REQUEST);
         }
 
-        Customers customer = customerRepository.findByEmail(emailString);
+        Customers customer = customerRepository.findByEmail(emailString)
+                .orElseThrow(() -> new ExceptionUtils(ExceptionUtils.CUSTOMER_NOT_FOUND));
         if (customer == null || customer.getVerificationToken() == null) {
             return new ResponseEntity("Customer Verification Token is Empty", HttpStatus.BAD_REQUEST);
         }

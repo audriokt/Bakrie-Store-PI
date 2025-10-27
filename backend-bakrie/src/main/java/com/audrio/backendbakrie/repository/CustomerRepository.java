@@ -24,5 +24,5 @@ public interface CustomerRepository extends JpaRepository<Customers, Long> {
             @Param("phoneNum") String phoneNum
     );
     Optional<Customers> findByVerificationToken(String token);
-    Customers findByEmail(String email);
+    Optional<Customers> findByEmail(String email);
 }
