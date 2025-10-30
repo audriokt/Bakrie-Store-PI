@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from "react-router-dom";
 
 export function DisclosureCard({ title, description, image, details }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,12 +53,14 @@ export function DisclosureCard({ title, description, image, details }) {
           <div className="flex flex-col pb-4 text-[13px] text-zinc-300 dark:text-zinc-700">
             <p>{description}</p>
             <p className="line-clamp-3">{details}</p>
-            <button
-              className="mt-3 w-full rounded-[4px] border border-yes bg-yes px-4 py-1 text-ookay transition-colors duration-300 hover:bg-ookay hover:text-yes"
-              type="button"
-            >
-              See More
-            </button>
+            <Link to="/about">
+              <button
+                className="mt-3 w-full rounded-[4px] border border-yes bg-yes px-4 py-1 text-ookay transition-colors duration-300 hover:bg-ookay hover:text-yes"
+                type="button"
+              >
+                See More
+              </button>
+            </Link>
           </div>
         )}
       </motion.div>

@@ -8,6 +8,8 @@ import LoginPage from './components/AuthPages/Login/LoginPage'
 import SignUpPage from './components/AuthPages/SignUp/SignUpPage'
 import ProductDetailPage from './components/CatalogPages/ProductDetail/ProductDetailPage'
 import CartsPage from './components/Carts/CartsPage'
+import About from './components/pages/about/About'
+import ProductPage from './components/pages/product/ProductPage'
 
 function App() {
   // atur halaman yang tidak ingin ditampilkan navbar dan footer
@@ -21,9 +23,10 @@ function App() {
       {!shouldHideLayout && <Navbar />}
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route path="/about" element={<About />} />
 
          {/* route untuk catalog dan product details */}
+          <Route path='/products' element={<ProductPage />}></Route>
           <Route path='/product-detail' element={<ProductDetailPage/>}/>
 
           {/* route untuk carts */}
