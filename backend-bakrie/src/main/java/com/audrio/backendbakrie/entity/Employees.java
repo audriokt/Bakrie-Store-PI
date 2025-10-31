@@ -3,6 +3,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import com.audrio.backendbakrie.roles.Roles;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -30,6 +32,10 @@ public class Employees implements UserDetails{
     private UUID idEmployee;
 
     @NotNull
+    @Column(name = "username")
+    private String username;
+
+    @NotNull
     @Size(max = 100)
     @Column(name = "email", unique = true)
     private String email;
@@ -38,10 +44,6 @@ public class Employees implements UserDetails{
     @Size(max = 200)
     @Column(name = "password", unique = true)
     private String password;
-
-    @ManyToOne
-    @JoinColumn(name = "roles_id", nullable = false)
-    private Roles roles;
 
     @NotNull
     @Column(name = "img_url")
@@ -56,25 +58,40 @@ public class Employees implements UserDetails{
     @Column(name = "is_verified")
     private Boolean is_verified;
 
-    @NotNull
     @CreationTimestamp
     @Column(updatable = false)
     private Timestamp created_at;
 
-    @NotNull
     @UpdateTimestamp
     private Timestamp updated_at;
 
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "employees")
     private List<Orders> orders;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return AuthorityUtils.createAuthorityList(empRoles.getName());
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Employees)) return false;
+        Employees employee = (Employees) o;
+        return Objects.equals(idEmployee, employee.idEmployee);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idEmployee);
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return email;
     }
+
+    @ManyToOne
+    @JoinColumn(name = "roles_id", nullable = false)
+    private Roles empRoles;
+
 }

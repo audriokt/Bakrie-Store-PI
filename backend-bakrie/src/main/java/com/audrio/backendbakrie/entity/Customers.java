@@ -12,11 +12,13 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -74,14 +76,32 @@ public class Customers implements UserDetails {
     @UpdateTimestamp
     private Timestamp updated_at;
 
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customers")
     private List<Orders> orders;
+
+    @OneToOne(mappedBy = "customers")
+    private Carts carts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return AuthorityUtils.createAuthorityList(cusRoles.getName()); // "CUSTOMER"
     }
+
     @ManyToOne
     @JoinColumn(name = "roles_id", nullable = false)
-    private Roles roles;
+    private Roles cusRoles;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Customers customer = (Customers) o;
+        return Objects.equals(idCustomer, customer.idCustomer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idCustomer);
+    }
+
 }

@@ -2,7 +2,7 @@ package com.audrio.backendbakrie.service.impl;
 
 import com.audrio.backendbakrie.io.CloudinaryResponse;
 import com.audrio.backendbakrie.service.CloudinaryService;
-import com.audrio.backendbakrie.utils.ExceptionUtils;
+import com.audrio.backendbakrie.utils.Exceptions.ImageUploadFailedException;
 import com.cloudinary.Cloudinary;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class UploadFileServiceImpl implements CloudinaryService {
                     .publicId(publicId)
                     .build();
         } catch (IOException e){
-            throw new ExceptionUtils(ExceptionUtils.FAILED_TO_UPLOAD_IMG + e.getMessage());
+            throw new ImageUploadFailedException(e.getMessage());
         }
     }
 

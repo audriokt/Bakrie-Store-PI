@@ -25,4 +25,5 @@ public interface CustomerRepository extends JpaRepository<Customers, Long> {
     );
     Optional<Customers> findByVerificationToken(String token);
     Optional<Customers> findByEmail(String email);
+    Optional<Customers> findByUsername(String username);
 }

@@ -30,11 +30,7 @@ public class Transactions {
 
     @OneToOne
     @JoinColumn(name = "id_order", nullable = false)
-    private Orders order;
-
-    @ManyToOne
-    @JoinColumn(name = "id_customer", nullable = false)
-    private Customers customer;
+    private Orders orders;
 
     @NotNull
     @Size(max = 100)

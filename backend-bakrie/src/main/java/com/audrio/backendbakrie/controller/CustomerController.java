@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +18,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
-@RequestMapping()
 @AllArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;
 
-    @PostMapping("/public/register")
+    @PostMapping("/public/register/customer")
     @ResponseStatus(HttpStatus.CREATED)
     public CustomerResponse createCustomer(@RequestPart("customer") String customerString,
                                            @RequestPart("file")MultipartFile file){
@@ -44,13 +45,13 @@ public class CustomerController {
         return customerService.getAll();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CustomerResponse updateCustomer(@PathVariable String id, @RequestBody CustomerRequest customerRequest) {
         return customerService.update(UUID.fromString(id), customerRequest);
     }
 
-    @DeleteMapping("/admin/delete/{id}")
+    @DeleteMapping("/delete/customer/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCustomer(@PathVariable String id) {
         try {

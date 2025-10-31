@@ -6,9 +6,9 @@ import com.audrio.backendbakrie.io.ProductRequest;
 import com.audrio.backendbakrie.io.ProductResponse;
 import com.audrio.backendbakrie.service.CloudinaryService;
 import com.audrio.backendbakrie.service.ProductService;
+import com.audrio.backendbakrie.utils.Exceptions.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.audrio.backendbakrie.utils.ExceptionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -42,14 +42,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void delete(UUID id_product) {
         Products existingProduct = productRepository.findByIdProduct(id_product)
-                .orElseThrow(() -> new ExceptionUtils(ExceptionUtils.PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + id_product));
         productRepository.delete(existingProduct);
     }
 
     @Override
     public ProductResponse update(UUID product_id,ProductRequest request) {
             Products existingProduct = productRepository.findByIdProduct(product_id)
-                    .orElseThrow(() -> new ExceptionUtils(ExceptionUtils.PRODUCT_NOT_FOUND));
+                    .orElseThrow(() -> new ProductNotFoundException("Product not found: " + product_id));
             productRepository.updateProductFields(
                     product_id,
                     request.getProduct_name(),

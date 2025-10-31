@@ -1,40 +1,37 @@
 package com.audrio.backendbakrie.controller;
 
+import com.audrio.backendbakrie.io.AuthResponse;
 import com.audrio.backendbakrie.io.CustomerAuthRequest;
-import com.audrio.backendbakrie.io.CustomerResponse;
 import com.audrio.backendbakrie.io.EmployeeAuthRequest;
-import com.audrio.backendbakrie.io.EmployeeResponse;
+import com.audrio.backendbakrie.service.CustomerService;
+import com.audrio.backendbakrie.service.EmployeeService;
+import com.audrio.backendbakrie.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 
-@RestController("/auth")
+@Slf4j
+@RestController
+@RequestMapping("/public")
 @RequiredArgsConstructor
 public class AuthController {
-    private final PasswordEncoder passwordEncoder;
 
-    private final AuthenticationManager authenticationManager;
+    private final CustomerService customerService;
+    private final EmployeeService employeeService;
 
-    /*
-        fungsi userType untuk membantu pengecekkan table,
-        hanya perlu mengecek salahsatu table saja tidak
-        perlu mengecek kedua table untuk mencari user
-        yang ingin login.
-    */
-    @PostMapping("/customer/login")
-    public CustomerResponse customerLogin(@RequestBody CustomerAuthRequest request) {
-        String userType = "CUSTOMER";
-
+    /**
+     * Endpoint untuk Customer Login
+     */
+    @PostMapping("/auth/login/customer")
+    public AuthResponse customerLogin(@RequestBody CustomerAuthRequest request) {
+        return customerService.login(request);
     }
 
-    @PostMapping("/employee/login")
-    public EmployeeResponse employeeLogin(@RequestBody EmployeeAuthRequest request) {
-        String userType = "EMPLOYEE";
-
+    /**
+     * Endpoint untuk Employee Login
+     */
+    @PostMapping("/auth/login/employee")
+    public AuthResponse employeeLogin(@RequestBody EmployeeAuthRequest request) {
+        return employeeService.login(request);
     }
-
-
 }

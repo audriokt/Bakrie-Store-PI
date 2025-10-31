@@ -1,5 +1,7 @@
 package com.audrio.backendbakrie.utils;
 
+import com.audrio.backendbakrie.utils.Exceptions.ImageInvalidExtentionException;
+import com.audrio.backendbakrie.utils.Exceptions.ImageSizeUnaproriateException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.DateFormat;
@@ -22,12 +24,12 @@ public class FileUploadUtils {
         final String fileName = file.getOriginalFilename();
         if(!isAllowedExtension(fileName, pattern)){
 
-            throw new ExceptionUtils(ExceptionUtils.INVALID_EXTENSION);
+            throw new ImageInvalidExtentionException("Invalid file name");
         }
 
         final long fileSize = file.getSize();
         if(file.getSize() > MAX_FILE_SIZE){
-            throw new ExceptionUtils(ExceptionUtils.IMG_SIZE_TO_BIG);
+            throw new ImageSizeUnaproriateException("File is too large");
         }
     }
 
