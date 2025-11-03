@@ -9,6 +9,9 @@ import SignUpPage from './components/AuthPages/SignUp/SignUpPage'
 import ProductDetailPage from './components/CatalogPages/ProductDetail/ProductDetailPage'
 import CartsPage from './components/Carts/CartsPage'
 import UserProfilePage from './components/Profile/UserProfile/UserProfilePage'
+import EditProfilePage from './components/Profile/EditProfile/EditProfilePage'
+import EditPasswordPage from './components/Profile/EditProfile/EditPasswordPage'
+
 function App() {
   // atur halaman yang tidak ingin ditampilkan navbar dan footer
   const location = useLocation();
@@ -33,6 +36,8 @@ function App() {
           <Route path='/login' element={<LoginPage/>}/>
           <Route path='/signup' element={<SignUpPage/>}/>
           <Route path='/profile' element={<UserProfilePage/>}/>
+          <Route path='/edit-profile' element={<EditProfilePage/>}/>
+          <Route path='/edit-password' element={<EditPasswordPage/>}/>
         </Routes>
       {!shouldHideLayout && <Footer />}
     </>

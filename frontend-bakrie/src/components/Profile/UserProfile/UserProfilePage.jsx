@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const ProfilePage = () => {
   return (
@@ -30,13 +31,15 @@ const ProfilePage = () => {
           </div>
 
           {/* Buttons */}
-          <motion.button
+          <Link to="/edit-profile" className="w-full">
+           <motion.button
             whileHover={{ scale: 1.05 }}
             className="w-full bg-red-600 text-white py-3 rounded-full font-semibold mb-4 shadow-sm hover:bg-red-700 transition"
           >
             Edit Profile
           </motion.button>
-
+          </Link>
+          <Link to="/edit-password" className="w-full">
           <motion.button
             whileHover={{ scale: 1.05 }}
             className="w-full bg-white text-red-600 border border-red-600 py-3 rounded-full font-semibold mb-4 hover:bg-red-600 hover:text-white transition"
@@ -44,12 +47,15 @@ const ProfilePage = () => {
             Change Password
           </motion.button>
 
+          </Link>
+         <Link to="/" className="w-full">
           <motion.button
             whileHover={{ scale: 1.05 }}
             className="w-full bg-[#FFB6B6] text-white py-3 rounded-full font-semibold hover:bg-red-600 transition"
           >
             Logout
           </motion.button>
+         </Link>
         </motion.div>
 
         {/* Right Card */}
