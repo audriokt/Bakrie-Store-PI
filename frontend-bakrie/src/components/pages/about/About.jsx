@@ -1,6 +1,6 @@
 import React from "react"
 import InView from "../../core/InView"
-import { aboutData } from "./aboutPage"
+import { aboutData } from "./AboutPage"
 
 const About = () => {
   return (

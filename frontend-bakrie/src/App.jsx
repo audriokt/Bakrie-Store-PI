@@ -8,6 +8,9 @@ import LoginPage from './components/AuthPages/Login/LoginPage'
 import SignUpPage from './components/AuthPages/SignUp/SignUpPage'
 import ProductDetailPage from './components/CatalogPages/ProductDetail/ProductDetailPage'
 import CartsPage from './components/Carts/CartsPage'
+import UserProfilePage from './components/Profile/UserProfile/UserProfilePage'
+import EditProfilePage from './components/Profile/EditProfile/EditProfilePage'
+import EditPasswordPage from './components/Profile/EditProfile/EditPasswordPage'
 
 function App() {
   // atur halaman yang tidak ingin ditampilkan navbar dan footer
