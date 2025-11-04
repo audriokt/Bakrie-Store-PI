@@ -1,6 +1,8 @@
 package com.audrio.backendbakrie.entity;
 
+import com.audrio.backendbakrie.roles.Roles;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -9,9 +11,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -20,45 +27,81 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Customers {
+public class Customers implements UserDetails {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private UUID id_customer;
+    private UUID idCustomer;
 
     @NotNull
-    @Size(max = 100)
+    @Size(max = 100, min = 15, message = "Email tidak boleh kurang dari 15 karakter dan tidak boleh lebih dari 100")
     @Column(name = "email", unique = true)
     private String email;
 
     @NotNull
-    @Size(max = 30)
+    @Size(max = 30, min = 5, message = "Username tidak boleh kurang dari 5 karakter atau/dan tidak boleh lebih dari 30 karakter")
     @Column(name = "username")
     private String  username;
 
     @NotNull
-    @Size(max = 300)
+    @Size(max = 300, min = 20, message = "Alamat tidak boleh kurang dari 20 karakter")
     @Column(name = "address")
     private String address;
 
     @NotNull
-    @Size(max = 14)
-    @Column(name = "phone_num")
+    @Size(max = 13, min = 11, message = "nomor telepon minimal 11 karakter dan maksimal 13 karakter")
+    @Column(name = "phone_num",  unique = true)
     private String phone_num;
 
     @NotNull
-    @Size(max = 200)
-    @Column(name = "password", unique = true)
+    @Column(name = "password")
     private String password;
 
-    @NotNull
+    @Column(name="image_url")
+    private String img_url;
+
+    @Column(name = "verification_token", unique = true)
+    private String verificationToken;
+
+    @Column(name = "reset_token")
+    private String reset_token;
+
+    @Column(name = "is_verified")
+    private Boolean is_verified;
+
     @CreationTimestamp
+    @Column(name="created_at", updatable = false)
     private Timestamp created_at;
-    @NotNull
+
     @UpdateTimestamp
     private Timestamp updated_at;
 
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customers")
     private List<Orders> orders;
+
+    @OneToOne(mappedBy = "customers")
+    private Carts carts;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return AuthorityUtils.createAuthorityList(cusRoles.getName()); // "CUSTOMER"
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "roles_id", nullable = false)
+    private Roles cusRoles;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Customers customer = (Customers) o;
+        return Objects.equals(idCustomer, customer.idCustomer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idCustomer);
+    }
 
 }

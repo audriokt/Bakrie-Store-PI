@@ -28,12 +28,12 @@ public class Orders {
     private UUID id_order;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer", nullable = false)
-    private Customers customer;
+    @JoinColumn(name = "id_customer") // nama kolom foreign key di tabel Orders
+    private Customers customers;
 
     @ManyToOne
     @JoinColumn(name = "id_employee", nullable = false)
-    private Employees employee;
+    private Employees employees;
 
     @NotNull
     @Size(max = 100)
@@ -55,9 +55,9 @@ public class Orders {
     @Column(name = "order_status")
     private String orderStatus;
 
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
     private Transactions transaction;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails;
 }

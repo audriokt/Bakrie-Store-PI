@@ -26,7 +26,7 @@ public class Carts {
 
     @OneToOne
     @JoinColumn(name = "id_customers", nullable = false)
-    private Customers customer;
+    private Customers customers;
 
     @NotNull
     @Column(name = "created_at")
