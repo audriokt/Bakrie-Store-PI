@@ -25,14 +25,14 @@ function App() {
       {!shouldHideLayout && <Navbar />}
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route path="/about" element={<About />} />
 
          {/* route untuk catalog dan product details */}
           <Route path='/products' element={<ProductPage/>}></Route>
           <Route path='/product-detail' element={<ProductDetailPage/>}/>
 
-          {/* route untuk carts */}
-          <Route path='/carts' element={<CartsPage/>}/>
+            {/* route untuk carts */}
+            <Route path='/carts' element={<CartsPage/>}/>
 
          {/* route untuk login sama sign up */}
           <Route path='/login' element={<LoginPage/>}/>
