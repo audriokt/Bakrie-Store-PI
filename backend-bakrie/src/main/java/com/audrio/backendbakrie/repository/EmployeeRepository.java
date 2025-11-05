@@ -1,6 +1,5 @@
 package com.audrio.backendbakrie.repository;
 
-import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.entity.Employees;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

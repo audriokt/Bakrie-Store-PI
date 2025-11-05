@@ -1,7 +1,5 @@
 package com.audrio.backendbakrie.config;
 
-import com.audrio.backendbakrie.repository.CustomerRepository;
-import com.audrio.backendbakrie.repository.EmployeeRepository;
 import com.audrio.backendbakrie.service.impl.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +17,6 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
-    private final CustomerRepository customerRepository;
-    private final EmployeeRepository employeeRepository;
     private final UserDetailsServiceImpl  userDetailsService;
 
     @Bean

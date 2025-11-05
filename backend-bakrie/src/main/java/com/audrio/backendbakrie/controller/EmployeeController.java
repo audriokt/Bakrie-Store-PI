@@ -3,7 +3,6 @@ package com.audrio.backendbakrie.controller;
 import com.audrio.backendbakrie.io.EmployeeRequest;
 import com.audrio.backendbakrie.io.EmployeeResponse;
 import com.audrio.backendbakrie.service.EmployeeService;
-import com.audrio.backendbakrie.utils.Exceptions.ImageFileEmptyException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;

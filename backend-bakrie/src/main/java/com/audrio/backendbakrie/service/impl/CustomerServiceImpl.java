@@ -1,6 +1,5 @@
 package com.audrio.backendbakrie.service.impl;
 
-import com.audrio.backendbakrie.entity.Employees;
 import com.audrio.backendbakrie.io.AuthResponse;
 import com.audrio.backendbakrie.io.CustomerAuthRequest;
 import com.audrio.backendbakrie.repository.CustomerRepository;
@@ -113,7 +112,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseEntity <String> verifyEmail(String token) {
+    public ResponseEntity<String> verifyEmail(String token) {
         String emailString = jwtUtils.extractEmail(token);
         if (emailString == null || emailString.isEmpty()) {
             return new ResponseEntity("Customer Email is Empty", HttpStatus.BAD_REQUEST);
@@ -144,6 +143,10 @@ public class CustomerServiceImpl implements CustomerService {
         Customers customer = customerRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
 
+        if(!customer.getIs_verified()) {
+            throw new UserNotVerifiedException("Customer not verified");
+        }
+        
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("purpose","access");
         claims.put("role","ROLE_CUSTOMER");

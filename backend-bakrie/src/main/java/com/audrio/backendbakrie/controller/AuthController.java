@@ -5,7 +5,6 @@ import com.audrio.backendbakrie.io.CustomerAuthRequest;
 import com.audrio.backendbakrie.io.EmployeeAuthRequest;
 import com.audrio.backendbakrie.service.CustomerService;
 import com.audrio.backendbakrie.service.EmployeeService;
-import com.audrio.backendbakrie.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

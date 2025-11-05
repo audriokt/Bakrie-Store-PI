@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface CustomerRepository extends JpaRepository<Customers, Long> {
+public interface CustomerRepository extends JpaRepository<Customers, UUID> {
     Optional<Customers> findByIdCustomer(UUID idCustomer);
     @Modifying
     @Query("UPDATE Customers c SET c.username = :username, c.password = :password, c.address = :address, c.email = :email, c.phone_num = :phoneNum WHERE c.idCustomer = :id_customer")

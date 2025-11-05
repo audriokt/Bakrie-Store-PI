@@ -1,7 +1,6 @@
 package com.audrio.backendbakrie.controller;
 
 import com.audrio.backendbakrie.service.CustomerService;
-import com.audrio.backendbakrie.service.EmailService;
 import com.audrio.backendbakrie.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

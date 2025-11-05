@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.lang.module.ResolutionException;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +20,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping("/admin/products")
+    @PostMapping("/public/products")
     @ResponseStatus(HttpStatus.CREATED)
     public ProductResponse addProduct(@RequestPart("product") String productString,
                                       @RequestPart("file") MultipartFile file) {
@@ -35,13 +34,13 @@ public class ProductController {
         }
     }
 
-    @GetMapping()
+    @GetMapping("/public/products")
     @ResponseStatus(HttpStatus.OK)
     public List<ProductResponse> fetchAllProducts(){
         return productService.getAll();
     }
 
-    @DeleteMapping("/admin/products/{productId}")
+    @DeleteMapping("/public/products/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable String productId){
         try {

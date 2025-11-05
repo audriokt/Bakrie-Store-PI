@@ -28,7 +28,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/public/auth/login/customer",
             "/public/auth/login/employee",
             "/public/register/customer",
-            "/req/signup/verify"
+            "/req/signup/verify",
+            "/public/products"
     );
 
 

@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { imageData } from '../layout/itemsCard/ItemsCard';
+import { useContext } from 'react';
+import { AppContext } from '../../context/AppContext.jsx';
+
 
 const InfiniteSlider = ({ children, speed = 0.5, gap = 24 }) => {
   const sliderRef = useRef(null);
@@ -64,21 +66,23 @@ const InfiniteSlider = ({ children, speed = 0.5, gap = 24 }) => {
 };
 
 const InfiniteSwiper = () => {
+    const {products} = useContext(AppContext)
+
   return (
     <div className="w-full bg-ookay">
       <InfiniteSlider speed={0.6} gap={32}>
-        {imageData.map((item, index) => (
+        {products.map((product, index) => (
           <div
             key={index}
             className="min-w-[220px] h-[280px] bg-ookay rounded-l flex flex-col items-center justify-center"
           >
             <img
-              src={item.src}
-              alt={item.name}
+              src={product.image_url}
+              alt={product.product_name}
               className="w-48 h-48 object-cover rounded-xl mb-3"
             />
-            <h3 className="font-semibold text-lg text-yes">{item.name}</h3>
-            <p className="text-yes text-sm">{item.price}</p>
+            <h3 className="font-semibold text-lg text-yes">{product.product_name}</h3>
+            <p className="text-yes text-sm">{product.product_price}</p>
           </div>
         ))}
       </InfiniteSlider>

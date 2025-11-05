@@ -1,38 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { AppContext } from "../../../context/AppContext.jsx";
+import App from "../../../App";
 
-export const imageData = [
-  {
-    src: "product/cake.jpg",
-    name: "Birthday Cake",
-    price: "$20.00",
-    description: "Delicious chocolate birthday cake with frosting.",
-  },
-  {
-    src: "product/cupcake.jpg",
-    name: "Chocolate Chip Cookies",
-    price: "$5.00",
-    description: "Freshly baked chocolate chip cookies.",
-  },
-];
 
 const ItemsCard = () => {
+  const {products} = useContext(AppContext)
+  if(products.length === 0){
+    console.log("produk kosong");
+  }
+  
   return (
     <div className="grid grid-cols-3 grid-rows-2 gap-7">
-      {imageData.map((item, index) => (
+      {products.map((product, index) => (
         <Link
           key={index}
           to="/product-detail"
-          state={item} // ← kirim data produk ke ProductDetailPage
+          state={product} // ← kirim data produk ke ProductDetailPage
           className="block"
         >
           <img
-            src={item.src}
-            alt={item.name}
+            src={product.image_url}
+            alt={product.product_name}
             className="card-shadow relative min-w-52 h-48 rounded-lg border border-red-500 overflow-hidden object-cover"
           />
-          <h2 className="font-semibold text-sm text-yes mt-2">{item.name}</h2>
-          <p className="text-yes font-semibold text-sm">{item.price}</p>
+          <h2 className="font-semibold text-sm text-yes mt-2">{product.product_name}</h2>
+          <p className="text-yes font-semibold text-sm">{product.product_price}</p>
         </Link>
       ))}
     </div>

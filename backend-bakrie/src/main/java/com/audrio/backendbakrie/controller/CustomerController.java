@@ -2,15 +2,12 @@ package com.audrio.backendbakrie.controller;
 
 import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;
-import com.audrio.backendbakrie.io.ProductRequest;
 import com.audrio.backendbakrie.service.CustomerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,7 +17,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CustomerController {
 
     private final CustomerService customerService;

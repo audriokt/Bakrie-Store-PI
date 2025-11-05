@@ -28,7 +28,7 @@ public class FileUploadUtils {
         }
 
         final long fileSize = file.getSize();
-        if(file.getSize() > MAX_FILE_SIZE){
+        if(fileSize > MAX_FILE_SIZE){
             throw new ImageSizeUnaproriateException("File is too large");
         }
     }

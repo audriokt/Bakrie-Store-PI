@@ -4,6 +4,7 @@ import ItemsCard from '../../layout/itemsCard/ItemsCard'
 import InfiniteSwiper from '../../core/InfiniteSwiper'
 import DisclosureCard from '../../core/DisclosureCard'
 import { aboutData } from '../about/AboutPage'
+import { AppContextProvider } from '../../../context/AppContext'
 
 const HomePage = () => {
   return (
@@ -28,7 +29,9 @@ const HomePage = () => {
       {/* item card */}
       <div className='flex flex-col justify-center items-center mt-20 w-full'>
         <h1 className='font-extrabold text-3xl text-yes mb-10'>Checkout Our Products</h1>
-        <ItemsCard/>
+        <AppContextProvider>
+          <ItemsCard/>
+        </AppContextProvider>
       </div>
 
       {/* about us */}

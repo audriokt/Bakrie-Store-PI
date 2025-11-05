@@ -13,8 +13,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-import java.time.LocalDate;
-
 @Entity
 @Table(name = "transactions")
 @Builder
