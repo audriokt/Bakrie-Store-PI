@@ -22,13 +22,13 @@ import EditProfilePage from "./pages/Profile/EditProfile/EditProfilePage";
 import EditPasswordPage from "./pages/Profile/EditProfile/EditPasswordPage";
 
 // Admin Routes
-// import AdminRoutes from "./routes/AdminRoutes";
+ import AdminRoutes from "./routes/AdminRoutes";
 
 function App() {
   const location = useLocation();
 
   // halaman yang tidak menampilkan navbar & footer
-  const hideLayoutPaths = ["/login", "/signup"];
+  const hideLayoutPaths = ["/login", "/signup", "/admin"];
   const shouldHideLayout = hideLayoutPaths.includes(location.pathname);
 
   // // deteksi halaman admin
@@ -40,7 +40,7 @@ function App() {
       {!shouldHideLayout && <Navbar />}
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/about" element={<AboutPage/>} />
 
          {/* route untuk catalog dan product details */}
           <Route path='/products' element={<ProductPage/>}></Route>
@@ -55,6 +55,8 @@ function App() {
           <Route path='/profile' element={<UserProfilePage/>}/>
           <Route path='/edit-profile' element={<EditProfilePage/>}/>
           <Route path='/edit-password' element={<EditPasswordPage/>}/>
+
+          <Route path="/admin" element={<AdminRoutes/>}/>
         </Routes>
       {!shouldHideLayout && <Footer />}
     </>

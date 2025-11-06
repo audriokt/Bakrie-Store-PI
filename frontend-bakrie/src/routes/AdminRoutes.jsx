@@ -1,19 +1,17 @@
 import { Routes, Route } from "react-router-dom";
-import AdminLayout from "../components/layout/admin/adminlayout";
+import AdminLayout from "../components/layout/admin/AdminLayout";
 import DashBoardPage from "../pages/Admins/Dashboard/DashBoardPage";
 
-// import halaman admin lain di sini
-
-const AdminRoutes = () => {
+function AdminRoutes() {
   return (
-    <AdminLayout>
-      <Routes>
-        <Route path="/admin/dashboard" element={<DashBoardPage />} />
-        {/* tambahkan halaman admin lain */}
-        {/* <Route path="/admin/products" element={<ProductListPage />} /> */}
-      </Routes>
-    </AdminLayout>
+    <Routes>
+      <Route path="/" element={<AdminLayout />}>
+        <Route index element={<DashBoardPage />} />
+        <Route path="dashboard" element={<DashBoardPage />} />
+        {/* Tambahkan route admin lainnya di sini */}
+      </Route>
+    </Routes>
   );
-};
+}
 
 export default AdminRoutes;

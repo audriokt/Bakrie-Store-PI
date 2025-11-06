@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { loginService } from "../../../services/api";
+// import { loginService } from "../../../services/api";
 
 const LoginPage = () => {
   return (
