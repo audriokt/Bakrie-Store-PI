@@ -1,23 +1,38 @@
-import { Route, Routes, useLocation } from 'react-router-dom'
-import './App.css'
-import Footer from './components/layout/footer/footer'
-import Navbar from './components/layout/navbar/Navbar'
-import HomePage from './components/pages/home/HomePage'
-import AboutPage from './components/pages/about/AboutPage'
-import LoginPage from './components/AuthPages/Login/LoginPage'
-import SignUpPage from './components/AuthPages/SignUp/SignUpPage'
-import ProductDetailPage from './components/CatalogPages/ProductDetail/ProductDetailPage'
-import CartsPage from './components/Carts/CartsPage'
-import UserProfilePage from './components/Profile/UserProfile/UserProfilePage'
-import EditProfilePage from './components/Profile/EditProfile/EditProfilePage'
-import EditPasswordPage from './components/Profile/EditProfile/EditPasswordPage'
-import ProductPage from './components/pages/product/ProductPage'
+import { Route, Routes, useLocation } from "react-router-dom";
+import "./App.css";
+
+//  Layouts
+import Footer from "./components/layout/footer/Footer";
+import Navbar from "./components/layout/navbar/Navbar";
+
+// Pages (semua di luar folder components)
+import HomePage from "./pages/home/HomePage";
+import AboutPage from "./pages/about/AboutPage";
+import ProductPage from "./pages/product/ProductPage";
+
+// Catalog & Cart
+import ProductDetailPage from "./pages/CatalogPages/ProductDetail/ProductDetailPage";
+import CartsPage from "./pages/Carts/CartsPage";
+
+// Auth & Profile
+import LoginPage from "./pages/AuthPages/Login/LoginPage";
+import SignUpPage from "./pages/AuthPages/SignUp/SignUpPage";
+import UserProfilePage from "./pages/Profile/UserProfile/UserProfilePage";
+import EditProfilePage from "./pages/Profile/EditProfile/EditProfilePage";
+import EditPasswordPage from "./pages/Profile/EditProfile/EditPasswordPage";
+
+// Admin Routes
+// import AdminRoutes from "./routes/AdminRoutes";
 
 function App() {
-  // atur halaman yang tidak ingin ditampilkan navbar dan footer
   const location = useLocation();
-  const hideLayoutPaths = ['/login', '/signup'];
+
+  // halaman yang tidak menampilkan navbar & footer
+  const hideLayoutPaths = ["/login", "/signup"];
   const shouldHideLayout = hideLayoutPaths.includes(location.pathname);
+
+  // // deteksi halaman admin
+  // const isAdminPage = location.pathname.startsWith("/admin");
 
   return (
     <>

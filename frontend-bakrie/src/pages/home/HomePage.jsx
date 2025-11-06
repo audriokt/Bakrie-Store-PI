@@ -1,8 +1,8 @@
 import React from 'react'
-import Carousel from '../../layout/swiperComponent/Carousel'
-import ItemsCard from '../../layout/itemsCard/ItemsCard'
-import InfiniteSwiper from '../../core/InfiniteSwiper'
-import DisclosureCard from '../../core/DisclosureCard'
+import Carousel from "../../components/layout/swiperComponent/Carousel";
+import ItemsCard from "../../components/layout/itemsCard/ItemsCard";
+import InfiniteSwiper from "../../components/core/InfiniteSwiper";
+import DisclosureCard from '../../components/core/DisclosureCard'
 import { aboutData } from '../about/AboutPage'
 import { AppContextProvider } from '../../../context/AppContext'
 
