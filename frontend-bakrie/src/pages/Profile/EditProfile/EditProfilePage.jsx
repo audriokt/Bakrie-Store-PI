@@ -6,7 +6,7 @@ const EditProfilePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-[#FFF5F5] pt-24 pb-10">
+    <div className="min-h-screen flex justify-center items-center bg-[#FFF5F5] pt-24 pb-10 mt-10">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -37,7 +37,7 @@ const EditProfilePage = () => {
             <input
               type="text"
               placeholder="Enter your username"
-              className="w-full border border-red-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full border border-red-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400 placeholder-gray-400"
             />
           </div>
 
@@ -48,7 +48,7 @@ const EditProfilePage = () => {
             <input
               type="email"
               placeholder="Enter your email"
-              className="w-full border border-red-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full border border-red-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400 placeholder-gray-400"
             />
           </div>
 
@@ -59,7 +59,8 @@ const EditProfilePage = () => {
             <input
               type="text"
               placeholder="+62..."
-              className="w-full border border-red-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400"
+              autoComplete="off"
+              className="w-full border border-red-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400 placeholder-gray-400"
             />
           </div>
 
@@ -70,7 +71,7 @@ const EditProfilePage = () => {
             <textarea
               rows="3"
               placeholder="Enter your address"
-              className="w-full border border-red-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
+              className="w-full border border-red-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-400 resize-none placeholder-gray-400"
             ></textarea>
           </div>
 
