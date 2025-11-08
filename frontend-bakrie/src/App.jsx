@@ -40,7 +40,7 @@ function App() {
       {!shouldHideLayout && <Navbar />}
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/about" element={<AboutPage />} />
 
          {/* route untuk catalog dan product details */}
           <Route path='/products' element={<ProductPage/>}></Route>

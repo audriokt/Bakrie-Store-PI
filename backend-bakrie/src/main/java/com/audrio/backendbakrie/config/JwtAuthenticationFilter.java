@@ -2,6 +2,7 @@ package com.audrio.backendbakrie.config;
 
 import com.audrio.backendbakrie.service.impl.UserDetailsServiceImpl;
 import com.audrio.backendbakrie.utils.JwtUtils;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+
 
 @Component
 @RequiredArgsConstructor
@@ -52,6 +54,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+
+        //Ambil token dari header Authorization
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const ProfilePage = () => {
   return (
-    <div className="flex justify-center items-center min-h-[calc(100vh-100px)] bg-[#FFF8F8] px-6 md:px-20 pt-28 pb-10">
+    <div className="flex justify-center items-center min-h-[calc(100vh-100px)] bg-[#FFF8F8] px-6 md:px-10 pt-28 pb-10 mt-10">
       {/* Main content */}
       <main className="flex flex-col md:flex-row gap-10 w-full max-w-6xl">
         {/* Left Card */}
@@ -12,7 +12,7 @@ const ProfilePage = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex flex-col items-center bg-white shadow-lg rounded-3xl p-10 md:w-1/3"
+          className="flex flex-col items-center bg-white shadow-lg rounded-3xl p-10 md:w-1/3 w-full"
         >
           {/* Profile Photo */}
           <div className="relative mb-8">
@@ -63,7 +63,7 @@ const ProfilePage = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="flex-1 bg-white shadow-lg rounded-3xl p-12"
+          className="flex-1 bg-white shadow-lg rounded-3xl p-12 md:w-1/3 w-full"
         >
           <h2 className="text-2xl font-bold text-red-600 border-b-2 border-red-300 pb-3 mb-8 text-center md:text-left">
             My Profile
