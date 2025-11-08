@@ -100,6 +100,9 @@ public class CustomerServiceImpl implements CustomerService {
     public void delete(UUID id) {
         Customers existingCustomer = customerRepository.findByIdCustomer(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer id: " + id + "not found"));
+//        try{
+//            boolean deleteImg = cloudinaryService.delete(existingCustomer.get)
+//        }
         customerRepository.delete(existingCustomer);
     }
 

@@ -22,7 +22,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @PostMapping("/public/register/customer")
+    @PostMapping("/public/auth/register/customer")
     @ResponseStatus(HttpStatus.CREATED)
     public CustomerResponse createCustomer(@RequestPart("customer") String customerString,
                                            @RequestPart("file")MultipartFile file){
@@ -36,19 +36,19 @@ public class CustomerController {
         }
     }
 
-    @GetMapping("/admin/fetchCustomer")
+    @GetMapping("/admin/customers/fetchCustomers")
     @ResponseStatus(HttpStatus.OK)
     public List<CustomerResponse> fetchAllCustomers() {
         return customerService.getAll();
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/customer/update/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CustomerResponse updateCustomer(@PathVariable String id, @RequestBody CustomerRequest customerRequest) {
         return customerService.update(UUID.fromString(id), customerRequest);
     }
 
-    @DeleteMapping("/delete/customer/{id}")
+    @DeleteMapping("/customer/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCustomer(@PathVariable String id) {
         try {

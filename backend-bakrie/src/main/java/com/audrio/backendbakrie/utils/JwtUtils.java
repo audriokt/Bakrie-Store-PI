@@ -76,6 +76,8 @@ public class JwtUtils {
                 .getBody();
     }
 
+    private Claims extractClaims(Function<Claims, String>, )
+
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }

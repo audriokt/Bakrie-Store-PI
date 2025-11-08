@@ -30,7 +30,7 @@ public class EmployeeController {
     * Controller for create employee account,
     * called add() from employeeServiceImpl() class in directory "service/impl"
     */
-    @PostMapping("/admin/register/employee")
+    @PostMapping("/admin/auth/register/employee")
     @ResponseStatus(HttpStatus.CREATED)
     public EmployeeResponse createEmployee(@RequestPart("employee") String employeeString,
                                            @RequestPart("file") MultipartFile file){
@@ -48,7 +48,7 @@ public class EmployeeController {
     * controller for get all employee's data from database.
     * called getAll() from employeeServiceImpl class in directory "service/impl"
     * */
-    @GetMapping("/admin/fetchEmployee")
+    @GetMapping("/admin/employees/fetchEmployees")
     @ResponseStatus(HttpStatus.OK)
     public List<EmployeeResponse> fetchAllEmployees() {
         return employeeService.getAll();
@@ -59,7 +59,7 @@ public class EmployeeController {
     * accept id parameter in url, only can get 1 employee's data at a time.
     * called update() from employeeServiceImpl class in directory "service/impl"
     */
-    @PutMapping("/admin/update/employee/{id}")
+    @PutMapping("/admin/employee/update/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EmployeeResponse updateEmployee(@PathVariable String id, @RequestBody EmployeeRequest employeeRequest) {
         return employeeService.update(UUID.fromString(id), employeeRequest);
@@ -70,7 +70,7 @@ public class EmployeeController {
     * called delete() from employeeServiceImpl() class in directory "service/impl"
     * accept id parameter in url, only can delete one employee at a time
     */
-    @DeleteMapping("/admin/delete/employee/{id}")
+    @DeleteMapping("/admin/employee/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCustomer(@PathVariable String id) {
         try {
