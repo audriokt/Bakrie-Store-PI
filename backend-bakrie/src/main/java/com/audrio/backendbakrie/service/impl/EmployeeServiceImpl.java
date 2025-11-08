@@ -51,25 +51,30 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public EmployeeResponse add(EmployeeRequest request, MultipartFile file) {
-        // Validasi awal
         validateRequest(request, file);
 
-        Optional<Employees> optionalEmployee = employeeRepository.findByEmail(request.getEmail());
+        Optional<Employees> optionalEmployee = employeeRepository.findByEmail(request.getEmail().trim());
         HashMap<String, Object> claims = new HashMap<>();
-        claims.put("purpose","email-verification");
-        String token = jwtUtils.generateToken(claims, request.getEmail());
+        claims.put("purpose", "email-verification");
+        String token = jwtUtils.generateToken(claims, request.getEmail().trim());
 
         if (optionalEmployee.isPresent()) {
-            Employees existingEmployee = optionalEmployee.get();
-
-            if (existingEmployee.getIs_verified()) {
-                throw new UserAlreadyVerifiedException("Employee with email: " + request.getEmail() + " is already verified");
+            Employees existing = optionalEmployee.get();
+            if (existing.getIs_verified()) {
+                throw new UserAlreadyVerifiedException("Email sudah terverifikasi");
             }
+            existing.setVerificationToken(token);
+            employeeRepository.save(existing);
+            emailService.sendEmpVerificationEmail(existing.getEmail(), token);
+            return convertToResponse(existing);
+        }
 
-            existingEmployee.setVerificationToken(token);
-            employeeRepository.save(existingEmployee);
-            emailService.sendVerificationEmail(existingEmployee.getEmail(), token);
-            return convertToResponse(existingEmployee);
+        // Upload file
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new ImageSizeUnaproriateException("File maksimal 5MB");
+        }
+        if (!file.getContentType().startsWith("image/")) {
+            throw new ImageInvalidExtentionException("Hanya file gambar");
         }
 
         String idImg = UUID.randomUUID().toString();
@@ -96,18 +101,20 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public EmployeeResponse update(UUID id, EmployeeRequest request) {
-        employeeRepository.updateEmployeeFields(
-                id,
-                request.getUsername(),
-                request.getPassword(),
-                request.getEmail(),
-                request.getImg_url()
-        );
+        Employees employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found: " + id));
 
-        Employees updated = employeeRepository.findByIdEmployee(id)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee with id: " + id + " not found"));
+        employee.setUsername(request.getUsername().trim());
+        employee.setEmail(request.getEmail().trim());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            employee.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getImg_url() != null) {
+            employee.setImg_url(request.getImg_url());
+        }
 
-        return convertToResponse(updated);
+        employeeRepository.save(employee);
+        return convertToResponse(employee);
     }
 
     /**
@@ -120,6 +127,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void delete(UUID id) {
         Employees existingCustomer = employeeRepository.findByIdEmployee(id)
                 .orElseThrow(() -> new EmployeeNotFoundException("Employee with id: " + id + " not found"));
+        try{
+            cloudinaryService.deleteFile(existingCustomer.getImg_url());
+        } catch (Exception e){
+            System.out.printf("Error deleting image: %s".formatted(e.getMessage()));
+        }
         employeeRepository.delete(existingCustomer);
     }
 
@@ -149,25 +161,32 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public ResponseEntity<String> verifyEmail(String token) {
-        String emailString = jwtUtils.extractEmail(token);
-        if (emailString == null || emailString.isEmpty()) {
-            throw new EmailShouldntBlankException("Email verification Token is empty");
+        if (token == null || token.isBlank()) {
+            throw new EmailShouldntBlankException("Token tidak boleh kosong");
         }
 
-        Employees employee = employeeRepository.findByEmail(emailString)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee with email: " + emailString + " not found"));
-        if (employee == null || employee.getVerificationToken() == null) {
-            throw new VerificationTokenEmptyException("Verification token is empty");
+        String email = jwtUtils.extractEmail(token);
+        if (email == null) {
+            throw new VerificationTokenNotValidException("Token tidak valid");
         }
 
-        if (!jwtUtils.validateToken(token) || !token.equals(employee.getVerificationToken())) {
-            throw new  VerificationTokenNotValidException("Verification token is not valid");
+        String purpose = jwtUtils.extractClaim(token, claims -> claims.get("purpose", String.class));
+        if (!"email-verification".equals(purpose)) {
+            throw new VerificationTokenNotValidException("Token bukan untuk verifikasi email");
+        }
+
+        Employees employee = employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee tidak ditemukan"));
+
+        if (!token.equals(employee.getVerificationToken())) {
+            throw new VerificationTokenNotValidException("Token tidak cocok");
         }
 
         employee.setIs_verified(true);
+        employee.setVerificationToken(null); // hapus token
         employeeRepository.save(employee);
 
-        return new  ResponseEntity("Email terverifikasi", HttpStatus.OK);
+        return ResponseEntity.ok("Email berhasil diverifikasi");
     }
 
     @Override
@@ -177,11 +196,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         );
 
         Employees employee = employeeRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee with email: " + request.getEmail() + " not found"));
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee tidak ditemukan"));
+
+        if (!employee.getIs_verified()) {
+            throw new UserNotVerifiedException("Email belum diverifikasi");
+        }
 
         HashMap<String, Object> claims = new HashMap<>();
-        claims.put("role","ROLE_CHASHIER");
-        claims.put("purpose","access");
+        claims.put("role", employee.getEmpRoles().getName());
+        claims.put("purpose", "access");
 
         String token = jwtUtils.generateToken(claims, employee.getEmail());
         return new AuthResponse(token);

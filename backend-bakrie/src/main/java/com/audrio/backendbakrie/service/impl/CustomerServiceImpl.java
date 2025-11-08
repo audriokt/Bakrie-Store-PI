@@ -42,25 +42,32 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerResponse add(CustomerRequest request, MultipartFile file) {
-        // Validasi awal
         validateRequest(request, file);
 
-        Optional<Customers> optionalCustomer = customerRepository.findByEmail(request.getEmail());
-        HashMap<String,Object> claims = new HashMap<>();
-        claims.put("purpose","email-verification");
-        String token = jwtUtils.generateToken(claims, request.getEmail());
+        String email = request.getEmail().trim();
+        Optional<Customers> optionalCustomer = customerRepository.findByEmail(email);
+
+        HashMap<String, Object> claims = new HashMap<>();
+        claims.put("purpose", "email-verification");
+        String token = jwtUtils.generateToken(claims, email);
 
         if (optionalCustomer.isPresent()) {
-            Customers existingCustomer = optionalCustomer.get();
-
-            if (existingCustomer.getIs_verified()) {
-                throw new UserAlreadyVerifiedException("Employee with email: " + request.getEmail() + " is already verified");
+            Customers existing = optionalCustomer.get();
+            if (existing.getIs_verified()) {
+                throw new UserAlreadyVerifiedException("Email sudah terverifikasi");
             }
-            existingCustomer.setVerificationToken(token);
-            customerRepository.save(existingCustomer);
-            emailService.sendVerificationEmail(existingCustomer.getEmail(), token);
-            throw new UserNotVerifiedException("User with email: " + request.getEmail() + " not verified. Please check your email");
+            existing.setVerificationToken(token);
+            customerRepository.save(existing);
+            emailService.sendVerificationEmail(existing.getEmail(), token);
+            return convertToResponse(existing); // ← RETURN, JANGAN THROW!
+        }
 
+        // Upload file
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new ImageSizeUnaproriateException("File maksimal 5MB");
+        }
+        if (!file.getContentType().startsWith("image/")) {
+            throw new ImageInvalidExtentionException("Hanya file gambar");
         }
 
         String idImg = UUID.randomUUID().toString();
@@ -81,29 +88,32 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional
     public CustomerResponse update(UUID id, CustomerRequest request) {
-        customerRepository.updateCustomerFields(
-                id,
-                request.getUsername(),
-                request.getPassword(),
-                request.getAddress(),
-                request.getEmail(),
-                request.getPhone_num()
-        );
+        Customers customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer tidak ditemukan: " + id));
 
-        Customers updated = customerRepository.findByIdCustomer(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer id: " + id + "not found"));
+        customer.setUsername(request.getUsername().trim());
+        customer.setEmail(request.getEmail().trim());
+        customer.setAddress(request.getAddress().trim());
+        customer.setPhone_num(request.getPhone_num().trim());
 
-        return convertToResponse(updated);
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        customerRepository.save(customer);
+        return convertToResponse(customer);
     }
 
     @Override
     public void delete(UUID id) {
-        Customers existingCustomer = customerRepository.findByIdCustomer(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer id: " + id + "not found"));
-//        try{
-//            boolean deleteImg = cloudinaryService.delete(existingCustomer.get)
-//        }
-        customerRepository.delete(existingCustomer);
+        Customers customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer tidak ditemukan: " + id));
+
+        if (customer.getImg_url() != null) {
+            cloudinaryService.deleteFile(customer.getImg_url());
+        }
+
+        customerRepository.delete(customer);
     }
 
     @Override
@@ -116,25 +126,32 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public ResponseEntity<String> verifyEmail(String token) {
-        String emailString = jwtUtils.extractEmail(token);
-        if (emailString == null || emailString.isEmpty()) {
-            return new ResponseEntity("Customer Email is Empty", HttpStatus.BAD_REQUEST);
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.badRequest().body("Token tidak boleh kosong");
         }
 
-        Customers customer = customerRepository.findByEmail(emailString)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer id: " + emailString + "not found"));
-        if (customer == null || customer.getVerificationToken() == null) {
-            return new ResponseEntity("Customer Verification Token is Empty", HttpStatus.BAD_REQUEST);
+        String email = jwtUtils.extractEmail(token);
+        if (email == null) {
+            return ResponseEntity.badRequest().body("Token tidak valid");
         }
 
-        if (!jwtUtils.validateToken(token) || !token.equals(customer.getVerificationToken())) {
-            return new ResponseEntity("Customer Verification Token is not valid", HttpStatus.BAD_REQUEST);
+        String purpose = jwtUtils.extractClaim(token, claims -> claims.get("purpose", String.class));
+        if (!"email-verification".equals(purpose)) {
+            return ResponseEntity.badRequest().body("Token bukan untuk verifikasi email");
+        }
+
+        Customers customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer tidak ditemukan"));
+
+        if (!token.equals(customer.getVerificationToken())) {
+            return ResponseEntity.badRequest().body("Token verifikasi tidak cocok");
         }
 
         customer.setIs_verified(true);
+        customer.setVerificationToken(null); // hapus token
         customerRepository.save(customer);
 
-        return new  ResponseEntity("Email terverifikasi", HttpStatus.OK);
+        return ResponseEntity.ok("Email berhasil diverifikasi");
     }
 
     @Override
@@ -187,59 +204,61 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private void validateRequest(CustomerRequest request, MultipartFile file) {
-        if (request == null) {
-            throw new RequestShouldntEmptyException("Request tidak boleh null");
+        if (request == null) throw new RequestShouldntEmptyException("Request tidak boleh null");
+
+        // Email
+        String email = request.getEmail();
+        if (email == null || !email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+            throw new EmailNotValidException("Format email tidak valid");
         }
 
-        // ===== Email =====
-        if (request.getEmail() == null || !request.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-            throw new EmailNotValidException("Email tidak valid");
-        }
-
-        // ===== Password =====
+        // Password
         if (request.getPassword() == null || request.getPassword().length() < 8) {
-            throw new PasswordMinLengthException("Password harus minimal 8 karakter");
+            throw new PasswordMinLengthException("Password minimal 8 karakter");
         }
 
-        // ===== Username =====
+        // Username
         String username = request.getUsername();
         if (username == null || username.trim().isEmpty()) {
-            throw new UsernameShouldntBlankException("Nama tidak boleh kosong");
+            throw new UsernameShouldntBlankException("Username tidak boleh kosong");
         }
-        if (username.length() < 8) {
-            throw new UsernameMinLengthException("Username harus minimal 8 karakter");
+        username = username.trim();
+        if (username.length() < 8 || username.length() > 32) {
+            throw new UsernameInvalidLengthException("Username 8-32 karakter");
         }
-        if (username.length() > 32) {
-            throw new UsernameMaxLengthException("Username maksimal 32 karakter");
-        }
-        if (username.matches(".*\\d.*") || username.matches(".*[^a-zA-Z0-9].*")) {
-            throw new UsernameContainNumberOrDigitsException("Username hanya boleh mengandung huruf");
+        if (!username.matches("^[a-zA-Z]+$")) {
+            throw new UsernameContainNumberOrDigitsException("Username hanya huruf");
         }
 
-        // ===== Phone Number =====
+        // Phone
         String phone = request.getPhone_num();
         if (phone == null || phone.trim().isEmpty()) {
-            throw new PhoneNumberShouldntBlankException("Nomor telepon tidak boleh kosong");
+            throw new PhoneNumberShouldntBlankException("Nomor telepon wajib diisi");
         }
+        phone = phone.trim();
         if (!phone.matches("^\\+?\\d{10,15}$")) {
-            throw new PhoneNumberNotValidException("Nomor telepon tidak valid (harus 10–15 digit, boleh diawali +)");
+            throw new PhoneNumberNotValidException("Nomor telepon harus 10-15 digit");
         }
 
-        // ===== Address =====
+        // Address
         String address = request.getAddress();
         if (address == null || address.trim().isEmpty()) {
-            throw new AddressShouldntBlankException("Alamat tidak boleh kosong");
+            throw new AddressShouldntBlankException("Alamat wajib diisi");
         }
-        if (address.length() < 10) {
-            throw new AddressMinLengthException("Alamat terlalu pendek, minimal 10 karakter");
-        }
-        if (address.length() > 255) {
-            throw new AddressMaxLengthException("Alamat terlalu panjang, maksimal 255 karakter");
+        address = address.trim();
+        if (address.length() < 10 || address.length() > 255) {
+            throw new AddressInvalidLengthException("Alamat 10-255 karakter");
         }
 
-        //field file
-        if(file.isEmpty()){
-            throw new ImageFileEmptyException("File tidak boleh kosong");
+        // File
+        if (file == null || file.isEmpty()) {
+            throw new ImageFileEmptyException("File gambar wajib diisi");
+        }
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new ImageSizeUnaproriateException("File maksimal 5MB");
+        }
+        if (!file.getContentType().startsWith("image/")) {
+            throw new ImageInvalidExtentionException("Hanya file gambar yang diizinkan");
         }
     }
 }
