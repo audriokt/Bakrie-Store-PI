@@ -25,11 +25,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final UserDetailsServiceImpl userDetailsService;
     private static final List<String> WHITELIST = List.of(
-            "/public/auth/login/customer",
-            "/public/auth/login/employee",
-            "/public/register/customer",
-            "/req/signup/verify",
-            "/public/products"
+            "/public/products/**",
+            "/public/auth/**",
+            "/public/register/**",
+            "/req/signup/**",
+            "/employee/**",
+            "/admin/**"
     );
 
 
