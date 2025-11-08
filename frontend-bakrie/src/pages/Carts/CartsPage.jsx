@@ -49,15 +49,15 @@ const CartsPage = () => {
   <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="max-w-4xl mx-auto px-4 pt-32 md:pb-10 text-red-700"
+      className="max-w-4xl mx-auto px-10 pt-40 md:pb-10 text-red-700"
     >
 
 
       {/* Heading */}
-      <h1 className="text-2xl font-bold mb-2">Your Cart</h1>
-      <p className="text-sm mb-6">
+      <h1 className="text-5xl font-extrabold mb-2">Your Cart</h1>
+      <p className="mb-6">
         Not ready to checkout?{" "}
-        <Link to="/about" className="underline hover:text-red-800">
+        <Link to="/products" className="underline hover:text-red-800">
           Continue Shopping
         </Link>
       </p>
@@ -139,7 +139,7 @@ const CartsPage = () => {
       </AnimatePresence>
 
       {/* Subtotal Box */}
-      <div className="border border-red-300 rounded-lg p-6 mt-10 shadow-sm">
+      <div className="border border-red-300 rounded-lg p-6 mt-10 mb-10 shadow-sm">
         <div className="flex justify-between text-sm font-medium">
           <span>Subtotal</span>
           <span className="font-bold">{formatPrice(subtotal)}</span>

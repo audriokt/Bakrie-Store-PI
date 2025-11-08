@@ -14,8 +14,8 @@ export const aboutData = {
 
 export default function AboutPage() {
   return (
-    <div className="p-10">
-      <h1 className="text-3xl font-bold mb-4">{aboutData.title}</h1>
+    <div className="px-10 pt-40 pb-10 max-w-4xl mx-auto">
+      <h1 className="text-5xl font-extrabold mb-4 text-yes">{aboutData.title}</h1>
       <p className="text-gray-600">{aboutData.details}</p>
     </div>
   );

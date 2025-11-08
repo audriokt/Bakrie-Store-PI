@@ -1,5 +1,5 @@
 import React from 'react'
-import ItemsCard from '../../layout/itemsCard/ItemsCard'
+import ItemsCard from '../../components/layout/itemsCard/ItemsCard'
 
 const ProductPage = () => {
   return (
