@@ -37,17 +37,22 @@ const Navbar = () => {
       }`}
     >
       {/* Hamburger Menu */}
-      <button className="flex justify-center items-center gap-2 w-auto relative z-[999]" onClick={ handleClick }>
-        <div className="flex flex-col gap-1">
-          <span className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${isOpen && "rotate-45 translate-y-2"}`}></span>
-          <span className={`w-7 h-[3px] bg-yes rounded-s transition-[width] ${isOpen && "w-auto m-auto"}`}></span>
-          <span className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${isOpen && "-rotate-45 -translate-y-1.5"}`}></span>
-        </div>
-      </button>
-      <div className="w-full">
-        <img src="./logo/Patteserie.svg" alt="Patteserie" className="w-48" />
+      <div className="flex w-20">
+        <button className="flex justify-center items-center gap-2 w-auto relative z-[999]" onClick={ handleClick }>
+          <div className="flex flex-col gap-1">
+            <span className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${isOpen && "rotate-45 translate-y-2"}`}></span>
+            <span className={`w-7 h-[3px] bg-yes rounded-s transition-[width] ${isOpen && "w-auto m-auto"}`}></span>
+            <span className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${isOpen && "-rotate-45 -translate-y-1.5"}`}></span>
+          </div>
+        </button>
       </div>
-      <Link to="/carts" className=""><i className="bx bx-shopping-bag text-2xl text-yes"></i></Link>
+      <div className="w-full">
+        <Link to="/"><img src="./logo/Patteserie.svg" alt="Patteserie" className="w-48" /></Link>
+      </div>
+      <div className="flex gap-4 w-20">
+        <Link to="/profile"><img src="https://i.pinimg.com/736x/e0/97/a7/e097a7826127764391f21dbb511ba437.jpg" alt="user-pic" className="w-[40px] rounded-full" /></Link>
+        <Link to="/carts" className=""><i className="bx bx-shopping-bag text-2xl text-yes"></i></Link>
+      </div>
       
       {/* sidebar menu section */}
       {isOpen && (
