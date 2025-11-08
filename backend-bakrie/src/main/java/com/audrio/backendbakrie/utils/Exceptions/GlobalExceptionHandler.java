@@ -135,15 +135,8 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
-    @ExceptionHandler({UsernameMinLengthException.class})
-    public ResponseEntity<Object>  handleUsernameMinLengthException(UsernameMinLengthException ex){
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ex.getMessage());
-    }
-
-    @ExceptionHandler({UsernameMaxLengthException.class})
-    public ResponseEntity<Object>  handleUsernameMaxLengthException(UsernameMaxLengthException ex){
+    @ExceptionHandler({UsernameInvalidLengthException.class})
+    public ResponseEntity<Object>  handleUsernameMinLengthException(UsernameInvalidLengthException ex){
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ex.getMessage());
@@ -177,20 +170,6 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
-    @ExceptionHandler({AddressMinLengthException.class})
-    public ResponseEntity<Object> handleAddressMinLengthException(AddressMinLengthException ex){
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ex.getMessage());
-    }
-
-    @ExceptionHandler({AddressMaxLengthException.class})
-    public ResponseEntity<Object> handleAddressMaxLengthException(AddressMaxLengthException ex){
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ex.getMessage());
-    }
-
     @ExceptionHandler({UserNotVerifiedException.class})
     public ResponseEntity<Object> handleUserNotVerifiedException(UserNotVerifiedException ex){
         return ResponseEntity
@@ -200,6 +179,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({ImageFileEmptyException.class})
     public ResponseEntity<Object> handleImageFileEmptyException(ImageFileEmptyException ex){
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler({AddressInvalidLengthException.class})
+    public ResponseEntity<Object> handleAddressInvalidLengthException(AddressInvalidLengthException ex){
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ex.getMessage());
