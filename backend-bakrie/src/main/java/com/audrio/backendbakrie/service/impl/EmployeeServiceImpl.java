@@ -259,8 +259,6 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @throws EmailNotValidException jika format email tidak sesuai
      * @throws PasswordMinLengthException jika password kurang dari 8 karakter
      * @throws UsernameShouldntBlankException jika username kosong atau hanya spasi
-     * @throws UsernameMinLengthException jika username kurang dari 8 karakter
-     * @throws UsernameMaxLengthException jika username lebih dari 32 karakter
      * @throws UsernameContainNumberOrDigitsException jika username mengandung angka atau simbol
      */
     private void validateRequest(EmployeeRequest request, MultipartFile file) {
@@ -283,12 +281,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (username == null || username.trim().isEmpty()) {
             throw new UsernameShouldntBlankException("Nama tidak boleh kosong");
         }
-        if (username.length() < 8) {
-            throw new UsernameMinLengthException("Username harus minimal 8 karakter");
+        if (username.length() < 8 || username.length() > 32) {
+            throw new UsernameInvalidLengthException("Username harus 8-32 karakter");
         }
-        if (username.length() > 32) {
-            throw new UsernameMaxLengthException("Username maksimal 32 karakter");
-        }
+
         if (username.matches(".*\\d.*") || username.matches(".*[^a-zA-Z0-9].*")) {
             throw new UsernameContainNumberOrDigitsException("Username hanya boleh mengandung huruf");
         }
