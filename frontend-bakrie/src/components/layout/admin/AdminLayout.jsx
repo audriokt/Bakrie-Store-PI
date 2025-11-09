@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import { HiOutlineBell } from "react-icons/hi";
 import { HiMenu, HiX } from "react-icons/hi";
 import AdminSidebar from "./AdminSidebar";
@@ -36,14 +36,15 @@ const AdminLayout = () => {
               )}
             </button>
 
-            <motion.img
-              src="./logo/Patteserie.svg"
+           <motion.img
+              src="/logo/Patteserie.svg"
               alt="Patteserie"
-              className="w-48" 
+              className="w-48"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
             />
+
           </div>
 
           {/* KANAN: Notifikasi + Profil */}

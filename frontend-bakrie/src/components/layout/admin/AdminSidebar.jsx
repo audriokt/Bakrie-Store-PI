@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarItems,
@@ -18,6 +18,7 @@ import {
 
 const AdminSidebar = ({ isOpen }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const baseItemClass =
     "!bg-ookay !text-yes hover:!bg-ookay/80 hover:!text-yes transition-all duration-200";
@@ -34,23 +35,26 @@ const AdminSidebar = ({ isOpen }) => {
     { to: "/admin/profile", icon: HiUserCircle, label: "Profile" },
   ];
 
+  const handleNavClick = (to) => {
+    navigate(to);
+  };
+
   return (
     <>
-      {/* Desktop Sidebar - berada di bawah navbar */}
+      {/* Desktop Sidebar */}
       <motion.div
         initial={false}
         animate={{ width: isOpen ? 288 : 80 }}
         transition={{ duration: 0.3 }}
-       className="hidden lg:flex flex-col bg-ookay border-r border-ookay/30 shadow-lg fixed z-[997] overflow-hidden"  
-        style={{ 
-          top: '5rem', // Mulai dari bawah navbar
-          height: 'calc(100vh - 5rem)' // Tinggi penuh dikurangi tinggi navbar
+        className="hidden lg:flex flex-col bg-ookay border-r border-ookay/30 shadow-lg fixed z-[997] overflow-hidden"
+        style={{
+          top: "5rem",
+          height: "calc(100vh - 5rem)",
         }}
       >
-        {/* Navigation - tanpa background Flowbite */}
         <div className="flex-1 py-4">
-          <Sidebar 
-            aria-label="Admin Sidebar" 
+          <Sidebar
+            aria-label="Admin Sidebar"
             className="!bg-transparent !border-none [&>*]:!bg-transparent"
           >
             <SidebarItems className="!bg-transparent">
@@ -58,9 +62,8 @@ const AdminSidebar = ({ isOpen }) => {
                 {navItems.map((item) => (
                   <SidebarItem
                     key={item.to}
-                    as={Link}
-                    to={item.to}
                     icon={item.icon}
+                    onClick={() => handleNavClick(item.to)} // ✅ Ganti Link dengan navigate
                     active={isActive(item.to)}
                     className={`${baseItemClass} ${
                       isActive(item.to) ? activeItemClass : ""
@@ -87,7 +90,6 @@ const AdminSidebar = ({ isOpen }) => {
               </div>
               <div>
                 <p className="text-sm font-medium text-yes">Admin</p>
-                <p className="text-xs text-yes/70">Administrator</p>
               </div>
             </div>
           </motion.div>
@@ -108,13 +110,12 @@ const AdminSidebar = ({ isOpen }) => {
                 {navItems.map((item) => (
                   <SidebarItem
                     key={item.to}
-                    as={Link}
-                    to={item.to}
                     icon={item.icon}
+                    onClick={() => handleNavClick(item.to)} // ✅ Navigasi juga
                     active={isActive(item.to)}
                     className={`${baseItemClass} ${
                       isActive(item.to) ? activeItemClass : ""
-                    }  !rounded-lg !py-4 !px-4 !bg-ookay text-lgy`}
+                    } !rounded-lg !py-4 !px-4 !bg-ookay text-lgy`}
                   >
                     {item.label}
                   </SidebarItem>
