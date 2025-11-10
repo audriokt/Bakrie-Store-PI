@@ -4,6 +4,7 @@
       <option value="$PROJECT_DIR$/backend-bakrie/.env" />
     </option>
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+    <module name="backend-bakrie" />
     <selectedOptions>
       <option name="environmentVariables" />
     </selectedOptions>
