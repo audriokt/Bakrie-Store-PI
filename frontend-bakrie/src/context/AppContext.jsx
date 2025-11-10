@@ -12,8 +12,15 @@ export const AppContextProvider =(props) => {
 
     useEffect(() => {
         async function fetchData(){
-            const res = await fetchProducts()
-            setProducts(res.data)
+            if(localStrage.getItem('token') && localStorage.getItem('role')){
+                setAuthData(
+                    localStorage.getItem('token'),
+                    localStorage.getItem('role')
+                )
+            }
+
+            const resProd = await fetchProducts()
+            setProducts(resProd.data)
         }
         fetchData()
     },[])
