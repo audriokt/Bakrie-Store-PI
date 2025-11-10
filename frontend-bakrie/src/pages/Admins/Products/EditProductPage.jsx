@@ -96,34 +96,46 @@ const EditProductPage = () => {
             </div>
 
             {/* image */}
-            <div className="flex flex-col items-center border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:border-red-400 transition">
-              <h3 className="text-lg font-semibold text-gray-700 mb-1">
-                Product Image
-              </h3>
-              <label
-                htmlFor="imageUpload"
-                className="flex flex-col items-center justify-center w-full h-64 cursor-pointer"
-              >
-                {preview ? (
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    className="object-contain h-56 w-full rounded-lg shadow"
-                  />
-                ) : (
-                  <>
-                    <HiUpload className="text-4xl text-gray-400 mb-3" />
-                    <p className="text-gray-600">Upload an image</p>
-                  </>
-                )}
-                <input
-                  id="imageUpload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </label>
+          <div className="flex flex-col items-center border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:border-red-400 transition">
+             <h3 className="text-lg font-semibold text-gray-700 mb-1">
+               Product Image
+             </h3>
+             <p className="text-gray-500 text-sm mb-4">
+               Add or change image for the product
+             </p>
+ 
+             <label
+               htmlFor="imageUpload"
+               className="flex flex-col items-center justify-center w-full h-64 cursor-pointer"
+             >
+               {preview ? (
+                 <img
+                   src={preview}
+                   alt="Preview"
+                   className="object-contain h-56 w-full rounded-lg shadow"
+                 />
+               ) : (
+                 <>
+                   <HiUpload className="text-4xl text-gray-400 mb-3" />
+                   <p className="text-gray-600">
+                     <span className="font-medium text-red-600 hover:underline">
+                       Drop your image here
+                     </span>{" "}
+                     or browse
+                   </p>
+                   <p className="text-gray-400 text-sm mt-1">
+                     Support: jpeg, png
+                   </p>
+                 </>
+               )}
+               <input
+                 id="imageUpload"
+                 type="file"
+                 accept="image/*"
+                 className="hidden"
+                 onChange={handleImageChange}
+               />
+             </label>
             </div>
           </div>
 

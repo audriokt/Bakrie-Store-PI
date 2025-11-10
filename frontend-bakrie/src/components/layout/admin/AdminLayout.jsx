@@ -9,7 +9,7 @@ const AdminLayout = () => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-ookay/20">
       {/* Sidebar */}
       <AdminSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
@@ -50,7 +50,7 @@ const AdminLayout = () => {
           </div>
         </header>
 
-        <main className="pt-28 px-8 lg:px-12 bg-white min-h-screen">
+        <main className="pt-28 px-8 lg:px-12 bg-ookay/20 min-h-screen">
           <Outlet />
         </main>
       </div>
