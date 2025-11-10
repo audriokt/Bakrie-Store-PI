@@ -2,6 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useContext } from 'react';
 import { AppContext } from '../../context/AppContext.jsx';
 
+const formatPrice = (price) => {
+    return price.toLocaleString("id-ID");
+  };
 
 const InfiniteSlider = ({ children, speed = 0.5, gap = 24 }) => {
   const sliderRef = useRef(null);
@@ -82,7 +85,9 @@ const InfiniteSwiper = () => {
               className="w-48 h-48 object-cover rounded-xl mb-3"
             />
             <h3 className="font-semibold text-lg text-yes">{product.product_name}</h3>
-            <p className="text-yes text-sm">{product.product_price}</p>
+            <p className="font-medium text-base text-yes ">
+              Rp. {formatPrice(product.product_price)}
+            </p>
           </div>
         ))}
       </InfiniteSlider>
