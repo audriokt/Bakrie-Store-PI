@@ -22,11 +22,11 @@ public class Carts {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_cart")
-    private UUID idCart;
+    private UUID cartId;
 
     @OneToOne
     @JoinColumn(name = "id_customers", nullable = false)
-    private Customers customers;
+    private Customers customerId;
 
     @NotNull
     @Column(name = "created_at")
@@ -36,6 +36,6 @@ public class Carts {
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Item_Carts> items;
+    @OneToMany(mappedBy = "idCart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item_Carts> itemCarts;
 }
