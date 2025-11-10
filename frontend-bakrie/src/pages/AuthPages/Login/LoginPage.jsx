@@ -1,9 +1,45 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-// import { loginService } from "../../services/api";
+import { useState, useContext } from "react"
+import { useNavigate } from "react-router-dom"
+import { loginCustomer } from "../../../services/authService.js"
+import { AppContext } from "../../../context/AppContext.jsx"
 
 const LoginPage = () => {
+    const {setAuthData} = useContext(AppContext)
+    const navigate = useNavigate()
+    const [loading, setLoading] = useState(false)
+    const [data, setData] = useState({
+        email: "",
+        password: "",
+    })
+
+    const onChangeHandler = (e) => {
+        const name = e.target.name;
+        const value = e.target.value;
+        setData((data)=> ({...data, [name]:value}))
+    }
+
+    const onSubmitHandler = async (e) => {
+        e.preventDefault()
+        setLoading(true)
+        try{
+            const response = await loginCustomer(data)
+            if(response.status === 200){
+                console.info("Login successfull")
+                localStorage.setItem("token", response.data.token)
+                localStorage.setItem("role", response.data.role)
+                setAuthData(response.data.token, response.data.role)
+                navigate("/");
+            }
+        } catch(error){
+            console.error("Email/Password Invalid " + error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
   return (
     <div className="flex h-screen items-center justify-center bg-ookay">
       {/* Container utama */}
@@ -22,9 +58,9 @@ const LoginPage = () => {
           </p>
 
           {/* Form login */}
-          <form className="space-y-4 w-full max-w-sm">
+          <form className="space-y-4 w-full max-w-sm" onSubmit={onSubmitHandler}>
             <div>
-              <label className="block text-sm text-red-700 mb-2 font-medium">
+              <label htmlFor="email" className="block text-sm text-red-700 mb-2 font-medium">
                 Email
               </label>
               <input
@@ -33,11 +69,15 @@ const LoginPage = () => {
                           focus:outline-none focus:ring-2 focus:ring-red-400 
                           text-gray-700 placeholder-gray-400"
                 placeholder="Email"
+                name="email"
+                id="email"
+                onChange={onChangeHandler}
+                value={data.email}
               />
             </div>
 
             <div>
-              <label className="block text-sm text-red-700 mb-2 font-medium">
+              <label className="block text-sm text-red-700 mb-2 font-medium" htmlFor="password">
                 Password
               </label>
               <input
@@ -46,6 +86,10 @@ const LoginPage = () => {
                           focus:outline-none focus:ring-2 focus:ring-red-400 
                           text-gray-700 placeholder-gray-400"
                 placeholder="Password"
+                name="password"
+                id="password"
+                onChange={onChangeHandler}
+                value={data.password}
               />
             </div>
 
