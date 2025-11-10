@@ -8,7 +8,11 @@ const ProductHeader = () => {
   const [showFilter, setShowFilter] = useState(false);
 
   return (
-    <div className="flex flex-col gap-3 mb-6 bg-ookay p-4 rounded-xl border border-red-200 shadow-sm">
+    <div className="flex flex-col sm:flex-row justify-between items-center bg-ookay p-4 sm:p-6 rounded-xl border border-red-200 shadow-sm mb-6">
+   <div className="flex flex-col sm:flex-row justify-between items-center w-full px-2 sm:px-6">
+      <h2 className="text-2xl font-bold text-red-600 self-start sm:self-center">
+      Product List
+    </h2>
       <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
         {/* Search Bar */}
         <div className="relative w-full sm:w-1/3">
@@ -41,6 +45,7 @@ const ProductHeader = () => {
             </Button>
           </Link>
         </div>
+      </div>
       </div>
 
       <AnimatePresence>

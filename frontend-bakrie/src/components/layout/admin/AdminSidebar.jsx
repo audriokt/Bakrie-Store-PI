@@ -14,9 +14,11 @@ import {
   HiUserCircle,
   HiChartPie,
   HiInbox,
+  HiMenu,
+  HiX,
 } from "react-icons/hi";
 
-const AdminSidebar = ({ isOpen }) => {
+const AdminSidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -35,23 +37,32 @@ const AdminSidebar = ({ isOpen }) => {
     { to: "/admin/profile", icon: HiUserCircle, label: "Profile" },
   ];
 
-  const handleNavClick = (to) => {
-    navigate(to);
-  };
+  const handleNavClick = (to) => navigate(to);
 
   return (
     <>
-      {/* Desktop Sidebar */}
+
       <motion.div
         initial={false}
         animate={{ width: isOpen ? 288 : 80 }}
         transition={{ duration: 0.3 }}
-        className="hidden lg:flex flex-col bg-ookay border-r border-ookay/30 shadow-lg fixed z-[997] overflow-hidden"
+        className="hidden lg:flex flex-col bg-ookay border-r border-ookay/30 shadow-lg fixed z-[997] overflow-hidden pt-16"
         style={{
-          top: "5rem",
-          height: "calc(100vh - 5rem)",
+          top: 0,
+          height: "100vh",
         }}
       >
+        {/* hamburger dalam sidebarnya */}
+        <div className="hidden lg:flex items-center justify-center p-4 bg-ookay border-b border-ookay/30 fixed top-0 left-0 w-20 z-50">
+          <button
+            onClick={onToggle}
+            className="text-yes hover:bg-yes/10 p-2 rounded-lg transition"
+          >
+            {isOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* navigation */}
         <div className="flex-1 py-4">
           <Sidebar
             aria-label="Admin Sidebar"
@@ -63,7 +74,7 @@ const AdminSidebar = ({ isOpen }) => {
                   <SidebarItem
                     key={item.to}
                     icon={item.icon}
-                    onClick={() => handleNavClick(item.to)} // ✅ Ganti Link dengan navigate
+                    onClick={() => handleNavClick(item.to)}
                     active={isActive(item.to)}
                     className={`${baseItemClass} ${
                       isActive(item.to) ? activeItemClass : ""
@@ -94,48 +105,6 @@ const AdminSidebar = ({ isOpen }) => {
             </div>
           </motion.div>
         )}
-      </motion.div>
-
-      {/* Mobile Sidebar */}
-      <motion.div
-        initial={{ x: "-100%" }}
-        animate={{ x: isOpen ? 0 : "-100%" }}
-        transition={{ duration: 0.3 }}
-        className="lg:hidden fixed top-0 left-0 h-screen w-72 bg-ookay border-r border-ookay/30 shadow-lg z-[998]"
-      >
-        <div className="py-8">
-          <Sidebar aria-label="Admin Sidebar" className="!bg-transparent !border-none">
-            <SidebarItems className="!bg-transparent">
-              <SidebarItemGroup className="!border-0 !space-y-1 !px-2 !bg-transparent">
-                {navItems.map((item) => (
-                  <SidebarItem
-                    key={item.to}
-                    icon={item.icon}
-                    onClick={() => handleNavClick(item.to)} // ✅ Navigasi juga
-                    active={isActive(item.to)}
-                    className={`${baseItemClass} ${
-                      isActive(item.to) ? activeItemClass : ""
-                    } !rounded-lg !py-4 !px-4 !bg-ookay text-lgy`}
-                  >
-                    {item.label}
-                  </SidebarItem>
-                ))}
-              </SidebarItemGroup>
-            </SidebarItems>
-          </Sidebar>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-ookay/30 bg-ookay/60">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-yes rounded-full flex items-center justify-center">
-              <HiUserCircle className="text-yes text-xl" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-yes">Admin</p>
-              <p className="text-xs text-yes/70">Administrator</p>
-            </div>
-          </div>
-        </div>
       </motion.div>
     </>
   );
