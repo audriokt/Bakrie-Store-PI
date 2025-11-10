@@ -12,6 +12,7 @@ import com.audrio.backendbakrie.utils.Exceptions.*;
 import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;  // TAMBAHAN
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,16 +21,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-/*
-*
-* */
 @Service
 @RequiredArgsConstructor
+@Slf4j  // TAMBAHAN: Aktifkan logging
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final CloudinaryService cloudinaryService;
@@ -39,46 +35,55 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final RolesRepository rolesRepository;
     private final AuthenticationManager authenticationManager;
 
-    /**
-     * Menyimpan data karyawan baru ke database.
-     * Jika email sudah terdaftar namun belum diverifikasi, maka token verifikasi akan dikirim ulang.
-     * Jika email belum terdaftar, maka data baru akan disimpan dan token verifikasi dikirim.
-     *
-     * @param request objek permintaan berisi data karyawan
-     * @param file file gambar profil karyawan
-     * @return EmployeeResponse berisi data karyawan yang disimpan
-     * @throws UserAlreadyVerifiedException jika email sudah diverifikasi sebelumnya
-     */
     @Override
     public EmployeeResponse add(EmployeeRequest request, MultipartFile file) {
+        log.info("ADD EMPLOYEE START");
+        log.debug("Request: {}", request);
+        log.debug("File: {} (size: {} bytes)", file.getOriginalFilename(), file.getSize());
+
         validateRequest(request, file);
 
-        Optional<Employees> optionalEmployee = employeeRepository.findByEmail(request.getEmail().trim());
+        String email = request.getEmail().trim();
+        log.debug("Checking email existence: {}", email);
+        Optional<Employees> optionalEmployee = employeeRepository.findByEmail(email);
+
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("purpose", "email-verification");
-        String token = jwtUtils.generateToken(claims, request.getEmail().trim());
+        String token = jwtUtils.generateToken(claims, email);
+        log.debug("Generated verification token (first 20 chars): {}", token.length() > 20 ? token.substring(0, 20) + "..." : token);
 
         if (optionalEmployee.isPresent()) {
             Employees existing = optionalEmployee.get();
+            log.info("Employee already exists: {}", existing.getEmail());
+
             if (existing.getIs_verified()) {
+                log.warn("Attempt to re-register verified email: {}", email);
                 throw new UserAlreadyVerifiedException("Email sudah terverifikasi");
             }
+
+            log.info("Updating verification token for existing unverified employee");
             existing.setVerificationToken(token);
             employeeRepository.save(existing);
             emailService.sendEmpVerificationEmail(existing.getEmail(), token);
+            log.info("Verification email resent to: {}", email);
             return convertToResponse(existing);
         }
 
         // Upload file
+        log.debug("Validating file size and type");
         if (file.getSize() > 5 * 1024 * 1024) {
+            log.warn("File too large: {} bytes", file.getSize());
             throw new ImageSizeUnaproriateException("File maksimal 5MB");
         }
         if (!file.getContentType().startsWith("image/")) {
+            log.warn("Invalid file type: {}", file.getContentType());
             throw new ImageInvalidExtentionException("Hanya file gambar");
         }
 
         String idImg = UUID.randomUUID().toString();
+        log.debug("Uploading image to Cloudinary with ID: {}", idImg);
         String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
+        log.debug("Image uploaded successfully: {}", imgUrl);
 
         Employees newEmployee = convertToEntity(request);
         newEmployee.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -87,118 +92,140 @@ public class EmployeeServiceImpl implements EmployeeService {
         newEmployee.setIs_verified(false);
 
         employeeRepository.save(newEmployee);
-        emailService.sendEmpVerificationEmail(newEmployee.getEmail(), token);
+        log.info("New employee saved with ID: {}", newEmployee.getIdEmployee());
 
+        emailService.sendEmpVerificationEmail(newEmployee.getEmail(), token);
+        log.info("Verification email sent to: {}", newEmployee.getEmail());
+
+        log.info("ADD EMPLOYEE SUCCESS");
         return convertToResponse(newEmployee);
     }
 
-    /**
-     * Menghapus data karyawan berdasarkan ID.
-     *
-     * @param id UUID dari karyawan yang ingin dihapus
-     * @throws EmployeeNotFoundException jika karyawan dengan ID tersebut tidak ditemukan
-     */
     @Override
     @Transactional
     public EmployeeResponse update(UUID id, EmployeeRequest request) {
+        log.info("UPDATE EMPLOYEE START | ID: {}", id);
+        log.debug("Update request: {}", request);
+
         Employees employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found: " + id));
+                .orElseThrow(() -> {
+                    log.warn("Employee not found for update: {}", id);
+                    return new EmployeeNotFoundException("Employee not found: " + id);
+                });
 
         employee.setUsername(request.getUsername().trim());
         employee.setEmail(request.getEmail().trim());
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            log.debug("Updating password for employee: {}", id);
             employee.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         if (request.getImg_url() != null) {
+            log.debug("Updating image URL for employee: {}", id);
             employee.setImg_url(request.getImg_url());
         }
 
         employeeRepository.save(employee);
+        log.info("Employee updated successfully: {}", id);
+        log.info("UPDATE EMPLOYEE SUCCESS");
         return convertToResponse(employee);
     }
 
-    /**
-     * Menghapus data karyawan berdasarkan ID.
-     *
-     * @param id UUID dari karyawan yang ingin dihapus
-     * @throws EmployeeNotFoundException jika karyawan dengan ID tersebut tidak ditemukan
-     */
     @Override
     public void delete(UUID id) {
-        Employees existingCustomer = employeeRepository.findByIdEmployee(id)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee with id: " + id + " not found"));
-        try{
-            cloudinaryService.deleteFile(existingCustomer.getImg_url());
-        } catch (Exception e){
-            System.out.printf("Error deleting image: %s".formatted(e.getMessage()));
+        log.info("DELETE EMPLOYEE START | ID: {}", id);
+
+        Employees existingEmployee = employeeRepository.findByIdEmployee(id)
+                .orElseThrow(() -> {
+                    log.warn("Employee not found for deletion: {}", id);
+                    return new EmployeeNotFoundException("Employee with id: " + id + " not found");
+                });
+
+        try {
+            if (existingEmployee.getImg_url() != null) {
+                log.debug("Deleting image from Cloudinary: {}", existingEmployee.getImg_url());
+                cloudinaryService.deleteFile(existingEmployee.getImg_url());
+            }
+        } catch (Exception e) {
+            log.error("Error deleting image for employee {}: {}", id, e.getMessage());
         }
-        employeeRepository.delete(existingCustomer);
+
+        employeeRepository.delete(existingEmployee);
+        log.info("Employee deleted successfully: {}", id);
+        log.info("DELETE EMPLOYEE SUCCESS");
     }
 
-    /**
-     * Mengambil seluruh data karyawan dari database.
-     *
-     * @return List<EmployeeResponse> daftar semua karyawan dalam bentuk response
-     */
     @Override
     public List<EmployeeResponse> getAll() {
+        log.info("GET ALL EMPLOYEES START");
         List<Employees> employees = employeeRepository.findAll();
-        return employees.stream()
+        log.debug("Found {} employees", employees.size());
+        List<EmployeeResponse> responses = employees.stream()
                 .map(this::convertToResponse)
                 .toList();
+        log.info("GET ALL EMPLOYEES SUCCESS | Count: {}", responses.size());
+        return responses;
     }
 
-    /**
-     * Memverifikasi email karyawan berdasarkan token JWT.
-     * Token harus valid dan cocok dengan token yang tersimpan di database.
-     *
-     * @param token token verifikasi yang dikirim melalui email
-     * @return ResponseEntity dengan pesan sukses jika verifikasi berhasil
-     * @throws EmailShouldntBlankException jika token kosong
-     * @throws EmployeeNotFoundException jika email tidak ditemukan
-     * @throws VerificationTokenEmptyException jika token verifikasi kosong
-     * @throws VerificationTokenNotValidException jika token tidak valid atau tidak cocok
-     */
     @Override
     public ResponseEntity<String> verifyEmail(String token) {
+        log.info("VERIFY EMPLOYEE EMAIL START");
+        log.debug("Verification token (first 20 chars): {}", token != null && token.length() > 20 ? token.substring(0, 20) + "..." : token);
+
         if (token == null || token.isBlank()) {
+            log.warn("Verification token is empty");
             throw new EmailShouldntBlankException("Token tidak boleh kosong");
         }
 
         String email = jwtUtils.extractEmail(token);
         if (email == null) {
+            log.warn("Failed to extract email from token");
             throw new VerificationTokenNotValidException("Token tidak valid");
         }
+        log.debug("Extracted email from token: {}", email);
 
         String purpose = jwtUtils.extractClaim(token, claims -> claims.get("purpose", String.class));
         if (!"email-verification".equals(purpose)) {
+            log.warn("Token purpose invalid: {}", purpose);
             throw new VerificationTokenNotValidException("Token bukan untuk verifikasi email");
         }
 
         Employees employee = employeeRepository.findByEmail(email)
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee tidak ditemukan"));
+                .orElseThrow(() -> {
+                    log.warn("Employee not found during email verification: {}", email);
+                    return new EmployeeNotFoundException("Employee tidak ditemukan");
+                });
 
         if (!token.equals(employee.getVerificationToken())) {
+            log.warn("Verification token mismatch for employee: {}", email);
             throw new VerificationTokenNotValidException("Token tidak cocok");
         }
 
         employee.setIs_verified(true);
-        employee.setVerificationToken(null); // hapus token
+        employee.setVerificationToken(null);
         employeeRepository.save(employee);
+        log.info("Employee email verified successfully: {}", email);
 
+        log.info("VERIFY EMPLOYEE EMAIL SUCCESS");
         return ResponseEntity.ok("Email berhasil diverifikasi");
     }
 
     @Override
     public AuthResponse login(EmployeeAuthRequest request) {
+        log.info("EMPLOYEE LOGIN START | Email: {}", request.getEmail());
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
+        log.debug("Spring Security authentication passed for: {}", request.getEmail());
 
         Employees employee = employeeRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new EmployeeNotFoundException("Employee tidak ditemukan"));
+                .orElseThrow(() -> {
+                    log.warn("Employee not found during login: {}", request.getEmail());
+                    return new EmployeeNotFoundException("Employee tidak ditemukan");
+                });
 
         if (!employee.getIs_verified()) {
+            log.warn("Login attempt with unverified email: {}", request.getEmail());
             throw new UserNotVerifiedException("Email belum diverifikasi");
         }
 
@@ -207,16 +234,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         claims.put("purpose", "access");
 
         String token = jwtUtils.generateToken(claims, employee.getEmail());
-        return new AuthResponse(token);
+        String role = jwtUtils.extractRole(token);
+        Date expirationTime = jwtUtils.extractExpiration(token);
+
+        log.debug("Access token generated (first 20 chars): {}", token.length() > 20 ? token.substring(0, 20) + "..." : token);
+        log.info("Employee login successful: {} | Role: {}", employee.getEmail(), role);
+        log.info("EMPLOYEE LOGIN SUCCESS");
+
+        return new AuthResponse(token, role, expirationTime);
     }
 
-    /**
-     * Mengubah objek Employees menjadi EmployeeResponse.
-     *
-     * @param newEmployee entitas Employees dari database
-     * @return EmployeeResponse representasi data untuk dikirim ke client
-     */
     private EmployeeResponse convertToResponse(Employees newEmployee) {
+        log.debug("Converting entity to response for employee ID: {}", newEmployee.getIdEmployee());
         return EmployeeResponse.builder()
                 .employee_id(newEmployee.getIdEmployee().toString())
                 .username(newEmployee.getUsername())
@@ -227,16 +256,14 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .build();
     }
 
-    /**
-     * Mengubah objek EmployeeRequest menjadi entitas Employees.
-     * Digunakan saat menyimpan data baru.
-     *
-     * @param request objek permintaan dari client
-     * @return entitas Employees yang siap disimpan
-     */
     private Employees convertToEntity(EmployeeRequest request) {
+        log.debug("Converting request to entity for email: {}", request.getEmail());
         Roles role = rolesRepository.findByName("ROLE_CASHIER")
-                .orElseThrow(() -> new  RoleNotFoundException("CASHIER Role not found"));
+                .orElseThrow(() -> {
+                    log.error("ROLE_CASHIER not found in database");
+                    return new RoleNotFoundException("CASHIER Role not found");
+                });
+
         return Employees.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
@@ -245,53 +272,47 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .build();
     }
 
-    /**
-     * Melakukan validasi terhadap data permintaan karyawan yang dikirim dari client.
-     * Validasi mencakup:
-     * Memastikan objek request tidak null
-     * Memastikan format email sesuai standar RFC sederhana
-     * Memastikan password tidak null dan memiliki minimal 8 karakter
-     * Memastikan username tidak kosong, memiliki panjang antara 8–32 karakter, dan hanya terdiri dari huruf tanpa angka atau simbol
-     * Jika salah satu validasi gagal, method ini akan melempar exception yang sesuai.
-     *
-     * @param request objek permintaan karyawan yang berisi data email, password, dan username
-     * @throws RequestShouldntEmptyException jika objek request bernilai null
-     * @throws EmailNotValidException jika format email tidak sesuai
-     * @throws PasswordMinLengthException jika password kurang dari 8 karakter
-     * @throws UsernameShouldntBlankException jika username kosong atau hanya spasi
-     * @throws UsernameContainNumberOrDigitsException jika username mengandung angka atau simbol
-     */
     private void validateRequest(EmployeeRequest request, MultipartFile file) {
+        log.debug("VALIDATING EMPLOYEE REQUEST");
         if (request == null) {
+            log.warn("Request is null");
             throw new RequestShouldntEmptyException("Request tidak boleh null");
         }
 
-        //field Email
+        // Email
         if (request.getEmail() == null || !request.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+            log.warn("Invalid email format: {}", request.getEmail());
             throw new EmailNotValidException("Email tidak valid");
         }
 
-        //field Password
+        // Password
         if (request.getPassword() == null || request.getPassword().length() < 8) {
+            log.warn("Password too short: {} chars", request.getPassword() != null ? request.getPassword().length() : 0);
             throw new PasswordMinLengthException("Password harus minimal 8 karakter");
         }
 
-        //field Username
+        // Username
         String username = request.getUsername();
         if (username == null || username.trim().isEmpty()) {
+            log.warn("Username is empty");
             throw new UsernameShouldntBlankException("Nama tidak boleh kosong");
         }
+        username = username.trim();
         if (username.length() < 8 || username.length() > 32) {
+            log.warn("Username length invalid: {}", username.length());
             throw new UsernameInvalidLengthException("Username harus 8-32 karakter");
         }
-
         if (username.matches(".*\\d.*") || username.matches(".*[^a-zA-Z0-9].*")) {
+            log.warn("Username contains invalid characters: {}", username);
             throw new UsernameContainNumberOrDigitsException("Username hanya boleh mengandung huruf");
         }
 
-        //field file
-        if(file.isEmpty()){
+        // File
+        if (file == null || file.isEmpty()) {
+            log.warn("Image file is empty");
             throw new ImageFileEmptyException("File tidak boleh kosong");
         }
+
+        log.debug("VALIDATION PASSED");
     }
 }

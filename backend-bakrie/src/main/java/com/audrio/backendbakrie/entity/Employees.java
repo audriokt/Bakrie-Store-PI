@@ -41,7 +41,7 @@ public class Employees implements UserDetails{
 
     @NotNull
     @Size(max = 200)
-    @Column(name = "password", unique = true)
+    @Column(name = "password")
     private String password;
 
     @NotNull
@@ -69,8 +69,13 @@ public class Employees implements UserDetails{
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return AuthorityUtils.createAuthorityList(empRoles.getName());
+        String roleName = empRoles.getName();
+        if (!roleName.startsWith("ROLE_")) {
+            roleName = "ROLE_" + roleName;
+        }
+        return AuthorityUtils.createAuthorityList(roleName);
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
