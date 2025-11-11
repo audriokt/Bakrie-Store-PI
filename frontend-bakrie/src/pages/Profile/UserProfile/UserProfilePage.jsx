@@ -1,8 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import {AppContext} from "../../../context/AppContext.jsx";
+import { useContext } from "react";
 
 const ProfilePage = () => {
+    const {user} = useContext(AppContext)
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-100px)] bg-[#FFF8F8] px-6 md:px-10 pt-28 pb-10 mt-10">
       {/* Main content */}
@@ -17,7 +20,7 @@ const ProfilePage = () => {
           {/* Profile Photo */}
           <div className="relative mb-8">
             <img
-              src="https://i.pinimg.com/736x/e0/97/a7/e097a7826127764391f21dbb511ba437.jpg"
+              src={user.img_url || "https://i.pinimg.com/736x/e0/97/a7/e097a7826127764391f21dbb511ba437.jpg"}
               alt="Profile"
               className="w-40 h-40 rounded-full object-cover border-4 border-[#FFECEC]"
             />
@@ -73,27 +76,27 @@ const ProfilePage = () => {
           <div className="space-y-6 text-sm md:text-base">
             <div className="flex flex-col border-b border-red-100 pb-3">
               <label className="text-red-700 font-semibold mb-1">Username</label>
-              <span className="text-gray-800 font-medium">John Doe</span>
+              <span className="text-gray-800 font-medium">{user.username}</span>
             </div>
 
             <div className="flex flex-col border-b border-red-100 pb-3">
               <label className="text-red-700 font-semibold mb-1">Email</label>
               <span className="text-gray-800 font-medium">
-                john@example.com
+                {user.email}
               </span>
             </div>
 
             <div className="flex flex-col border-b border-red-100 pb-3">
               <label className="text-red-700 font-semibold mb-1">Phone Number</label>
               <span className="text-gray-800 font-medium">
-                +62 812 3456 7890
+                {user.phone_num}
               </span>
             </div>
 
             <div className="flex flex-col border-b border-red-100 pb-3">
               <label className="text-red-700 font-semibold mb-1">Address</label>
               <span className="text-gray-800 font-medium leading-relaxed">
-                Jl. Mawar No. 12, Bandung
+                {user.address}
               </span>
             </div>
           </div>
