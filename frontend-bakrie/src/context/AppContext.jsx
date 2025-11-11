@@ -24,16 +24,20 @@ export const AppContextProvider =(props) => {
     useEffect(() => {
         async function fetchData() {
             try {
+                const token = localStorage.getItem("token");
+                const role = localStorage.getItem("role");
+                if (token && role) {
+                    setAuthData(token, role);
+                    const custData = await profileCustomer();
+                    setUser(custData.data);
+                }
                 const resProd = await fetchProducts();
-                const custData = await profileCustomer();
-                setAuthData(localStorage.getItem('token'), localStorage.getItem('role'));
-
                 setProducts(resProd.data);
-                setUser(custData.data);
             } catch (error) {
                 console.error("Gagal mengambil data:", error);
             }
         }
+
         fetchData()
     },[])
 
@@ -46,7 +50,8 @@ export const AppContextProvider =(props) => {
         setProducts,
         auth,
         setAuthData,
-        user
+        user,
+        setUser
     }
 
     return <AppContext.Provider value={contextValue}>

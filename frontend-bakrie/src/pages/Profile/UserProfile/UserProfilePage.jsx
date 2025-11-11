@@ -1,11 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import {AppContext} from "../../../context/AppContext.jsx";
-import { useContext } from "react";
+import { useAuth } from "../../../hooks/useAuth.js"
 
 const ProfilePage = () => {
-    const {user} = useContext(AppContext)
+    const {user} = useAuth()
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-100px)] bg-[#FFF8F8] px-6 md:px-10 pt-28 pb-10 mt-10">
       {/* Main content */}

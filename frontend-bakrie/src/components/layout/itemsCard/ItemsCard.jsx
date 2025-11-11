@@ -1,13 +1,7 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
-import { AppContext } from "../../../context/AppContext.jsx";
 
-const ProductsCard = () => {
-  const { products } = useContext(AppContext);
-
-  if (products.length === 0) {
-    console.log("produk kosong");
-  }
+const ItemsCard = ({ product }) => {
 
   const formatPrice = (price) => {
     return price.toLocaleString("id-ID");
@@ -15,9 +9,7 @@ const ProductsCard = () => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {products.map((product, index) => (
         <Link
-          key={index}
           to="/product-detail"
           state={product}
           className="flex flex-col border border-ookay rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 w-full max-w-[340px] h-[430px] mx-auto overflow-hidden group bg-white"
@@ -62,9 +54,8 @@ const ProductsCard = () => {
             <div className="border-t border-red-100 my-3"></div>
           </div>
         </Link>
-      ))}
     </div>
   );
 };
 
-export default ProductsCard;
+export default ItemsCard;

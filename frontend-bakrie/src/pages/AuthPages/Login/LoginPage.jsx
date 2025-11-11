@@ -1,43 +1,57 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useState, useContext } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { loginCustomer,profileCustomer } from "../../../services/authService.js"
-import { AppContext } from "../../../context/AppContext.jsx"
+import { loginCustomer } from "../../../services/authService.js"
+import { profileCustomer } from "../../../services/customerService.js"
+import { useAuth } from "../../../hooks/useAuth.js"
 
 const LoginPage = () => {
-    const {setAuthData} = useContext(AppContext)
+    // akses fungsi yang ada di useContext lewat hook useAuth
+    const {setAuthData, setUser} = useAuth()
+
+    // pake useNavigate untuk navigasi ke halaman lain setelah login
     const navigate = useNavigate()
+
+    // loading untuk sebagai penanda jika prose blm selesai loading bernilai true
+    // klo selesai loading bernilai false
     const [loading, setLoading] = useState(false)
+
+    // data untuk menampung nilai dari form login
+    // nilai awal kosong
     const [data, setData] = useState({
         email: "",
         password: "",
     })
 
+    // fungsi akan dipanggil ketika ada perubahan pada komponen input email dan password
+    // perubahan akan disimpan ke dalam data login "data"
     const onChangeHandler = (e) => {
-        const name = e.target.name;
-        const value = e.target.value;
-        setData((data)=> ({...data, [name]:value}))
+        const {name, value} = e.target
+        setData((prev)=> ({...prev, [name]:value}))
     }
 
+    // fungsi bakal dipanggil klo form di submit
+    // fungsi ini akan mengirim data login ke server dan mengembalikan token dan role di "res"
+    // lalu data tersebut di simpan di localSorage pake function setAuthData
+    // lalu ambil data user yang baru login pake function profileCustomer
+    // trus isi nilai user
+    // klo berhasil bakal di arahin ke halaman utama
     const onSubmitHandler = async (e) => {
-        e.preventDefault()
-        setLoading(true)
-        try{
-            const response = await loginCustomer(data)
-            if(response.status === 200){
-                console.info("Login successfull")
-                localStorage.setItem( "token", response.data.token)
-                localStorage.setItem("role", response.data.role)
-                setAuthData(response.data.token, response.data.role)
-                const userData = await profileCustomer()
-                navigate("/");
-            }
-        } catch(error){
-            console.error("Email/Password Invalid " + error)
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const resLogin = await loginCustomer(data);
+            const { token, role } = resLogin.data;
+            setAuthData(token, role);
+            const resUser = await profileCustomer();
+            setUser(resUser.data);
+            navigate("/");
+        } catch (err) {
+            console.error("Login gagal:", err);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     }
 
