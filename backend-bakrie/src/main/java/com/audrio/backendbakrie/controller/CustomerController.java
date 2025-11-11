@@ -2,6 +2,7 @@ package com.audrio.backendbakrie.controller;
 
 import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;
+import com.audrio.backendbakrie.io.ProductRequest;
 import com.audrio.backendbakrie.service.CustomerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,10 +43,20 @@ public class CustomerController {
         return customerService.getAll();
     }
 
-    @PutMapping("/customer/update/{id}")
+    @PutMapping("/customer/update/{custId}")
     @ResponseStatus(HttpStatus.OK)
-    public CustomerResponse updateCustomer(@PathVariable String id, @RequestBody CustomerRequest customerRequest) {
-        return customerService.update(UUID.fromString(id), customerRequest);
+    public CustomerResponse updateCustomer(@PathVariable String custId,
+                                           @RequestPart("customer") String customerString,
+                                           @RequestPart("file") MultipartFile file) {
+        ObjectMapper mapper = new ObjectMapper();
+        CustomerRequest request = null;
+        try{
+            request = mapper.readValue(customerString, CustomerRequest.class);
+        } catch(JsonProcessingException e) {
+            log.error("JsonProcessingException : {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to product request"+e.getMessage());
+        }
+        return customerService.update(UUID.fromString(custId), request);
     }
 
     @DeleteMapping("/customer/delete/{id}")
@@ -53,6 +64,17 @@ public class CustomerController {
     public void deleteCustomer(@PathVariable String id) {
         try {
             customerService.delete(UUID.fromString(id));
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/customer/myprofile")
+    @ResponseStatus(HttpStatus.OK)
+    public CustomerResponse myProfile(@RequestHeader("Authorization") String token){
+        try{
+            log.info("Method : GET | Endpoint : /customer/myprofile | Payload : {}", token);
+            return customerService.customerProfile(token);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }

@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Missing or invalid Authorization header");
+            log.warn("Missing or invalid Authorization header | Header: {}", authHeader);
             filterChain.doFilter(request, response);
             return;
         }
@@ -123,7 +123,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
-        log.debug("Authenticated user: {}", email);
+        log.debug("Authenticated user from JWT: {}", email);
+        log.info("Authenticated user: {}", userDetails.getUsername());
+        log.info("Authorities: {}", userDetails.getAuthorities());
+
 
         filterChain.doFilter(request, response);
     }

@@ -240,6 +240,25 @@ public class CustomerServiceImpl implements CustomerService {
         return new AuthResponse(token, role, expirationTime);
     }
 
+    public CustomerResponse customerProfile(String token) {
+        String pureToken = token.replace("Bearer ", "").trim();
+        String email = jwtUtils.extractEmail(pureToken);
+        try{
+            log.info("GET CUSTOMER PROFILE START | ID: {}");
+            System.out.println(email);
+            Customers customer = customerRepository.findByEmail(email)
+                    .orElseThrow(() -> {
+                        log.warn("Customer not found for profile: {}", email);
+                        return new CustomerNotFoundException("Customer tidak ditemukan: " + email);
+                    });
+            log.info("GET CUSTOMER PROFILE SUCCESS");
+            return convertToResponse(customer);
+        } catch (Exception e) {
+            log.error("GET CUSTOMER PROFILE FAILED {}", email);
+            throw new CustomerNotFoundException("Customer tidak ditemukan");
+        }
+    }
+
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
         log.debug("Converting entity to response for customer ID: {}", newCustomer.getIdCustomer());
