@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"
-import { loginCustomer } from "../../../services/authService.js"
+import { loginCustomer,profileCustomer } from "../../../services/authService.js"
 import { AppContext } from "../../../context/AppContext.jsx"
 
 const LoginPage = () => {
@@ -31,6 +31,7 @@ const LoginPage = () => {
                 localStorage.setItem( "token", response.data.token)
                 localStorage.setItem("role", response.data.role)
                 setAuthData(response.data.token, response.data.role)
+                const userData = await profileCustomer()
                 navigate("/");
             }
         } catch(error){
