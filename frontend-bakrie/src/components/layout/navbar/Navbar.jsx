@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import { motion } from "framer-motion"
 import { Link, useLocation } from "react-router-dom"
+import { AppContext } from "../../../context/AppContext"
 
 const Navbar = () => {
   // atur hamburger menu
@@ -27,8 +28,11 @@ const Navbar = () => {
       setIsScrolled(true); // selain di homepage bg nya selalu muncul
     }
 
+
     return () => window.removeEventListener("scroll", handleScroll)}, [location])
 
+    //buat gambar sesuai user yg login
+    const {user} = useContext(AppContext)
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-[999] flex justify-between items-center w-full h-28 px-10 ${
@@ -50,7 +54,7 @@ const Navbar = () => {
         <Link to="/"><img src="./logo/Patteserie.svg" alt="Patteserie" className="w-48" /></Link>
       </div>
       <div className="flex gap-4 w-20">
-        <Link to="/profile"><img src="https://i.pinimg.com/736x/e0/97/a7/e097a7826127764391f21dbb511ba437.jpg" alt="user-pic" className="w-[40px] rounded-full" /></Link>
+        <Link to="/profile"><img src={user.img_url || "https://i.pinimg.com/736x/e0/97/a7/e097a7826127764391f21dbb511ba437.jpg"} alt="user-pic" className="w-[40px] rounded-full" /></Link>
         <Link to="/carts" className=""><i className="bx bx-shopping-bag text-2xl text-yes"></i></Link>
       </div>
       

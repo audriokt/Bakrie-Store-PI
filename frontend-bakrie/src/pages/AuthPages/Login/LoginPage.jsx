@@ -28,7 +28,7 @@ const LoginPage = () => {
             const response = await loginCustomer(data)
             if(response.status === 200){
                 console.info("Login successfull")
-                localStorage.setItem("token", response.data.token)
+                localStorage.setItem( "token", response.data.token)
                 localStorage.setItem("role", response.data.role)
                 setAuthData(response.data.token, response.data.role)
                 navigate("/");

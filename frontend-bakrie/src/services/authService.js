@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from '../utils/axiosConfig'
 
 const URL_BASE = "http://localhost:9090/api/v1.0"
 

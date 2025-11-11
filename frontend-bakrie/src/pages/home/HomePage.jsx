@@ -4,12 +4,13 @@ import ItemsCard from "../../components/layout/itemsCard/ItemsCard";
 import InfiniteSwiper from "../../components/core/InfiniteSwiper";
 import DisclosureCard from "../../components/core/DisclosureCard";
 import { aboutData } from "../about/AboutPage";
-import { AppContextProvider } from "../../context/AppContext";
+import { AppContextProvider} from "../../context/AppContext";
 import { fetchProducts } from "../../services/productService";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
   // const [loading, setLoading] = useState(true); ini bisa dipake kalo mau tambahin loading state
+
 
   useEffect(() => {
     const getProducts = async () => {
