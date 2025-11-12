@@ -6,6 +6,7 @@ import DisclosureCard from "../../components/core/DisclosureCard";
 import { aboutData } from "../about/AboutPage";
 import { AppContextProvider} from "../../context/AppContext";
 import { fetchProducts } from "../../services/productService";
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
@@ -33,13 +34,17 @@ const HomePage = () => {
 
       {/* Favorite Choices */}
       <div className="w-full bg-ookay mt-20 py-10">
-        <div className="flex justify-between items-center">
-          <h1 className="font-extrabold text-5xl text-yes pl-10">
+        <div className="min-w-full flex justify-between items-center">
+          <h1 className="w-auto font-extrabold text-5xl text-yes pl-10">
             Favorites Choices
           </h1>
-          <button className="bg-yes text-white text-sm w-28 h-9 rounded-full mr-10 border border-yes hover:bg-transparent hover:text-yes font-medium transition duration-300">
-            Shop All
-          </button>
+          <div className="w-20 self-end relative right-5">
+            <Link to="/products">
+              <button className="bg-yes text-white text-sm w-28 h-9 rounded-full border border-yes hover:bg-transparent hover:text-yes font-medium transition duration-300">
+                Shop All
+              </button>
+            </Link>
+          </div>
         </div>
 
         {/* Infinite Swiper */}

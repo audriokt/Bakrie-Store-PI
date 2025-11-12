@@ -20,6 +20,7 @@ import SignUpPage from "./pages/AuthPages/SignUp/SignUpPage";
 import UserProfilePage from "./pages/Profile/UserProfile/UserProfilePage";
 import EditProfilePage from "./pages/Profile/EditProfile/EditProfilePage";
 import EditPasswordPage from "./pages/Profile/EditProfile/EditPasswordPage";
+import LoginPageEmployee from "./pages/AuthPages/Login/LoginPageEmployee";
 
 // Admin Routes
 // import AdminRoutes from "./routes/AdminRoutes";
@@ -51,6 +52,7 @@ function App() {
 
          {/* route untuk login sama sign up */}
           <Route path='/login' element={<LoginPage/>}/>
+          <Route path="/login-employee" element={<LoginPageEmployee />}></Route>
           <Route path='/signup' element={<SignUpPage/>}/>
           <Route path='/profile' element={<UserProfilePage/>}/>
           <Route path='/edit-profile' element={<EditProfilePage/>}/>
