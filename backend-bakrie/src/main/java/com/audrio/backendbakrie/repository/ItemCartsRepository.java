@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface ItemCartsRepository extends JpaRepository<Item_Carts, UUID> {
     Item_Carts findByIdItemCarts(UUID idItemCarts);
     void deleteByIdItemCarts(UUID idItemCarts);
-    void deleteAllByIdCart(Carts cart);
-    Optional<Item_Carts> findByIdCart(Carts cart);
+    void deleteAllByCart(Carts cart);
+    Optional<Item_Carts> findByCart(Carts cart);
 
 }

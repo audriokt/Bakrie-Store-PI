@@ -1,11 +1,12 @@
 package com.audrio.backendbakrie.service;
 
 import com.audrio.backendbakrie.entity.Carts;
+import com.audrio.backendbakrie.entity.Customers;
 
 import java.util.UUID;
 
 public interface CartService {
-    public void recalculateTotal(Carts cart);
-    public void deleteCart(Carts cart);
-    public Carts getCartByCustomerId(UUID customerId);
+    void recalculateTotal(Carts cart);
+    void deleteCart(Carts cart);
+    Carts getCartByCustomerId(Customers customer);
 }

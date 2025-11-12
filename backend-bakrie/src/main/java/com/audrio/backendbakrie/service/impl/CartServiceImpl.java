@@ -1,4 +1,4 @@
-package com.audrio.fibackendbakrie.service.impl;
+package com.audrio.backendbakrie.service.impl;
 
 import com.audrio.backendbakrie.entity.Carts;
 import com.audrio.backendbakrie.entity.Customers;
@@ -48,8 +48,8 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Carts getCartByCustomerId(UUID customerId) {
-        return cartRepository.findByCustomerId(customerId)
+    public Carts getCartByCustomerId(Customers customer) {
+        return cartRepository.findByCustomer(customer)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
     }
 }
