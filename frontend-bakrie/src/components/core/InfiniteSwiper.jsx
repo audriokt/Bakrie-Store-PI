@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useContext } from 'react';
-import { AppContext } from '../../context/AppContext.jsx';
+import { useProduct } from "../../hooks/useProduct.js"
 
 const formatPrice = (price) => {
     return price.toLocaleString("id-ID");
@@ -69,7 +68,7 @@ const InfiniteSlider = ({ children, speed = 0.5, gap = 24 }) => {
 };
 
 const InfiniteSwiper = () => {
-    const {products} = useContext(AppContext)
+    const {products} = useProduct()
 
   return (
     <div className="w-full bg-ookay">

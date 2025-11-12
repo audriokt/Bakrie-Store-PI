@@ -1,7 +1,9 @@
 package com.audrio.backendbakrie.service.impl;
 
+import com.audrio.backendbakrie.entity.Carts;
 import com.audrio.backendbakrie.io.AuthResponse;
 import com.audrio.backendbakrie.io.CustomerAuthRequest;
+import com.audrio.backendbakrie.repository.CartRepository;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.io.CustomerRequest;
@@ -23,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -37,6 +40,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final JwtUtils jwtUtils;
     private final RolesRepository rolesRepository;
     private final AuthenticationManager authenticationManager;
+    private final CartRepository cartRepository;
 
     @Override
     public CustomerResponse add(CustomerRequest request, MultipartFile file) {
@@ -95,6 +99,13 @@ public class CustomerServiceImpl implements CustomerService {
 
         newCustomer = customerRepository.save(newCustomer);
         log.info("New customer saved with ID: {}", newCustomer.getIdCustomer());
+
+        Carts cart = new Carts();
+        cart.setCustomerId(optionalCustomer.get());
+        cart.setTotalPrice(0.0);
+        cartRepository.save(cart);
+        log.info("Cart created for new customer {}", newCustomer.getIdCustomer());
+
 
         emailService.sendVerificationEmail(newCustomer.getEmail(), token);
         log.info("Verification email sent to: {}", newCustomer.getEmail());
@@ -238,6 +249,25 @@ public class CustomerServiceImpl implements CustomerService {
         log.info("CUSTOMER LOGIN SUCCESS");
 
         return new AuthResponse(token, role, expirationTime);
+    }
+
+    public CustomerResponse customerProfile(String token) {
+        String pureToken = token.replace("Bearer ", "").trim();
+        String email = jwtUtils.extractEmail(pureToken);
+        try{
+            log.info("GET CUSTOMER PROFILE START | ID: {}");
+            System.out.println(email);
+            Customers customer = customerRepository.findByEmail(email)
+                    .orElseThrow(() -> {
+                        log.warn("Customer not found for profile: {}", email);
+                        return new CustomerNotFoundException("Customer tidak ditemukan: " + email);
+                    });
+            log.info("GET CUSTOMER PROFILE SUCCESS");
+            return convertToResponse(customer);
+        } catch (Exception e) {
+            log.error("GET CUSTOMER PROFILE FAILED {}", email);
+            throw new CustomerNotFoundException("Customer tidak ditemukan");
+        }
     }
 
 

@@ -17,4 +17,5 @@ public interface CustomerService {
     List<CustomerResponse> getAll();
     ResponseEntity<String> verifyEmail(String token);
     AuthResponse login(CustomerAuthRequest request);
+    CustomerResponse customerProfile(String token);
 }

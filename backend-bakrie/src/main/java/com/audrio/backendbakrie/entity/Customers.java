@@ -78,7 +78,7 @@ public class Customers implements UserDetails {
     @OneToMany(mappedBy = "customers")
     private List<Orders> orders;
 
-    @OneToOne(mappedBy = "customers")
+    @OneToOne(mappedBy = "customerId")
     private Carts carts;
 
     @Override

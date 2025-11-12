@@ -32,18 +32,18 @@ const ProductDetailPage = () => {
         transition={{ duration: 0.6 }}
       >
         {/* Carousel Produk */}
-        <ProductCarousel images={[state.src]} />
+        <ProductCarousel images={[state.image_url]} />
 
         {/* Info Produk */}
         <div className="flex flex-col text-red-700 w-full">
-          <h2 className="text-2xl font-semibold">{state.name}</h2>
+          <h2 className="text-2xl font-semibold">{state.product_name}</h2>
           <div className="border-b border-red-300 mt-2 mb-4 w-full"></div>
 
           <p className="text-sm leading-relaxed mb-8 text-red-700/90">
             {state.description}
           </p>
 
-          <p className="text-lg font-semibold mb-4">{state.price}</p>
+          <p className="text-lg font-semibold mb-4">{state.product_price}</p>
 
           {/* Quantity Selector & Add to Cart */}
           <div className="flex flex-col w-full h-20 items-start gap-4 mt-6">

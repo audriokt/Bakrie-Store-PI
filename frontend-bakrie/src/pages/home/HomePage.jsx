@@ -4,28 +4,12 @@ import ItemsCard from "../../components/layout/itemsCard/ItemsCard";
 import InfiniteSwiper from "../../components/core/InfiniteSwiper";
 import DisclosureCard from "../../components/core/DisclosureCard";
 import { aboutData } from "../about/AboutPage";
-import { AppContextProvider} from "../../context/AppContext";
-import { fetchProducts } from "../../services/productService";
+import { useProduct } from "../../hooks/useProduct.js";
 import { Link } from "react-router-dom";
 
 const HomePage = () => {
-  const [products, setProducts] = useState([]);
+  const { products, setProducts, loading } = useProduct()
   // const [loading, setLoading] = useState(true); ini bisa dipake kalo mau tambahin loading state
-
-
-  useEffect(() => {
-    const getProducts = async () => {
-      try {
-        const response = await fetchProducts();
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        // setLoading(false); ini bisa dipake kalo mau tambahin loading state
-      }
-    }
-    getProducts();
-  }, []);
 
   return (
     <div className="min-h-[800px] w-full">
@@ -58,11 +42,9 @@ const HomePage = () => {
         <h1 className="font-extrabold text-5xl text-yes mb-14">
           Checkout Our Products
         </h1>
-
-        <AppContextProvider>
           {products.length > 0 ? (
-            products.map((product) => (
-              <ItemsCard key={product.id} products={product} />
+              products.map((product) => (
+                  <ItemsCard key={product.id} product={product} />
             ))
           ) : (
             <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border border-[#FFDADA] rounded-2xl shadow-md w-[80%] max-w-xl py-16 px-10 text-center">
@@ -74,7 +56,6 @@ const HomePage = () => {
               </p>
             </div>
           )}
-        </AppContextProvider>
       </div>
 
       {/* About Us Section */}

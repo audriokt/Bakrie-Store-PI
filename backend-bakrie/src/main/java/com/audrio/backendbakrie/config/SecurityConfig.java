@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/req/signup/**").permitAll()
                         .requestMatchers("/employee/**").hasAnyRole("CASHIER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/customer/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
