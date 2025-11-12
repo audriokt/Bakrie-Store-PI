@@ -101,7 +101,7 @@ public class CustomerServiceImpl implements CustomerService {
         log.info("New customer saved with ID: {}", newCustomer.getIdCustomer());
 
         Carts cart = new Carts();
-        cart.setCustomerId(optionalCustomer.get());
+        cart.setCustomer(optionalCustomer.get());
         cart.setTotalPrice(0.0);
         cartRepository.save(cart);
         log.info("Cart created for new customer {}", newCustomer.getIdCustomer());
