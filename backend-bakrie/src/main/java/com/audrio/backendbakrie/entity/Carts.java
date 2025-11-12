@@ -1,5 +1,6 @@
 package com.audrio.backendbakrie.entity;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -26,16 +27,27 @@ public class Carts {
 
     @OneToOne
     @JoinColumn(name = "id_customers", nullable = false)
-    private Customers customerId;
+    private Customers customer;
+
+    @NotNull
+    @Column(name = "total_price")
+    private double totalPrice;
 
     @NotNull
     @Column(name = "created_at")
-    private LocalDate createdAt;
+    private Timestamp createdAt;
 
     @NotNull
     @Column(name = "updated_at")
-    private LocalDate updatedAt;
+    private Timestamp  updatedAt;
 
-    @OneToMany(mappedBy = "idCart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item_Carts> itemCarts;
+
+    public Item_Carts findItemByProductId(UUID productId) {
+        return itemCarts.stream()
+                .filter(item -> item.getProduct().getIdProduct().equals(productId))
+                .findFirst()
+                .orElse(null);
+    }
 }
