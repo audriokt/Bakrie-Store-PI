@@ -2,6 +2,7 @@ package com.audrio.backendbakrie.repository;
 
 import com.audrio.backendbakrie.entity.Carts;
 import com.audrio.backendbakrie.entity.Item_Carts;
+import com.audrio.backendbakrie.entity.Products;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +15,6 @@ public interface ItemCartsRepository extends JpaRepository<Item_Carts, UUID> {
     void deleteByIdItemCarts(UUID idItemCarts);
     void deleteAllByCart(Carts cart);
     Optional<Item_Carts> findByCart(Carts cart);
+    Optional<Item_Carts> findByCartAndProduct(Carts cart, Products product);
 
 }

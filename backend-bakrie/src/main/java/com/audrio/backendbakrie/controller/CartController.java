@@ -34,7 +34,7 @@ public class CartController {
             Carts cart = cartService.getCartByCustomerId(customer);
 
             return CartResponse.builder()
-                    .cartId(cart.getIdCarts())
+                    .cartId(cart.getCartId())
                     .customerId(customerId)
                     .totalPrice(cart.getTotalPrice())
                     .item_carts(cart.getItemCarts())
