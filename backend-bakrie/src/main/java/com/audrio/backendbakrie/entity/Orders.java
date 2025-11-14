@@ -44,17 +44,16 @@ public class Orders {
     @Column(name = "order_number", unique = true)
     private String orderNumber;
 
-    @NotNull
+    @CreationTimestamp
     @Column(name = "order_date", updatable = false)
     private Timestamp orderDate;
 
     @NotNull
-    @CreationTimestamp
     @Size(max = 20)
     @Column(name = "order_status")
     private String orderStatus;
 
-    @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Transactions transaction;
 
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
