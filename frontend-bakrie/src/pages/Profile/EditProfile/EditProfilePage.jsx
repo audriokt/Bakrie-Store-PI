@@ -1,9 +1,25 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth.js";
+
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const [avatarSrc, setAvatarSrc] = React.useState(null);
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAvatarSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-[#FFF5F5] pt-24 pb-10 mt-10">
@@ -27,6 +43,49 @@ const EditProfilePage = () => {
         </div>
 
         <hr className="border-red-200 mb-6" />
+
+        {/* Profile Photo */}
+        <div className="relative mb-8 w-40">
+          <img
+            src={
+              avatarSrc ||
+              user.img_url ||
+              "defaultProfile/default_profile.png"
+            }
+            alt="Profile"
+            className="w-40 h-40 rounded-full object-cover border-4 border-[#FFECEC]"
+          />
+
+          {/* Hidden file input */}
+          <input
+            id="avatarUpload"
+            type="file"
+            accept="image/*"
+            style={{
+              border: 0,
+              clip: "rect(0 0 0 0)",
+              height: "1px",
+              margin: "-1px",
+              overflow: "hidden",
+              padding: 0,
+              position: "absolute",
+              whiteSpace: "nowrap",
+              width: "1px",
+            }}
+            onChange={handleAvatarChange}
+          />
+
+          {/* Icon Button */}
+          <button
+            onClick={() => document.getElementById("avatarUpload").click()}
+            title="Edit Profile Picture"
+            className="absolute bottom-1 right-1 w-9 h-9 flex items-center justify-center 
+              bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md transition 
+              border-2 border-white"
+          >
+            ✎
+          </button>
+        </div>
 
         {/* Form */}
         <form className="space-y-5">

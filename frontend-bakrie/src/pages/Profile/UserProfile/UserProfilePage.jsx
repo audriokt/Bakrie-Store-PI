@@ -19,17 +19,17 @@ const ProfilePage = () => {
           {/* Profile Photo */}
           <div className="relative mb-8">
             <img
-              src={user.img_url || "https://i.pinimg.com/736x/e0/97/a7/e097a7826127764391f21dbb511ba437.jpg"}
+              src={user.img_url || "defaultProfile/default_profile.png"}
               alt="Profile"
               className="w-40 h-40 rounded-full object-cover border-4 border-[#FFECEC]"
             />
-            {/* Icon edit dipindah ke kiri bawah */}
+            {/* Icon edit dipindah ke kiri bawah
             <button
               title="Edit Profile Picture"
               className="absolute bottom-2 right-2 w-9 h-9 flex items-center justify-center bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md transition"
             >
               ✎
-            </button>
+            </button> */}
           </div>
 
           {/* Buttons */}
