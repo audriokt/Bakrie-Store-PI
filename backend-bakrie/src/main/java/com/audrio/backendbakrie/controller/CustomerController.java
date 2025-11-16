@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,18 +24,10 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @PostMapping("/public/auth/register/customer")
+    @PostMapping(value = "/public/auth/register/customer", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public CustomerResponse createCustomer(@RequestPart("customer") String customerString,
-                                           @RequestPart("file")MultipartFile file){
-        ObjectMapper mapper = new ObjectMapper();
-        CustomerRequest request = null;
-        try{
-            request = mapper.readValue(customerString,CustomerRequest.class);
-            return customerService.add(request, file);
-        }catch(JsonProcessingException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to customer request"+e.getMessage());
-        }
+    public CustomerResponse createCustomer(@RequestBody CustomerRequest customerRequest){
+            return customerService.add(customerRequest);
     }
 
     @GetMapping("/admin/customers/fetchCustomers")
@@ -52,11 +45,11 @@ public class CustomerController {
         CustomerRequest request = null;
         try{
             request = mapper.readValue(customerString, CustomerRequest.class);
+            return customerService.update(UUID.fromString(custId), request, file);
         } catch(JsonProcessingException e) {
             log.error("JsonProcessingException : {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to product request"+e.getMessage());
         }
-        return customerService.update(UUID.fromString(custId), request);
     }
 
     @DeleteMapping("/customer/delete/{id}")

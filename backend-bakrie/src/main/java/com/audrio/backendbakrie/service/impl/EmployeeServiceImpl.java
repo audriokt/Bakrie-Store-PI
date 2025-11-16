@@ -12,8 +12,7 @@ import com.audrio.backendbakrie.utils.Exceptions.*;
 import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;  // TAMBAHAN
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +24,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j  // TAMBAHAN: Aktifkan logging
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final CloudinaryService cloudinaryService;
@@ -108,7 +107,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 log.warn("File too large: {} bytes", file.getSize());
                 throw new ImageSizeUnaproriateException("File maksimal 5MB");
             }
-            if (!file.getContentType().startsWith("image/")) {
+            if (!Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
                 log.warn("Invalid file type: {}", file.getContentType());
                 throw new ImageInvalidExtentionException("Hanya file gambar");
             }else{
@@ -280,7 +279,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // Email
-        if (request.getEmail() == null || !request.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+        if (request.getEmail() == null || !request.getEmail().matches("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             log.warn("Invalid email format: {}", request.getEmail());
             throw new EmailNotValidException("Email tidak valid");
         }

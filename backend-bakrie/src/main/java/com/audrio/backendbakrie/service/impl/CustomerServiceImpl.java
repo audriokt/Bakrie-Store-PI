@@ -1,6 +1,5 @@
 package com.audrio.backendbakrie.service.impl;
 
-import com.audrio.backendbakrie.entity.Carts;
 import com.audrio.backendbakrie.io.AuthResponse;
 import com.audrio.backendbakrie.io.CustomerAuthRequest;
 import com.audrio.backendbakrie.repository.CartRepository;
@@ -25,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -43,12 +41,11 @@ public class CustomerServiceImpl implements CustomerService {
     private final CartRepository cartRepository;
 
     @Override
-    public CustomerResponse add(CustomerRequest request, MultipartFile file) {
+    public CustomerResponse add(CustomerRequest request) {
         log.info("=== ADD CUSTOMER START ===");
         log.debug("Request: {}", request);
-        log.debug("File: {} (size: {} bytes)", file.getOriginalFilename(), file.getSize());
 
-        validateRequest(request, file);
+        validateRequest(request);
 
         String email = request.getEmail().trim();
         log.debug("Checking email existence: {}", email);
@@ -76,24 +73,9 @@ public class CustomerServiceImpl implements CustomerService {
             return convertToResponse(existing);
         }
 
-        log.debug("Validating file size and type");
-        if (file.getSize() > 5 * 1024 * 1024) {
-            log.warn("File too large: {} bytes", file.getSize());
-            throw new ImageSizeUnaproriateException("File maksimal 5MB");
-        }
-        if (!file.getContentType().startsWith("image/")) {
-            log.warn("Invalid file type: {}", file.getContentType());
-            throw new ImageInvalidExtentionException("Hanya file gambar");
-        }
-
-        String idImg = UUID.randomUUID().toString();
-        log.debug("Uploading image to Cloudinary with ID: {}", idImg);
-        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
-        log.debug("Image uploaded successfully: {}", imgUrl);
-
         Customers newCustomer = convertToEntity(request);
         newCustomer.setPassword(passwordEncoder.encode(request.getPassword()));
-        newCustomer.setImg_url(imgUrl);
+        newCustomer.setImg_url(null);
         newCustomer.setVerificationToken(token);
         newCustomer.setIs_verified(false);
 
@@ -109,7 +91,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public CustomerResponse update(UUID id, CustomerRequest request) {
+    public CustomerResponse update(UUID id, CustomerRequest request, MultipartFile file) {
         log.info("UPDATE CUSTOMER START | ID: {}", id);
         log.debug("Update request: {}", request);
 
@@ -119,6 +101,23 @@ public class CustomerServiceImpl implements CustomerService {
                     return new CustomerNotFoundException("Customer tidak ditemukan: " + id);
                 });
 
+        log.debug("Validating file size and type");
+        if (file.getSize() > 5 * 1024 * 1024) {
+            log.warn("File too large: {} bytes", file.getSize());
+            throw new ImageSizeUnaproriateException("File maksimal 5MB");
+        }
+        if (!Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
+            log.warn("Invalid file type: {}", file.getContentType());
+            throw new ImageInvalidExtentionException("Hanya file gambar");
+        }
+        String idImg = UUID.randomUUID().toString();
+        log.debug("Uploading image to Cloudinary with ID: {}", idImg);
+        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
+        log.debug("Image uploaded successfully: {}", imgUrl);
+        if (imgUrl == null) {
+            log.warn("Image upload failed");
+        }
+        customer.setImg_url(imgUrl);
         customer.setUsername(request.getUsername().trim());
         customer.setEmail(request.getEmail().trim());
         customer.setAddress(request.getAddress().trim());
@@ -248,7 +247,7 @@ public class CustomerServiceImpl implements CustomerService {
         String pureToken = token.replace("Bearer ", "").trim();
         String email = jwtUtils.extractEmail(pureToken);
         try{
-            log.info("GET CUSTOMER PROFILE START | ID: {}");
+            log.info("GET CUSTOMER PROFILE START | EMAIL: {}", email);
             System.out.println(email);
             Customers customer = customerRepository.findByEmail(email)
                     .orElseThrow(() -> {
@@ -297,7 +296,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
     }
 
-    private void validateRequest(CustomerRequest request, MultipartFile file) {
+    private void validateRequest(CustomerRequest request) {
         log.debug("VALIDATING CUSTOMER REQUEST");
         if (request == null) {
             log.warn("Request is null");
@@ -355,20 +354,6 @@ public class CustomerServiceImpl implements CustomerService {
         if (address.length() < 10 || address.length() > 255) {
             log.warn("Address length invalid: {}", address.length());
             throw new AddressInvalidLengthException("Alamat 10-255 karakter");
-        }
-
-        // File
-        if (file == null || file.isEmpty()) {
-            log.warn("Image file is empty");
-            throw new ImageFileEmptyException("File gambar wajib diisi");
-        }
-        if (file.getSize() > 5 * 1024 * 1024) {
-            log.warn("File too large: {} bytes", file.getSize());
-            throw new ImageSizeUnaproriateException("File maksimal 5MB");
-        }
-        if (!file.getContentType().startsWith("image/")) {
-            log.warn("Invalid file type: {}", file.getContentType());
-            throw new ImageInvalidExtentionException("Hanya file gambar yang diizinkan");
         }
 
         log.debug("VALIDATION PASSED");

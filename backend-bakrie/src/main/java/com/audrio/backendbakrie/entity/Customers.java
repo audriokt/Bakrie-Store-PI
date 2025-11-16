@@ -56,7 +56,7 @@ public class Customers implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @Column(name="image_url", nullable = true)
+    @Column(name="image_url")
     private String img_url;
 
     @Column(name = "verification_token", unique = true)
