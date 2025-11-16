@@ -44,8 +44,7 @@ public class Employees implements UserDetails{
     @Column(name = "password")
     private String password;
 
-    @NotNull
-    @Column(name = "img_url")
+    @Column(name = "img_url", nullable = true)
     private String img_url;
 
     @Column(name = "verification_token", unique = true)

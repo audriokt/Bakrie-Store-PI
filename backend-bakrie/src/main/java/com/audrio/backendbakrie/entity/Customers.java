@@ -56,7 +56,7 @@ public class Customers implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @Column(name="image_url")
+    @Column(name="image_url", nullable = true)
     private String img_url;
 
     @Column(name = "verification_token", unique = true)
@@ -83,7 +83,7 @@ public class Customers implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return AuthorityUtils.createAuthorityList(cusRoles.getName()); // "CUSTOMER"
+        return AuthorityUtils.createAuthorityList(cusRoles.getName());
     }
 
     @ManyToOne

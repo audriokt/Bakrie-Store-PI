@@ -100,13 +100,6 @@ public class CustomerServiceImpl implements CustomerService {
         newCustomer = customerRepository.save(newCustomer);
         log.info("New customer saved with ID: {}", newCustomer.getIdCustomer());
 
-        Carts cart = new Carts();
-        cart.setCustomer(optionalCustomer.get());
-        cart.setTotalPrice(0.0);
-        cartRepository.save(cart);
-        log.info("Cart created for new customer {}", newCustomer.getIdCustomer());
-
-
         emailService.sendVerificationEmail(newCustomer.getEmail(), token);
         log.info("Verification email sent to: {}", newCustomer.getEmail());
 
@@ -287,9 +280,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     private Customers convertToEntity(CustomerRequest request) {
         log.debug("Converting request to entity for email: {}", request.getEmail());
-        Roles role = rolesRepository.findByName("ROLE_CUSTOMER")
+        Roles role = rolesRepository.findByName("CUSTOMER")
                 .orElseThrow(() -> {
-                    log.error("ROLE_CUSTOMER not found in database");
+                    log.error("CUSTOMER not found in database");
                     return new RoleNotFoundException("Customer Role not found");
                 });
 
