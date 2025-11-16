@@ -14,6 +14,6 @@ import java.util.UUID;
 
 @Repository
 public interface CartRepository extends JpaRepository<Carts, UUID> {
-//    Berdasarkan entity
+//    cek apakaha ada cart dengan customer tertentu
     Optional<Carts> findByCustomer(Customers customer);
 }

@@ -43,11 +43,4 @@ public class Carts {
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item_Carts> itemCarts;
-
-    public Item_Carts findItemByProductId(UUID productId) {
-        return itemCarts.stream()
-                .filter(item -> item.getProduct().getIdProduct().equals(productId))
-                .findFirst()
-                .orElse(null);
-    }
 }

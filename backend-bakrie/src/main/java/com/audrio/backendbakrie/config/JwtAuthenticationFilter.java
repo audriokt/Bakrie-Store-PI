@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsServiceImpl userDetailsService;
 
     private static final List<String> WHITELIST = List.of(
-            "/public/**",
+            "/public/auth/**",
             "/req/signup/**"
     );
 

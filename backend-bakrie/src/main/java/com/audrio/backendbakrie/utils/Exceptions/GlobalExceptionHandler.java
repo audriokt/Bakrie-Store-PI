@@ -190,4 +190,11 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler({CartNotFoundException.class})
+    public ResponseEntity<Object> handleCartNotFoundException(CartNotFoundException ex){
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ex.getMessage());
+    }
 }

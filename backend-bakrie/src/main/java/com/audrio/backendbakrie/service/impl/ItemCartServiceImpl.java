@@ -4,6 +4,9 @@ import com.audrio.backendbakrie.entity.Carts;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.entity.Item_Carts;
 import com.audrio.backendbakrie.entity.Products;
+import com.audrio.backendbakrie.io.CartRequest;
+import com.audrio.backendbakrie.io.CartResponse;
+import com.audrio.backendbakrie.io.ItemCartResponse;
 import com.audrio.backendbakrie.repository.CartRepository;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.repository.ItemCartsRepository;
@@ -17,13 +20,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ItemCartServiceImpl implements ItemCartService {
+public class
+   ItemCartServiceImpl implements ItemCartService {
 
     private final ItemCartsRepository itemCartRepository;
     private final CartRepository cartRepository;
@@ -33,29 +38,34 @@ public class ItemCartServiceImpl implements ItemCartService {
 
     @Transactional
     @Override
-    public Carts addItemToCart(UUID customerId, UUID productId, int quantity) {
+    public CartResponse addItemToCart(CartRequest cartRequest, String customerId) {
+        UUID productId = UUID.fromString(cartRequest.getProductId());
+        int quantity = cartRequest.getQuantity();
+
         log.info("Add item to cart initiated. Customer ID: {}, Product ID: {}, Quantity: {}", customerId, productId, quantity);
         validateQuantity(quantity);
-        Customers customer = getCustomer(customerId);
+        Customers customer = getCustomer(UUID.fromString(customerId));
         Carts cart = getCart(customer);
         Products product = getProduct(productId);
 
         Optional<Item_Carts> itemOpt = itemCartRepository.findByCartAndProduct(cart, product);
-        Item_Carts item;
+
         if (itemOpt.isPresent()) {
-            item = itemOpt.get();
+            Item_Carts item = itemOpt.get();
             int updatedQuantity = item.getQuantity() + quantity;
             item.setQuantity(updatedQuantity);
             item.setSubPrice(product.getProduct_price() * updatedQuantity);
+            itemCartRepository.save(item);
             log.info("Updated existing item. Product ID: {}, New Quantity: {}, New SubPrice: {}", productId, updatedQuantity, item.getSubPrice());
         } else {
+            Item_Carts item;
             item = createNewItem(cart, product, quantity);
+            itemCartRepository.save(item);
             log.info("Created new item. Product ID: {}, Quantity: {}, SubPrice: {}", productId, quantity, item.getSubPrice());
         }
-        itemCartRepository.save(item);
 
         cartService.recalculateTotal(cart);
-        return cart;
+        return convertToResponse(cart);
     }
 
     @Override
@@ -73,9 +83,7 @@ public class ItemCartServiceImpl implements ItemCartService {
         try {
             log.info("Updating item quantity. ItemCart ID: {}, New Quantity: {}", itemCartId, newQuantity);
 
-            if (newQuantity <= 0) {
-                throw new IllegalArgumentException("Quantity must be greater than zero");
-            }
+            validateQuantity(newQuantity);
 
             Item_Carts item = itemCartRepository.findById(itemCartId)
                     .orElseThrow(() -> {
@@ -100,8 +108,6 @@ public class ItemCartServiceImpl implements ItemCartService {
         }
     }
 
-
-
     private void validateQuantity(int quantity) {
         if(quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than 0");
@@ -118,7 +124,9 @@ public class ItemCartServiceImpl implements ItemCartService {
     }
     private Carts getCart(Customers customer) {
         return cartRepository.findByCustomer(customer)
-                .orElseThrow(() -> new RuntimeException("Cart not found by customer id: " + customer.getIdCustomer()));
+                .orElseGet(() -> cartRepository.save(Carts.builder()
+                        .customer(customer)
+                        .build()));
     }
     private Item_Carts createNewItem(Carts cart, Products product, int quantity) {
         double subPrice = product.getProduct_price() * quantity;
@@ -131,5 +139,25 @@ public class ItemCartServiceImpl implements ItemCartService {
                                         .build();
         cart.getItemCarts().add(newItem);
         return newItem;
+    }
+
+    private CartResponse convertToResponse(Carts cart) {
+        List<ItemCartResponse> itemResponses = cart.getItemCarts().stream()
+                .map(item -> ItemCartResponse.builder()
+                        .productId(UUID.fromString(item.getProduct().getIdProduct().toString()))
+                        .itemCartId(item.getIdItemCarts())
+                        .quantity(item.getQuantity())
+                        .subPrice(item.getSubPrice())
+                        .productName(item.getProduct().getProduct_name())
+                        .productImgUrl(item.getProduct().getImage_url())
+                        .build())
+                .toList();
+
+        return CartResponse.builder()
+                .customerId(cart.getCustomer().getIdCustomer().toString())
+                .cartId(String.valueOf(cart.getCartId()))
+                .totalPrice(cart.getTotalPrice())
+                .item_carts(itemResponses)
+                .build();
     }
 }
