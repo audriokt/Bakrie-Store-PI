@@ -5,6 +5,7 @@ import com.audrio.backendbakrie.io.ProductResponse;
 import com.audrio.backendbakrie.service.ProductService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class ProductController {
 
     @PostMapping("/admin/product/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductResponse addProduct(@RequestPart("product") String productString,
+    public ProductResponse addProduct(@Valid @RequestPart("product") String productString,
                                       @RequestPart("file") MultipartFile file) {
         log.info("Method : POST | Endpoint : /admin/product/add | Payload : {}", productString);
         ObjectMapper mapper = new ObjectMapper();
@@ -47,7 +48,7 @@ public class ProductController {
 
     @DeleteMapping("/admin/product/delete/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable String productId){
+    public void delete(@Valid @PathVariable String productId){
         log.info("Method :  DELETE | Endpoint : /admin/product/delete | ProductId: {}", productId);
         try {
             productService.delete(UUID.fromString(productId));
@@ -60,7 +61,7 @@ public class ProductController {
 
     @PutMapping("/admin/product/update/{productId}")
     @ResponseStatus(HttpStatus.OK)
-    public ProductResponse update(@RequestPart("product") String productString,
+    public ProductResponse update(@Valid @RequestPart("product") String productString,
                                   @RequestPart("file") MultipartFile file,
                                   @PathVariable UUID productId){
         log.info("Method : PUT | Endpoint : /admin/product/update | ProductId: {}", productId);

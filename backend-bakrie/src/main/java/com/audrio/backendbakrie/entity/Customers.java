@@ -54,6 +54,7 @@ public class Customers implements UserDetails {
 
     @NotNull
     @Column(name = "password")
+    @Size(min = 6, message = "Password minimal 6 karakter")
     private String password;
 
     @Column(name="image_url")
@@ -83,7 +84,7 @@ public class Customers implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return AuthorityUtils.createAuthorityList(cusRoles.getName()); // "CUSTOMER"
+        return AuthorityUtils.createAuthorityList(cusRoles.getName());
     }
 
     @ManyToOne

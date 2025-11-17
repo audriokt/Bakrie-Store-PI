@@ -1,8 +1,46 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { addCustomer, profileCustomer } from "../../../services/customerService";
+import { useAuth } from "../../../hooks/useAuth";
+import Loading from "../../../components/loader/Loading";
 
 const SignUpPage = () => {
+  const [data, setData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    phone_num: "",
+    address: "",
+  })
+
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const [registerError, setRegisterError] = useState(false)
+  
+  const onChangeHandler = (e) => {
+    const {name, value} = e.target;
+    setData((prev) => ({...prev, [name]: value}));
+  }
+
+  // const {setAuthData, setUser} = useAuth()
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const resRegister = await addCustomer(data);
+      navigate("/login");
+      }
+      catch (err) {
+        console.error("Registration failed:", err);
+        setRegisterError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+  
+
   return (
     <div className="flex h-screen items-center justify-center bg-pink-100">
       {/* Container utama */}
@@ -21,13 +59,17 @@ const SignUpPage = () => {
           </p>
 
           {/* Form signup */}
-          <form className="space-y-4 w-full max-w-sm">
+          <form className="space-y-4 w-full max-w-sm" onSubmit={onSubmitHandler}>
             <input
               type="text"
               placeholder="Username"
               className="w-full border border-red-500 rounded-md py-3 px-4 
                         focus:outline-none focus:ring-2 focus:ring-red-400 
                         text-gray-700 placeholder-gray-400"
+              name="username"
+              id="username"
+              onChange={onChangeHandler}
+              value={data.username}
             />
             <input
               type="email"
@@ -35,6 +77,10 @@ const SignUpPage = () => {
               className="w-full border border-red-500 rounded-md py-3 px-4 
                         focus:outline-none focus:ring-2 focus:ring-red-400 
                         text-gray-700 placeholder-gray-400"
+              name="email"
+              id="email"
+              onChange={onChangeHandler}
+              value={data.email}
             />
             <input
               type="password"
@@ -42,6 +88,10 @@ const SignUpPage = () => {
               className="w-full border border-red-500 rounded-md py-3 px-4 
                         focus:outline-none focus:ring-2 focus:ring-red-400 
                         text-gray-700 placeholder-gray-400"
+              name="password"
+              id="password"
+              onChange={onChangeHandler}
+              value={data.password}
             />
             <input
               type="text"
@@ -49,6 +99,10 @@ const SignUpPage = () => {
               className="w-full border border-red-500 rounded-md py-3 px-4 
                         focus:outline-none focus:ring-2 focus:ring-red-400 
                         text-gray-700 placeholder-gray-400"
+              name="phone_num"
+              id="phone_num"
+              onChange={onChangeHandler}
+              value={data.phone_num}
             />
             <input
               type="text"
@@ -56,16 +110,27 @@ const SignUpPage = () => {
               className="w-full border border-red-500 rounded-md py-3 px-4 
                         focus:outline-none focus:ring-2 focus:ring-red-400 
                         text-gray-700 placeholder-gray-400"
+              name="address"
+              id="address"
+              onChange={onChangeHandler}
+              value={data.address}
             />
+
+            {registerError && (
+              <p className="text-red-600 text-sm mt-2">
+                Registration failed. Please make sure your information is correct.
+              </p>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              className="w-full bg-red-600 text-white py-3 rounded-full 
+              className="w-full h-12 bg-red-600 text-white py-3 rounded-full 
                 hover:bg-red-700 transition-all duration-200 font-semibold shadow-md"
+              disabled={loading}
             >
-              Register
+              {loading ? <Loading /> : "Sign Up"}
             </motion.button>
           </form>
 

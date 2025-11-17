@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom"
 import { loginCustomer } from "../../../services/authService.js"
 import { profileCustomer } from "../../../services/customerService.js"
 import { useAuth } from "../../../hooks/useAuth.js"
+import Loading from "../../../components/loader/Loading.jsx";
 
 const LoginPage = () => {
     // akses fungsi yang ada di useContext lewat hook useAuth
@@ -24,6 +25,8 @@ const LoginPage = () => {
         email: "",
         password: "",
     })
+
+    const [loginError, setLoginError] = useState(false);
 
     // fungsi akan dipanggil ketika ada perubahan pada komponen input email dan password
     // perubahan akan disimpan ke dalam data login "data"
@@ -49,7 +52,8 @@ const LoginPage = () => {
             setUser(resUser.data);
             navigate("/");
         } catch (err) {
-            console.error("Login gagal:", err);
+            console.error("Login Failed:", err);
+            setLoginError(true);
         } finally {
             setLoading(false);
         }
@@ -108,14 +112,21 @@ const LoginPage = () => {
               />
             </div>
 
+            {loginError && (
+              <p className="text-red-600 text-sm mt-2">
+                Login failed. Please check your email and password.
+              </p>
+            )}
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              className="w-full bg-red-600 text-white py-3 rounded-full 
+              className="w-full h-12 bg-red-600 text-white py-3 rounded-full 
                 hover:bg-red-700 transition-all duration-200 font-semibold shadow-md"
+               disabled={loading}
             >
-              Login
+              {loading ? <Loading /> : "Login"}
             </motion.button>
           </form>
 
