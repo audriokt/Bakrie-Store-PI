@@ -5,6 +5,7 @@ import com.audrio.backendbakrie.io.EmployeeResponse;
 import com.audrio.backendbakrie.service.EmployeeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class EmployeeController {
     */
     @PostMapping(value = "/admin/auth/register/employee", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public EmployeeResponse createEmployee(@RequestBody EmployeeRequest employeeRequest){
+    public EmployeeResponse createEmployee(@Valid @RequestBody EmployeeRequest employeeRequest){
             return employeeService.add(employeeRequest);
     }
 
@@ -54,7 +55,7 @@ public class EmployeeController {
     */
     @PutMapping("/admin/employee/update/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EmployeeResponse updateEmployee(@PathVariable String id,
+    public EmployeeResponse updateEmployee(@Valid @PathVariable String id,
                                            @RequestPart("employee") String employeeString,
                                            @RequestPart("file") MultipartFile file) {
         ObjectMapper mapper = new ObjectMapper();
@@ -73,7 +74,7 @@ public class EmployeeController {
     */
     @DeleteMapping("/admin/employee/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCustomer(@PathVariable String id) {
+    public void deleteCustomer(@Valid @PathVariable String id) {
         try {
             employeeService.delete(UUID.fromString(id));
         } catch (Exception e){

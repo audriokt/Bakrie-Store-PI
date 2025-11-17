@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.audrio.backendbakrie.roles.Roles;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -41,6 +42,7 @@ public class Employees implements UserDetails{
 
     @NotNull
     @Size(max = 200)
+    @Min(6)
     @Column(name = "password")
     private String password;
 

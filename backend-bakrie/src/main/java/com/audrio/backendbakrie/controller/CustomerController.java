@@ -6,6 +6,7 @@ import com.audrio.backendbakrie.io.ProductRequest;
 import com.audrio.backendbakrie.service.CustomerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class CustomerController {
 
     @PostMapping(value = "/public/auth/register/customer", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public CustomerResponse createCustomer(@RequestBody CustomerRequest customerRequest){
+    public CustomerResponse createCustomer(@Valid @RequestBody CustomerRequest customerRequest){
             return customerService.add(customerRequest);
     }
 
@@ -38,7 +39,7 @@ public class CustomerController {
 
     @PutMapping("/customer/update/{custId}")
     @ResponseStatus(HttpStatus.OK)
-    public CustomerResponse updateCustomer(@PathVariable String custId,
+    public CustomerResponse updateCustomer(@Valid @PathVariable String custId,
                                            @RequestPart("customer") String customerString,
                                            @RequestPart("file") MultipartFile file) {
         ObjectMapper mapper = new ObjectMapper();
@@ -54,7 +55,7 @@ public class CustomerController {
 
     @DeleteMapping("/customer/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCustomer(@PathVariable String id) {
+    public void deleteCustomer(@Valid @PathVariable String id) {
         try {
             customerService.delete(UUID.fromString(id));
         } catch (Exception e){
@@ -64,7 +65,7 @@ public class CustomerController {
 
     @GetMapping("/customer/myprofile")
     @ResponseStatus(HttpStatus.OK)
-    public CustomerResponse myProfile(@RequestHeader("Authorization") String token){
+    public CustomerResponse myProfile(@Valid @RequestHeader("Authorization") String token){
         try{
             log.info("Method : GET | Endpoint : /customer/myprofile | Payload : {}", token);
             return customerService.customerProfile(token);

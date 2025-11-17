@@ -11,9 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmployeeAuthRequest {
-    @NotBlank
+    @NotBlank(message = "Email tidak boleh kosong")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "Password tidak boleh kosong")
     private String password;
+
 }

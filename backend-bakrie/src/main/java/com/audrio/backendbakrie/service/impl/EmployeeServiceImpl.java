@@ -285,9 +285,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // Password
-        if (request.getPassword() == null || request.getPassword().length() < 8) {
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
             log.warn("Password too short: {} chars", request.getPassword() != null ? request.getPassword().length() : 0);
-            throw new PasswordMinLengthException("Password harus minimal 8 karakter");
+            throw new PasswordMinLengthException("Password harus minimal 6 karakter");
         }
 
         // Username
