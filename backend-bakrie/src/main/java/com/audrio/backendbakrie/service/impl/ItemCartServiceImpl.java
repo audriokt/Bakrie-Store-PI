@@ -4,6 +4,7 @@ import com.audrio.backendbakrie.entity.Carts;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.entity.Item_Carts;
 import com.audrio.backendbakrie.entity.Products;
+import com.audrio.backendbakrie.io.AddItemCartRequest;
 import com.audrio.backendbakrie.io.CartRequest;
 import com.audrio.backendbakrie.io.CartResponse;
 import com.audrio.backendbakrie.io.ItemCartResponse;
@@ -15,14 +16,20 @@ import com.audrio.backendbakrie.service.CartService;
 import com.audrio.backendbakrie.service.ItemCartService;
 import com.audrio.backendbakrie.utils.Exceptions.CustomerNotFoundException;
 import com.audrio.backendbakrie.utils.Exceptions.ProductNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.aspectj.runtime.internal.Conversions.doubleValue;
 
 @Slf4j
 @Service
@@ -36,15 +43,18 @@ public class
     private final CartService cartService;
     private final ProductRepository productRepository;
 
+    @SneakyThrows
     @Transactional
     @Override
-    public CartResponse addItemToCart(CartRequest cartRequest, String customerId) {
-        UUID productId = UUID.fromString(cartRequest.getProductId());
+    public CartResponse addItemToCart(AddItemCartRequest cartRequest) {
+        UUID productId = cartRequest.getProductUUID();
         int quantity = cartRequest.getQuantity();
+        UUID customerId = cartRequest.getCustomerUUID();
 
         log.info("Add item to cart initiated. Customer ID: {}, Product ID: {}, Quantity: {}", customerId, productId, quantity);
         validateQuantity(quantity);
-        Customers customer = getCustomer(UUID.fromString(customerId));
+
+        Customers customer = getCustomer(customerId);
         Carts cart = getCart(customer);
         Products product = getProduct(productId);
 
@@ -54,18 +64,19 @@ public class
             Item_Carts item = itemOpt.get();
             int updatedQuantity = item.getQuantity() + quantity;
             item.setQuantity(updatedQuantity);
-            item.setSubPrice(product.getProduct_price() * updatedQuantity);
+            item.setSubPrice((BigDecimal.valueOf(updatedQuantity)).doubleValue() * product.getProduct_price());
             itemCartRepository.save(item);
             log.info("Updated existing item. Product ID: {}, New Quantity: {}, New SubPrice: {}", productId, updatedQuantity, item.getSubPrice());
         } else {
-            Item_Carts item;
-            item = createNewItem(cart, product, quantity);
+            Item_Carts item = createNewItem(cart, product, quantity);
             itemCartRepository.save(item);
             log.info("Created new item. Product ID: {}, Quantity: {}, SubPrice: {}", productId, quantity, item.getSubPrice());
         }
 
         cartService.recalculateTotal(cart);
-        return convertToResponse(cart);
+        CartResponse cartResponse = convertToResponse(cart);
+        log.info("Returning CartResponse: {}", new ObjectMapper().writeValueAsString(cartResponse));
+        return cartResponse;
     }
 
     @Override
@@ -82,7 +93,6 @@ public class
     public void updateItemQuantity(UUID itemCartId, int newQuantity) {
         try {
             log.info("Updating item quantity. ItemCart ID: {}, New Quantity: {}", itemCartId, newQuantity);
-
             validateQuantity(newQuantity);
 
             Item_Carts item = itemCartRepository.findById(itemCartId)
@@ -98,9 +108,8 @@ public class
             log.info("Item updated. Product ID: {}, Quantity: {}, SubPrice: {}",
                     item.getProduct().getIdProduct(), newQuantity, item.getSubPrice());
 
-            Carts cart = item.getCart();
-            cartService.recalculateTotal(cart);
-            log.info("Cart total recalculated for Customer ID: {}", cart.getCustomer().getIdCustomer());
+            cartService.recalculateTotal(item.getCart());
+            log.info("Cart total recalculated for Customer ID: {}", item.getCart().getCustomer().getIdCustomer());
 
         } catch (Exception e) {
             log.error("Failed to update item quantity. ItemCart ID: {}, Error: {}", itemCartId, e.getMessage(), e);
@@ -126,10 +135,12 @@ public class
         return cartRepository.findByCustomer(customer)
                 .orElseGet(() -> cartRepository.save(Carts.builder()
                         .customer(customer)
+                                .itemCarts(new ArrayList<>())
+                                .totalPrice(0.0)
                         .build()));
     }
     private Item_Carts createNewItem(Carts cart, Products product, int quantity) {
-        double subPrice = product.getProduct_price() * quantity;
+        double subPrice = product.getProduct_price() * (BigDecimal.valueOf(quantity)).doubleValue();
 
         Item_Carts newItem = Item_Carts.builder()
                                         .cart(cart)
@@ -143,19 +154,22 @@ public class
 
     private CartResponse convertToResponse(Carts cart) {
         List<ItemCartResponse> itemResponses = cart.getItemCarts().stream()
-                .map(item -> ItemCartResponse.builder()
-                        .productId(UUID.fromString(item.getProduct().getIdProduct().toString()))
+                .map(item -> {
+                        Products p = item.getProduct();
+                        return ItemCartResponse.builder()
+                        .productId(p.getIdProduct())
                         .itemCartId(item.getIdItemCarts())
                         .quantity(item.getQuantity())
                         .subPrice(item.getSubPrice())
-                        .productName(item.getProduct().getProduct_name())
-                        .productImgUrl(item.getProduct().getImage_url())
-                        .build())
+                        .productName(p.getProduct_name())
+                        .productImgUrl(p.getImage_url())
+                        .build();
+                })
                 .toList();
 
         return CartResponse.builder()
                 .customerId(cart.getCustomer().getIdCustomer().toString())
-                .cartId(String.valueOf(cart.getCartId()))
+                .cartId(cart.getCartId().toString())
                 .totalPrice(cart.getTotalPrice())
                 .item_carts(itemResponses)
                 .build();

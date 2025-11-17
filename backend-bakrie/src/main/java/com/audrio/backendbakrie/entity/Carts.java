@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "carts")
@@ -33,11 +35,11 @@ public class Carts {
     @Column(name = "total_price")
     private double totalPrice;
 
-    @NotNull
+    @CreationTimestamp
     @Column(name = "created_at")
     private Timestamp createdAt;
 
-    @NotNull
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp  updatedAt;
 

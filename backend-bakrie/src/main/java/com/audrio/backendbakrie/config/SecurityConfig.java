@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/public/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/req/signup/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/employee/**").hasAnyRole("CASHIER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/customer/**").hasRole("CUSTOMER")

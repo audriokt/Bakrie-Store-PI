@@ -12,9 +12,21 @@ import java.util.UUID;
 @AllArgsConstructor
 @Data
 public class AddItemCartRequest {
+    @NotNull(message = "ID customer wajib diisi")
+    private String customerId;
+
     @NotNull(message = "ID produk wajib diisi")
-    private UUID productId;
+    private String productId;
 
     @Min(value = 1, message = "Jumlah produk minimal 1")
     private int quantity;
+
+    public UUID getCustomerUUID() {
+        return UUID.fromString(customerId);
+    }
+
+    public UUID getProductUUID() {
+        return UUID.fromString(productId);
+    }
+
 }

@@ -1,9 +1,11 @@
 package com.audrio.backendbakrie.io;
 
 import lombok.Builder;
+import lombok.Data;
 
 import java.util.UUID;
 
+@Data
 @Builder
 public class ItemCartResponse {
     private UUID itemCartId;
