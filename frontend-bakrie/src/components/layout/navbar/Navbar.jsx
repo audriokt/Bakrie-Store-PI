@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth.js";
 
 const Navbar = () => {
@@ -9,6 +9,7 @@ const Navbar = () => {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,7 +27,16 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [location]);
 
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout(); 
+    navigate("/"); 
+    if (isOpen) {
+      handleClick(); 
+    }
+  };
+
 
   return (
     <nav
@@ -68,18 +78,28 @@ const Navbar = () => {
       </div>
 
       {/* Profile + Cart Icons */}
-      <div className="flex items-center gap-5 min-w-fit">
-        <Link to="/profile">
-          <img
-            src={user.img_url || "defaultProfile/default_profile.png"}
-            alt="user"
-            className="w-10 h-10 rounded-full object-cover border-2 border-yes shadow-md hover:scale-105 transition"
-          />
-        </Link>
-
-        <Link to="/carts">
-          <i className="bx bx-shopping-bag text-3xl text-yes hover:text-red-700 transition"></i>
-        </Link>
+      <div className="flex gap-5 min-w-fit justify-end w-20">
+        {user ? (
+          <>
+            <Link to="/profile">
+              <img
+                src={user.img_url || "/defaultProfile/default_profile.png"}
+                alt="user"
+                className="w-10 h-10 rounded-full object-cover border-2 border-yes shadow-md hover:scale-105 transition"
+              />
+            </Link>
+            <Link to="/carts">
+              <i className="bx bx-shopping-bag text-3xl text-yes hover:text-red-700 transition"></i>
+            </Link>
+          </>
+        ) : (
+          <Link
+            to="/login"
+            className="relative bg-red-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-red-700 transition shadow-md text-sm whitespace-nowrap"
+          >
+            <span className="relative top-[-1px]">Login</span>
+          </Link>
+        )}
       </div>
 
       {/* Sidebar */}
@@ -96,33 +116,32 @@ const Navbar = () => {
               <Link to="/products" className="w-full">Products</Link>
               <Link to="/about" className="w-full">About Us</Link>
               <div className="flex w-56">
-                <Link to="/login" className="flex items-center gap-2 text-yes absolute">
-                  <svg
-                    width="24px"
-                    height="24px"
-                    strokeWidth="1.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    color="#C31D1D"
+                {user ? (
+                  /* TOMBOL LOGOUT (Icon Pintu Keluar) */
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 text-yes absolute"
                   >
-                    <path
-                      d="M19 12H12M12 12L15 15M12 12L15 9"
-                      stroke="#C31D1D"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>
-                    <path
-                      d="M19 6V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V18"
-                      stroke="#C31D1D"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>
-                  </svg>
-                  <span>Login</span>
-                </Link>
+                    <svg width="24px" height="24px" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#C31D1D">
+                      <path d="M12 12H19M19 12L15 15M19 12L15 9" stroke="#C31D1D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                      <path d="M5 12H12M5 6V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V19C19 20.1046 18.1046 21 17 21H7C5.89543 21 5 20.1046 5 19V18" stroke="#C31D1D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                    </svg>
+                    <span>Logout</span>
+                  </button>
+                ) : (
+                  /* TOMBOL LOGIN (Icon Pintu Masuk - Asli Anda) */
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-2 text-yes absolute"
+                    onClick={handleClick}
+                  >
+                    <svg width="24px" height="24px" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#C31D1D">
+                        <path d="M19 12H12M12 12L15 15M12 12L15 9" stroke="#C31D1D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                        <path d="M19 6V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V18" stroke="#C31D1D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                    </svg>
+                    <span>Login</span>
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

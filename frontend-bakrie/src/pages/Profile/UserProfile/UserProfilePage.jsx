@@ -1,10 +1,26 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth.js"
 
 const ProfilePage = () => {
-    const {user} = useAuth()
+  const { user, logout } = useAuth()
+
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout(); 
+    navigate("/"); 
+  };
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-100px)] bg-[#FFF8F8] pt-28 pb-10">
+        <Loading />
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-100px)] bg-[#FFF8F8] px-6 md:px-10 pt-28 pb-10 mt-10">
       {/* Main content */}
@@ -23,13 +39,6 @@ const ProfilePage = () => {
               alt="Profile"
               className="w-40 h-40 rounded-full object-cover border-4 border-[#FFECEC]"
             />
-            {/* Icon edit dipindah ke kiri bawah
-            <button
-              title="Edit Profile Picture"
-              className="absolute bottom-2 right-2 w-9 h-9 flex items-center justify-center bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md transition"
-            >
-              ✎
-            </button> */}
           </div>
 
           {/* Buttons */}
@@ -54,6 +63,7 @@ const ProfilePage = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             className="w-full bg-[#FFB6B6] text-white py-3 rounded-full font-semibold hover:bg-red-600 transition"
+            onClick={handleLogout}
           >
             Logout
           </motion.button>
