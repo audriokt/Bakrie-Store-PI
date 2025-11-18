@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth.js";
+import Swal from "sweetalert2";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +32,18 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout(); 
-    navigate("/"); 
+
+    Swal.fire({
+      title: "Logout Successful",
+      text: "You have successfully logged out.",
+      icon: "success",
+      confirmButtonText: "Ok",
+      confirmButtonColor: "#C31D1D"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        navigate("/"); 
+      }
+    })
     if (isOpen) {
       handleClick(); 
     }
