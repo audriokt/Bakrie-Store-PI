@@ -49,12 +49,13 @@ const HomePage = () => {
                   <ItemsCard key={product.id} product={product} />
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border border-[#FFDADA] rounded-2xl shadow-md w-[80%] max-w-xl py-16 px-10 text-center">
+            <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border border-[#FFDADA] rounded-2xl shadow-md w-[80%] max-w-xl py-16 px-10 text-center mb-10">              
               <h2 className="text-2xl font-semibold text-red-600 mb-3">
-                There's no product right now
+                <img src="/waiting/waiting.svg" alt="waiting" />
+                <p>There's no product right now</p>
               </h2>
               <p className="text-gray-500">
-                Please check back later or explore our favorites above!
+                Please check back later or explore our store right away!
               </p>
             </div>
           )}
