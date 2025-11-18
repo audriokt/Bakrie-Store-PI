@@ -7,6 +7,7 @@ import { loginCustomer } from "../../../services/authService.js"
 import { profileCustomer } from "../../../services/customerService.js"
 import { useAuth } from "../../../hooks/useAuth.js"
 import Loading from "../../../components/loader/Loading.jsx";
+import Swal from "sweetalert2";
 
 const LoginPage = () => {
     // akses fungsi yang ada di useContext lewat hook useAuth
@@ -44,13 +45,25 @@ const LoginPage = () => {
     const onSubmitHandler = async (e) => {
         e.preventDefault();
         setLoading(true);
+
         try {
             const resLogin = await loginCustomer(data);
             const { token, role } = resLogin.data;
             setAuthData(token, role);
             const resUser = await profileCustomer();
             setUser(resUser.data);
-            navigate("/");
+
+            Swal.fire({
+              title: "Login Successful",
+              text: "You have successfully logged in.",
+              icon: "success",
+              confirmButtonText: "Ok",
+              confirmButtonColor: "#C31D1D"
+            }).then((result) => {
+              if(result.isConfirmed) {
+                navigate("/");
+              }
+            });
         } catch (err) {
             console.error("Login Failed:", err);
             setLoginError(true);
@@ -73,7 +86,7 @@ const LoginPage = () => {
           {/* Logo dan teks */}
           <img src="./logo/login.svg" alt="Logo" className="w-32 mb-2" />
           <p className="text-red-600 text-sm mb-6">
-            Sign in to your account here!
+            Login to your account here!
           </p>
 
           {/* Form login */}

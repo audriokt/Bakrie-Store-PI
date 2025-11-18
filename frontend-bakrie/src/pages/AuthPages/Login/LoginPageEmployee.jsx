@@ -54,7 +54,7 @@ const LoginPageEmployee = () => {
           {/* Logo dan teks */}
           <img src="./logo/login.svg" alt="Logo" className="w-32 mb-2" />
           <p className="text-red-600 text-sm mb-6">
-            Sign in to your account here!
+            Login to your account here!
           </p>
 
           {/* Form login */}
