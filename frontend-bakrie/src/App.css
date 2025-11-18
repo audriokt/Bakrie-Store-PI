@@ -41,3 +41,29 @@ html {
 .slider-hover-area:hover .animate-scroll-horizontal {
   --speed: 5; /* makin besar = makin lambat (karena durasi = *speed) */
 }
+
+/* === Override warna sidebar Flowbite === */
+.sidebar,
+.sidebar-items,
+.sidebar-item-group,
+.sidebar-item {
+  background-color: #FEE7E7 !important; /* <- kode warna ookay */
+}
+
+/* Jika mode gelap aktif di Flowbite */
+.dark .sidebar,
+.dark .sidebar-items,
+.dark .sidebar-item-group,
+.dark .sidebar-item {
+  background-color: #FEE7E7 !important;
+}
+
+/* Pastikan hover & active state tetap dalam tema kamu */
+.sidebar-item:hover {
+  background-color: rgba(195, 29, 29, 0.1) !important; /* sedikit transparan merah */
+}
+.sidebar-item.active {
+  background-color: #C31D1D !important; /* warna yes */
+  color: white !important;
+}
+

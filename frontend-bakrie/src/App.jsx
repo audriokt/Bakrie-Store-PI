@@ -1,16 +1,14 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 
-//  Layouts
+// Layouts
 import Footer from "./components/layout/footer/Footer";
 import Navbar from "./components/layout/navbar/Navbar";
 
-// Pages (semua di luar folder components)
+// Pages (Non-admin)
 import HomePage from "./pages/home/HomePage";
 import AboutPage from "./pages/about/AboutPage";
 import ProductPage from "./pages/product/ProductPage";
-
-// Catalog & Cart
 import ProductDetailPage from "./pages/CatalogPages/ProductDetail/ProductDetailPage";
 import CartsPage from "./pages/Carts/CartsPage";
 
@@ -22,43 +20,46 @@ import EditProfilePage from "./pages/Profile/EditProfile/EditProfilePage";
 import EditPasswordPage from "./pages/Profile/EditProfile/EditPasswordPage";
 
 // Admin Routes
-// import AdminRoutes from "./routes/AdminRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
 
 function App() {
   const location = useLocation();
 
-  // halaman yang tidak menampilkan navbar & footer
-  const hideLayoutPaths = ["/login", "/signup"];
-  const shouldHideLayout = hideLayoutPaths.includes(location.pathname);
-
-  // // deteksi halaman admin
-  // const isAdminPage = location.pathname.startsWith("/admin");
+  // deteksi halaman yang tidak menampilkan navbar/footer
+  const hideNavbarFooter =
+    location.pathname.startsWith("/admin") ||
+    location.pathname === "/login" ||
+    location.pathname === "/signup";
 
   return (
     <>
-    {/* klo true di halaman login signup maka navbar dihilangin */}
-      {!shouldHideLayout && <Navbar />}
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<About />} />
+      {/* tampilkan navbar & footer hanya jika bukan halaman admin / login / signup */}
+      {!hideNavbarFooter && <Navbar />}
 
-         {/* route untuk catalog dan product details */}
-          <Route path='/products' element={<ProductPage/>}></Route>
-          <Route path='/product-detail' element={<ProductDetailPage/>}/>
+      <Routes>
+        {/* Route untuk user biasa */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/products" element={<ProductPage />} />
+        <Route path="/product-detail" element={<ProductDetailPage />} />
+        <Route path="/carts" element={<CartsPage />} />
 
-            {/* route untuk carts */}
-            <Route path='/carts' element={<CartsPage/>}/>
+        {/* Auth */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
 
-         {/* route untuk login sama sign up */}
-          <Route path='/login' element={<LoginPage/>}/>
-          <Route path='/signup' element={<SignUpPage/>}/>
-          <Route path='/profile' element={<UserProfilePage/>}/>
-          <Route path='/edit-profile' element={<EditProfilePage/>}/>
-          <Route path='/edit-password' element={<EditPasswordPage/>}/>
-        </Routes>
-      {!shouldHideLayout && <Footer />}
+        {/* Profile */}
+        <Route path="/profile" element={<UserProfilePage />} />
+        <Route path="/edit-profile" element={<EditProfilePage />} />
+        <Route path="/edit-password" element={<EditPasswordPage />} />
+
+        {/* Route untuk halaman admin */}
+        <Route path="/admin/*" element={<AdminRoutes />} />
+      </Routes>
+
+      {!hideNavbarFooter && <Footer />}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
