@@ -2,6 +2,7 @@ package com.audrio.backendbakrie.service.impl;
 
 import com.audrio.backendbakrie.io.AuthResponse;
 import com.audrio.backendbakrie.io.CustomerAuthRequest;
+import com.audrio.backendbakrie.repository.CartRepository;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.io.CustomerRequest;
@@ -15,7 +16,7 @@ import com.audrio.backendbakrie.utils.Exceptions.*;
 import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,13 +24,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
@@ -39,123 +38,233 @@ public class CustomerServiceImpl implements CustomerService {
     private final JwtUtils jwtUtils;
     private final RolesRepository rolesRepository;
     private final AuthenticationManager authenticationManager;
+    private final CartRepository cartRepository;
 
     @Override
-    public CustomerResponse add(CustomerRequest request, MultipartFile file) {
-        // Validasi awal
-        validateRequest(request, file);
+    public CustomerResponse add(CustomerRequest request) {
+        log.info("=== ADD CUSTOMER START ===");
+        log.debug("Request: {}", request);
 
-        Optional<Customers> optionalCustomer = customerRepository.findByEmail(request.getEmail());
-        HashMap<String,Object> claims = new HashMap<>();
-        claims.put("purpose","email-verification");
-        String token = jwtUtils.generateToken(claims, request.getEmail());
+        validateRequest(request);
+
+        String email = request.getEmail().trim();
+        log.debug("Checking email existence: {}", email);
+        Optional<Customers> optionalCustomer = customerRepository.findByEmail(email);
+
+        HashMap<String, Object> claims = new HashMap<>();
+        claims.put("purpose", "email-verification");
+        String token = jwtUtils.generateToken(claims, email);
+        log.debug("Generated verification token (first 20 chars): {}", token.length() > 20 ? token.substring(0, 20) + "..." : token);
 
         if (optionalCustomer.isPresent()) {
-            Customers existingCustomer = optionalCustomer.get();
+            Customers existing = optionalCustomer.get();
+            log.info("Customer already exists: {}", existing.getEmail());
 
-            if (existingCustomer.getIs_verified()) {
-                throw new UserAlreadyVerifiedException("Employee with email: " + request.getEmail() + " is already verified");
+            if (existing.getIs_verified()) {
+                log.warn("Attempt to re-register verified email: {}", email);
+                throw new UserAlreadyVerifiedException("Email sudah terverifikasi");
             }
-            existingCustomer.setVerificationToken(token);
-            customerRepository.save(existingCustomer);
-            emailService.sendVerificationEmail(existingCustomer.getEmail(), token);
-            throw new UserNotVerifiedException("User with email: " + request.getEmail() + " not verified. Please check your email");
 
+            log.info("Updating verification token for existing unverified user");
+            existing.setVerificationToken(token);
+            customerRepository.save(existing);
+            emailService.sendVerificationEmail(existing.getEmail(), token);
+            log.info("Verification email resent to: {}", email);
+            return convertToResponse(existing);
         }
-
-        String idImg = UUID.randomUUID().toString();
-        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
 
         Customers newCustomer = convertToEntity(request);
         newCustomer.setPassword(passwordEncoder.encode(request.getPassword()));
-        newCustomer.setImg_url(imgUrl);
+        newCustomer.setImg_url(null);
         newCustomer.setVerificationToken(token);
         newCustomer.setIs_verified(false);
 
         newCustomer = customerRepository.save(newCustomer);
-        emailService.sendVerificationEmail(newCustomer.getEmail(), token);
+        log.info("New customer saved with ID: {}", newCustomer.getIdCustomer());
 
+        emailService.sendVerificationEmail(newCustomer.getEmail(), token);
+        log.info("Verification email sent to: {}", newCustomer.getEmail());
+
+        log.info("ADD CUSTOMER SUCCESS");
         return convertToResponse(newCustomer);
     }
 
     @Override
     @Transactional
-    public CustomerResponse update(UUID id, CustomerRequest request) {
-        customerRepository.updateCustomerFields(
-                id,
-                request.getUsername(),
-                request.getPassword(),
-                request.getAddress(),
-                request.getEmail(),
-                request.getPhone_num()
-        );
+    public CustomerResponse update(UUID id, CustomerRequest request, MultipartFile file) {
+        log.info("UPDATE CUSTOMER START | ID: {}", id);
+        log.debug("Update request: {}", request);
 
-        Customers updated = customerRepository.findByIdCustomer(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer id: " + id + "not found"));
+        Customers customer = customerRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Customer not found for update: {}", id);
+                    return new CustomerNotFoundException("Customer tidak ditemukan: " + id);
+                });
 
-        return convertToResponse(updated);
+        log.debug("Validating file size and type");
+        if (file.getSize() > 5 * 1024 * 1024) {
+            log.warn("File too large: {} bytes", file.getSize());
+            throw new ImageSizeUnaproriateException("File maksimal 5MB");
+        }
+        if (!Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
+            log.warn("Invalid file type: {}", file.getContentType());
+            throw new ImageInvalidExtentionException("Hanya file gambar");
+        }
+        String idImg = UUID.randomUUID().toString();
+        log.debug("Uploading image to Cloudinary with ID: {}", idImg);
+        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
+        log.debug("Image uploaded successfully: {}", imgUrl);
+        if (imgUrl == null) {
+            log.warn("Image upload failed");
+        }
+        customer.setImg_url(imgUrl);
+        customer.setUsername(request.getUsername().trim());
+        customer.setEmail(request.getEmail().trim());
+        customer.setAddress(request.getAddress().trim());
+        customer.setPhone_num(request.getPhone_num().trim());
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            log.debug("Updating password for customer: {}", id);
+            customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        customerRepository.save(customer);
+        log.info("Customer updated successfully: {}", id);
+        log.info("UPDATE CUSTOMER SUCCESS");
+        return convertToResponse(customer);
     }
 
     @Override
     public void delete(UUID id) {
-        Customers existingCustomer = customerRepository.findByIdCustomer(id)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer id: " + id + "not found"));
-        customerRepository.delete(existingCustomer);
+        log.info("DELETE CUSTOMER START | ID: {}", id);
+
+        Customers customer = customerRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Customer not found for deletion: {}", id);
+                    return new CustomerNotFoundException("Customer tidak ditemukan: " + id);
+                });
+
+        if (customer.getImg_url() != null) {
+            log.debug("Deleting image from Cloudinary: {}", customer.getImg_url());
+            cloudinaryService.deleteFile(customer.getImg_url());
+        }
+
+        customerRepository.delete(customer);
+        log.info("Customer deleted successfully: {}", id);
+        log.info("DELETE CUSTOMER SUCCESS");
     }
 
     @Override
     public List<CustomerResponse> getAll() {
+        log.info("GET ALL CUSTOMERS START");
         List<Customers> customers = customerRepository.findAll();
-        return customers.stream()
+        log.debug("Found {} customers", customers.size());
+        List<CustomerResponse> responses = customers.stream()
                 .map(this::convertToResponse)
                 .toList();
+        log.info("GET ALL CUSTOMERS SUCCESS | Count: {}", responses.size());
+        return responses;
     }
 
     @Override
     public ResponseEntity<String> verifyEmail(String token) {
-        String emailString = jwtUtils.extractEmail(token);
-        if (emailString == null || emailString.isEmpty()) {
-            return new ResponseEntity("Customer Email is Empty", HttpStatus.BAD_REQUEST);
+        log.info("VERIFY EMAIL START");
+        log.debug("Verification token (first 20 chars): {}", token != null && token.length() > 20 ? token.substring(0, 20) + "..." : token);
+
+        if (token == null || token.isBlank()) {
+            log.warn("Verification token is empty");
+            return ResponseEntity.badRequest().body("Token tidak boleh kosong");
         }
 
-        Customers customer = customerRepository.findByEmail(emailString)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer id: " + emailString + "not found"));
-        if (customer == null || customer.getVerificationToken() == null) {
-            return new ResponseEntity("Customer Verification Token is Empty", HttpStatus.BAD_REQUEST);
+        String email = jwtUtils.extractEmail(token);
+        if (email == null) {
+            log.warn("Failed to extract email from token");
+            return ResponseEntity.badRequest().body("Token tidak valid");
+        }
+        log.debug("Extracted email from token: {}", email);
+
+        String purpose = jwtUtils.extractClaim(token, claims -> claims.get("purpose", String.class));
+        if (!"email-verification".equals(purpose)) {
+            log.warn("Token purpose invalid: {}", purpose);
+            return ResponseEntity.badRequest().body("Token bukan untuk verifikasi email");
         }
 
-        if (!jwtUtils.validateToken(token) || !token.equals(customer.getVerificationToken())) {
-            return new ResponseEntity("Customer Verification Token is not valid", HttpStatus.BAD_REQUEST);
+        Customers customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.warn("Customer not found during email verification: {}", email);
+                    return new CustomerNotFoundException("Customer tidak ditemukan");
+                });
+
+        if (!token.equals(customer.getVerificationToken())) {
+            log.warn("Verification token mismatch for user: {}", email);
+            return ResponseEntity.badRequest().body("Token verifikasi tidak cocok");
         }
 
         customer.setIs_verified(true);
+        customer.setVerificationToken(null);
         customerRepository.save(customer);
+        log.info("Email verified successfully: {}", email);
 
-        return new  ResponseEntity("Email terverifikasi", HttpStatus.OK);
+        log.info("VERIFY EMAIL SUCCESS");
+        return ResponseEntity.ok("Email berhasil diverifikasi");
     }
 
     @Override
     public AuthResponse login(CustomerAuthRequest request) {
+        log.info("CUSTOMER LOGIN START | Email: {}", request.getEmail());
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
+        log.debug("Spring Security authentication passed for: {}", request.getEmail());
 
         Customers customer = customerRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+                .orElseThrow(() -> {
+                    log.warn("Customer not found during login: {}", request.getEmail());
+                    return new CustomerNotFoundException("Customer not found");
+                });
 
-        if(!customer.getIs_verified()) {
+        if (!customer.getIs_verified()) {
+            log.warn("Login attempt with unverified email: {}", request.getEmail());
             throw new UserNotVerifiedException("Customer not verified");
         }
-        
+
         HashMap<String, Object> claims = new HashMap<>();
-        claims.put("purpose","access");
-        claims.put("role","ROLE_CUSTOMER");
+        claims.put("purpose", "access");
+        claims.put("role", customer.getCusRoles().getName());
         String token = jwtUtils.generateToken(claims, customer.getEmail());
-        return new AuthResponse(token);
+        String role = customer.getCusRoles().getName();
+        Date expirationTime = jwtUtils.extractExpiration(token);
+
+        log.debug("Access token generated (first 20 chars): {}", token.length() > 20 ? token.substring(0, 20) + "..." : token);
+        log.info("Customer login successful: {} | Role: {}", customer.getEmail(), role);
+        log.info("CUSTOMER LOGIN SUCCESS");
+
+        return new AuthResponse(token, role, expirationTime);
+    }
+
+    public CustomerResponse customerProfile(String token) {
+        String pureToken = token.replace("Bearer ", "").trim();
+        String email = jwtUtils.extractEmail(pureToken);
+        try{
+            log.info("GET CUSTOMER PROFILE START | EMAIL: {}", email);
+            System.out.println(email);
+            Customers customer = customerRepository.findByEmail(email)
+                    .orElseThrow(() -> {
+                        log.warn("Customer not found for profile: {}", email);
+                        return new CustomerNotFoundException("Customer tidak ditemukan: " + email);
+                    });
+            log.info("GET CUSTOMER PROFILE SUCCESS");
+            return convertToResponse(customer);
+        } catch (Exception e) {
+            log.error("GET CUSTOMER PROFILE FAILED {}", email);
+            throw new CustomerNotFoundException("Customer tidak ditemukan");
+        }
     }
 
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
+        log.debug("Converting entity to response for customer ID: {}", newCustomer.getIdCustomer());
         return CustomerResponse.builder()
                 .customer_id(newCustomer.getIdCustomer().toString())
                 .phone_num(newCustomer.getPhone_num())
@@ -169,8 +278,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private Customers convertToEntity(CustomerRequest request) {
-        Roles role = rolesRepository.findByName("ROLE_CUSTOMER")
-                        .orElseThrow(() -> new RoleNotFoundException("Customer Role not found"));
+        log.debug("Converting request to entity for email: {}", request.getEmail());
+        Roles role = rolesRepository.findByName("CUSTOMER")
+                .orElseThrow(() -> {
+                    log.error("CUSTOMER not found in database");
+                    return new RoleNotFoundException("Customer Role not found");
+                });
 
         return Customers.builder()
                 .username(request.getUsername())
@@ -183,60 +296,66 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
     }
 
-    private void validateRequest(CustomerRequest request, MultipartFile file) {
+    private void validateRequest(CustomerRequest request) {
+        log.debug("VALIDATING CUSTOMER REQUEST");
         if (request == null) {
+            log.warn("Request is null");
             throw new RequestShouldntEmptyException("Request tidak boleh null");
         }
 
-        // ===== Email =====
-        if (request.getEmail() == null || !request.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-            throw new EmailNotValidException("Email tidak valid");
+        // Email
+        String email = request.getEmail();
+        if (email == null || !email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+            log.warn("Invalid email format: {}", email);
+            throw new EmailNotValidException("Format email tidak valid");
         }
 
-        // ===== Password =====
-        if (request.getPassword() == null || request.getPassword().length() < 8) {
-            throw new PasswordMinLengthException("Password harus minimal 8 karakter");
+        // Password
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
+            log.warn("Password too short: {} chars", request.getPassword() != null ? request.getPassword().length() : 0);
+            throw new PasswordMinLengthException("Password minimal 6 karakter");
         }
 
-        // ===== Username =====
+        // Username
         String username = request.getUsername();
         if (username == null || username.trim().isEmpty()) {
-            throw new UsernameShouldntBlankException("Nama tidak boleh kosong");
+            log.warn("Username is empty");
+            throw new UsernameShouldntBlankException("Username tidak boleh kosong");
         }
-        if (username.length() < 8) {
-            throw new UsernameMinLengthException("Username harus minimal 8 karakter");
+        username = username.trim();
+        if (username.length() < 8 || username.length() > 32) {
+            log.warn("Username length invalid: {}", username.length());
+            throw new UsernameInvalidLengthException("Username 8-32 karakter");
         }
-        if (username.length() > 32) {
-            throw new UsernameMaxLengthException("Username maksimal 32 karakter");
-        }
-        if (username.matches(".*\\d.*") || username.matches(".*[^a-zA-Z0-9].*")) {
-            throw new UsernameContainNumberOrDigitsException("Username hanya boleh mengandung huruf");
+        if (!username.matches("^[a-zA-Z]+$")) {
+            log.warn("Username contains invalid characters: {}", username);
+            throw new UsernameContainNumberOrDigitsException("Username hanya huruf");
         }
 
-        // ===== Phone Number =====
+        // Phone
         String phone = request.getPhone_num();
         if (phone == null || phone.trim().isEmpty()) {
-            throw new PhoneNumberShouldntBlankException("Nomor telepon tidak boleh kosong");
+            log.warn("Phone number is empty");
+            throw new PhoneNumberShouldntBlankException("Nomor telepon wajib diisi");
         }
+        phone = phone.trim();
         if (!phone.matches("^\\+?\\d{10,15}$")) {
-            throw new PhoneNumberNotValidException("Nomor telepon tidak valid (harus 10–15 digit, boleh diawali +)");
+            log.warn("Invalid phone format: {}", phone);
+            throw new PhoneNumberNotValidException("Nomor telepon harus 10-15 digit");
         }
 
-        // ===== Address =====
+        // Address
         String address = request.getAddress();
         if (address == null || address.trim().isEmpty()) {
-            throw new AddressShouldntBlankException("Alamat tidak boleh kosong");
+            log.warn("Address is empty");
+            throw new AddressShouldntBlankException("Alamat wajib diisi");
         }
-        if (address.length() < 10) {
-            throw new AddressMinLengthException("Alamat terlalu pendek, minimal 10 karakter");
-        }
-        if (address.length() > 255) {
-            throw new AddressMaxLengthException("Alamat terlalu panjang, maksimal 255 karakter");
+        address = address.trim();
+        if (address.length() < 10 || address.length() > 255) {
+            log.warn("Address length invalid: {}", address.length());
+            throw new AddressInvalidLengthException("Alamat 10-255 karakter");
         }
 
-        //field file
-        if(file.isEmpty()){
-            throw new ImageFileEmptyException("File tidak boleh kosong");
-        }
+        log.debug("VALIDATION PASSED");
     }
 }

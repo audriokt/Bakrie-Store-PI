@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EmployeeService {
-    EmployeeResponse add(EmployeeRequest request, MultipartFile file);
-    EmployeeResponse update(UUID id, EmployeeRequest request);
+    EmployeeResponse add(EmployeeRequest request);
+    EmployeeResponse update(UUID id, EmployeeRequest request, MultipartFile file);
     void delete(UUID id);
     List<EmployeeResponse> getAll();
     ResponseEntity<String> verifyEmail(String token);

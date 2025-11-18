@@ -1,22 +1,57 @@
 import { createContext, useEffect, useState } from "react";
 import { fetchProducts } from "../services/productService";
+import { profileCustomer } from "../services/customerService";
 
 export const AppContext = createContext(null);
 
 export const AppContextProvider =(props) => {
     const [products, setProducts] = useState([])
+    const [auth, setAuth] = useState({
+        token : null,
+        role : null
+    })
+    const [user, setUser] = useState({
+        id : null,
+        username : null,
+        address : null,
+        email : null,
+        phone_num : null,
+        img_url : null,
+        updatedAt : null,
+        createdAt : null,
+    })
 
     useEffect(() => {
-        async function fetchData(){
-            const res = await fetchProducts()
-            setProducts(res.data)
+        async function fetchData() {
+            try {
+                const token = localStorage.getItem("token");
+                const role = localStorage.getItem("role");
+                if (token && role) {
+                    setAuthData(token, role);
+                    const custData = await profileCustomer();
+                    setUser(custData.data);
+                }
+                const resProd = await fetchProducts();
+                setProducts(resProd.data);
+            } catch (error) {
+                console.error("Gagal mengambil data:", error);
+            }
         }
+
         fetchData()
     },[])
 
+    const setAuthData = (token, role) => {
+        setAuth({token, role })
+    }
+
     const contextValue = {
         products,
-        setProducts
+        setProducts,
+        auth,
+        setAuthData,
+        user,
+        setUser
     }
 
     return <AppContext.Provider value={contextValue}>

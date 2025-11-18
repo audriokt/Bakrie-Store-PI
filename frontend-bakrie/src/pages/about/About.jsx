@@ -4,7 +4,7 @@ import { aboutData } from "./AboutPage"
 
 const About = () => {
   return (
-    <div className="min-h-[800px] mt-40 flex flex-col items-center space-y-12 px-6">
+    <div className="min-h-[800px] mt-40 flex flex-col items-center space-y-12">
 
       <InView>
         <img

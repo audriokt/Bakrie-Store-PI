@@ -1,5 +1,7 @@
 package com.audrio.backendbakrie.config;
 
+import com.audrio.backendbakrie.utils.Exceptions.CustomAccessDeniedHandler;
+import com.audrio.backendbakrie.utils.Exceptions.CustomAuthEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,14 +33,16 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/products/**").permitAll()
-                        .requestMatchers("/public/auth/**").permitAll()
-                        .requestMatchers("/public/register/**").permitAll()
+                        .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/req/signup/**").permitAll()
                         .requestMatchers("/employee/**").hasAnyRole("CASHIER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/public/**").hasRole("CUSTOMER")
+                        .requestMatchers("/customer/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new CustomAuthEntryPoint())
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

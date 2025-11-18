@@ -5,9 +5,11 @@ import com.audrio.backendbakrie.io.EmployeeResponse;
 import com.audrio.backendbakrie.service.EmployeeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,25 +32,17 @@ public class EmployeeController {
     * Controller for create employee account,
     * called add() from employeeServiceImpl() class in directory "service/impl"
     */
-    @PostMapping("/admin/register/employee")
+    @PostMapping(value = "/admin/auth/register/employee", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public EmployeeResponse createEmployee(@RequestPart("employee") String employeeString,
-                                           @RequestPart("file") MultipartFile file){
-        ObjectMapper mapper = new ObjectMapper();
-        EmployeeRequest request = null;
-        try{
-            request = mapper.readValue(employeeString,EmployeeRequest.class);
-            return employeeService.add(request, file);
-        }catch(JsonProcessingException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to customer request"+e.getMessage());
-        }
+    public EmployeeResponse createEmployee(@Valid @RequestBody EmployeeRequest employeeRequest){
+            return employeeService.add(employeeRequest);
     }
 
     /*
     * controller for get all employee's data from database.
     * called getAll() from employeeServiceImpl class in directory "service/impl"
     * */
-    @GetMapping("/admin/fetchEmployee")
+    @GetMapping("/admin/employees/fetchEmployees")
     @ResponseStatus(HttpStatus.OK)
     public List<EmployeeResponse> fetchAllEmployees() {
         return employeeService.getAll();
@@ -59,10 +53,18 @@ public class EmployeeController {
     * accept id parameter in url, only can get 1 employee's data at a time.
     * called update() from employeeServiceImpl class in directory "service/impl"
     */
-    @PutMapping("/admin/update/employee/{id}")
+    @PutMapping("/admin/employee/update/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EmployeeResponse updateEmployee(@PathVariable String id, @RequestBody EmployeeRequest employeeRequest) {
-        return employeeService.update(UUID.fromString(id), employeeRequest);
+    public EmployeeResponse updateEmployee(@Valid @PathVariable String id,
+                                           @RequestPart("employee") String employeeString,
+                                           @RequestPart("file") MultipartFile file) {
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            EmployeeRequest request = mapper.readValue(employeeString, EmployeeRequest.class);
+            return employeeService.update(UUID.fromString(id), request, file);
+        }catch (JsonProcessingException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to employee request"+e.getMessage());
+        }
     }
 
     /*
@@ -70,9 +72,9 @@ public class EmployeeController {
     * called delete() from employeeServiceImpl() class in directory "service/impl"
     * accept id parameter in url, only can delete one employee at a time
     */
-    @DeleteMapping("/admin/delete/employee/{id}")
+    @DeleteMapping("/admin/employee/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCustomer(@PathVariable String id) {
+    public void deleteCustomer(@Valid @PathVariable String id) {
         try {
             employeeService.delete(UUID.fromString(id));
         } catch (Exception e){

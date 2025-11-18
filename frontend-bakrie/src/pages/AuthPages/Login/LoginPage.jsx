@@ -1,9 +1,64 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-// import { loginService } from "../../../services/api";
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { loginCustomer } from "../../../services/authService.js"
+import { profileCustomer } from "../../../services/customerService.js"
+import { useAuth } from "../../../hooks/useAuth.js"
+import Loading from "../../../components/loader/Loading.jsx";
 
 const LoginPage = () => {
+    // akses fungsi yang ada di useContext lewat hook useAuth
+    const {setAuthData, setUser} = useAuth()
+
+    // pake useNavigate untuk navigasi ke halaman lain setelah login
+    const navigate = useNavigate()
+
+    // loading untuk sebagai penanda jika prose blm selesai loading bernilai true
+    // klo selesai loading bernilai false
+    const [loading, setLoading] = useState(false)
+
+    // data untuk menampung nilai dari form login
+    // nilai awal kosong
+    const [data, setData] = useState({
+        email: "",
+        password: "",
+    })
+
+    const [loginError, setLoginError] = useState(false);
+
+    // fungsi akan dipanggil ketika ada perubahan pada komponen input email dan password
+    // perubahan akan disimpan ke dalam data login "data"
+    const onChangeHandler = (e) => {
+        const {name, value} = e.target
+        setData((prev)=> ({...prev, [name]:value}))
+    }
+
+    // fungsi bakal dipanggil klo form di submit
+    // fungsi ini akan mengirim data login ke server dan mengembalikan token dan role di "res"
+    // lalu data tersebut di simpan di localSorage pake function setAuthData
+    // lalu ambil data user yang baru login pake function profileCustomer
+    // trus isi nilai user
+    // klo berhasil bakal di arahin ke halaman utama
+    const onSubmitHandler = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const resLogin = await loginCustomer(data);
+            const { token, role } = resLogin.data;
+            setAuthData(token, role);
+            const resUser = await profileCustomer();
+            setUser(resUser.data);
+            navigate("/");
+        } catch (err) {
+            console.error("Login Failed:", err);
+            setLoginError(true);
+        } finally {
+            setLoading(false);
+        }
+    }
+
   return (
     <div className="flex h-screen items-center justify-center bg-ookay">
       {/* Container utama */}
@@ -22,9 +77,9 @@ const LoginPage = () => {
           </p>
 
           {/* Form login */}
-          <form className="space-y-4 w-full max-w-sm">
+          <form className="space-y-4 w-full max-w-sm" onSubmit={onSubmitHandler}>
             <div>
-              <label className="block text-sm text-red-700 mb-2 font-medium">
+              <label htmlFor="email" className="block text-sm text-red-700 mb-2 font-medium">
                 Email
               </label>
               <input
@@ -33,11 +88,15 @@ const LoginPage = () => {
                           focus:outline-none focus:ring-2 focus:ring-red-400 
                           text-gray-700 placeholder-gray-400"
                 placeholder="Email"
+                name="email"
+                id="email"
+                onChange={onChangeHandler}
+                value={data.email}
               />
             </div>
 
             <div>
-              <label className="block text-sm text-red-700 mb-2 font-medium">
+              <label className="block text-sm text-red-700 mb-2 font-medium" htmlFor="password">
                 Password
               </label>
               <input
@@ -46,17 +105,28 @@ const LoginPage = () => {
                           focus:outline-none focus:ring-2 focus:ring-red-400 
                           text-gray-700 placeholder-gray-400"
                 placeholder="Password"
+                name="password"
+                id="password"
+                onChange={onChangeHandler}
+                value={data.password}
               />
             </div>
+
+            {loginError && (
+              <p className="text-red-600 text-sm mt-2">
+                Login failed. Please check your email and password.
+              </p>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              className="w-full bg-red-600 text-white py-3 rounded-full 
+              className="w-full h-12 bg-red-600 text-white py-3 rounded-full
                 hover:bg-red-700 transition-all duration-200 font-semibold shadow-md"
+               disabled={loading}
             >
-              Login
+              {loading ? <Loading /> : "Login"}
             </motion.button>
           </form>
 

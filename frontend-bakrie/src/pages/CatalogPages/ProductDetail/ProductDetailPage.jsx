@@ -16,12 +16,31 @@ const ProductDetailPage = () => {
   };
 
   if (!state) {
-    return (
-      <div className="min-h-screen flex justify-center items-center text-red-600">
-        <p>Product not found 😢</p>
+  return (
+    <div className="min-h-screen flex justify-center items-center bg-[#fff] px-6">
+      <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border border-[#FFDADA] rounded-2xl shadow-md w-[80%] max-w-xl py-16 px-10 text-center">
+        <h2 className="text-2xl font-semibold text-red-600 mb-3">
+          Product Not Found 😢
+        </h2>
+        <p className="text-gray-500 mb-5">
+          We couldn't find the product you're looking for...
+        </p>
+
+        <Link
+          to="/products"
+          className="bg-red-600 text-white py-3 px-8 rounded-full font-semibold hover:bg-red-700 transition-colors duration-200"
+        >
+          Back to Products
+        </Link>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+
+    const formatPrice = (price) => {
+    return price.toLocaleString("id-ID");
+    };
 
   return (
     <div className="max-w-screen min-h-screen flex items-center justify-center bg-[#fff] px-8 py-16 pt-32">
@@ -32,18 +51,18 @@ const ProductDetailPage = () => {
         transition={{ duration: 0.6 }}
       >
         {/* Carousel Produk */}
-        <ProductCarousel images={[state.src]} />
+        <ProductCarousel images={[state.image_url]} />
 
         {/* Info Produk */}
         <div className="flex flex-col text-red-700 w-full">
-          <h2 className="text-2xl font-semibold">{state.name}</h2>
+          <h2 className="text-2xl font-semibold">{state.product_name}</h2>
           <div className="border-b border-red-300 mt-2 mb-4 w-full"></div>
 
           <p className="text-sm leading-relaxed mb-8 text-red-700/90">
             {state.description}
           </p>
 
-          <p className="text-lg font-semibold mb-4">{state.price}</p>
+          <p className="text-lg font-semibold mb-4">Rp{formatPrice(state.product_price)}</p>
 
           {/* Quantity Selector & Add to Cart */}
           <div className="flex flex-col w-full h-20 items-start gap-4 mt-6">

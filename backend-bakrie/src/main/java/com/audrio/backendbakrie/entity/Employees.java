@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.audrio.backendbakrie.roles.Roles;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -41,11 +42,11 @@ public class Employees implements UserDetails{
 
     @NotNull
     @Size(max = 200)
-    @Column(name = "password", unique = true)
+    @Min(6)
+    @Column(name = "password")
     private String password;
 
-    @NotNull
-    @Column(name = "img_url")
+    @Column(name = "img_url", nullable = true)
     private String img_url;
 
     @Column(name = "verification_token", unique = true)
@@ -69,8 +70,13 @@ public class Employees implements UserDetails{
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return AuthorityUtils.createAuthorityList(empRoles.getName());
+        String roleName = empRoles.getName();
+        if (!roleName.startsWith("ROLE_")) {
+            roleName = "ROLE_" + roleName;
+        }
+        return AuthorityUtils.createAuthorityList(roleName);
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -11,10 +11,11 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CustomerService {
-    CustomerResponse add(CustomerRequest request, MultipartFile file);
-    CustomerResponse update(UUID id, CustomerRequest request);
+    CustomerResponse add(CustomerRequest request);
+    CustomerResponse update(UUID id, CustomerRequest request, MultipartFile file);
     void delete(UUID id);
     List<CustomerResponse> getAll();
     ResponseEntity<String> verifyEmail(String token);
     AuthResponse login(CustomerAuthRequest request);
+    CustomerResponse customerProfile(String token);
 }
