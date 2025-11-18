@@ -1,8 +1,8 @@
 package com.audrio.backendbakrie.service.impl;
 
+import com.audrio.backendbakrie.events.EmailVerificationEvent;
 import com.audrio.backendbakrie.io.AuthResponse;
 import com.audrio.backendbakrie.io.CustomerAuthRequest;
-import com.audrio.backendbakrie.repository.CartRepository;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.io.CustomerRequest;
@@ -11,18 +11,19 @@ import com.audrio.backendbakrie.repository.RolesRepository;
 import com.audrio.backendbakrie.roles.Roles;
 import com.audrio.backendbakrie.service.CloudinaryService;
 import com.audrio.backendbakrie.service.CustomerService;
-import com.audrio.backendbakrie.service.EmailService;
 import com.audrio.backendbakrie.utils.Exceptions.*;
 import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.*;
 
@@ -33,12 +34,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CloudinaryService cloudinaryService;
-    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final RolesRepository rolesRepository;
     private final AuthenticationManager authenticationManager;
-    private final CartRepository cartRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public CustomerResponse add(CustomerRequest request) {
@@ -68,7 +68,18 @@ public class CustomerServiceImpl implements CustomerService {
             log.info("Updating verification token for existing unverified user");
             existing.setVerificationToken(token);
             customerRepository.save(existing);
-            emailService.sendVerificationEmail(existing.getEmail(), token);
+
+            String verificationUrl2 = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/req/signup/emp/verify")
+                    .queryParam("token", token)
+                    .toUriString();
+
+            eventPublisher.publishEvent(EmailVerificationEvent.builder()
+                    .email(existing.getEmail())
+                    .token(token)
+                    .verificationUrl(verificationUrl2)
+                    .build());
+
             log.info("Verification email resent to: {}", email);
             return convertToResponse(existing);
         }
@@ -79,10 +90,20 @@ public class CustomerServiceImpl implements CustomerService {
         newCustomer.setVerificationToken(token);
         newCustomer.setIs_verified(false);
 
-        newCustomer = customerRepository.save(newCustomer);
+        Customers saved = customerRepository.save(newCustomer);
         log.info("New customer saved with ID: {}", newCustomer.getIdCustomer());
 
-        emailService.sendVerificationEmail(newCustomer.getEmail(), token);
+        String verificationUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/req/signup/emp/verify")
+                .queryParam("token", saved.getVerificationToken())
+                .toUriString();
+
+        // Kirim email verifikasi
+        eventPublisher.publishEvent(EmailVerificationEvent.builder()
+                .email(saved.getEmail())
+                .token(saved.getVerificationToken())
+                .verificationUrl(verificationUrl)
+                .build());
         log.info("Verification email sent to: {}", newCustomer.getEmail());
 
         log.info("ADD CUSTOMER SUCCESS");

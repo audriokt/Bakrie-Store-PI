@@ -21,7 +21,8 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
-@Table(name = "employees")
+@Table(name = "employees",
+uniqueConstraints = @UniqueConstraint(columnNames = {"username", "email"}))
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,12 +33,12 @@ public class Employees implements UserDetails{
     private UUID idEmployee;
 
     @NotNull
-    @Column(name = "username")
+    @Column(unique = true, name = "username")
     private String username;
 
     @NotNull
     @Size(max = 100)
-    @Column(name = "email", unique = true)
+    @Column(unique = true,  name= "email")
     private String email;
 
     @NotNull
