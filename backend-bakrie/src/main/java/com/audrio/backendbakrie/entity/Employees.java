@@ -41,8 +41,7 @@ public class Employees implements UserDetails{
     private String email;
 
     @NotNull
-    @Size(max = 200)
-    @Min(6)
+    @Size(max = 200, min = 8)
     @Column(name = "password")
     private String password;
 

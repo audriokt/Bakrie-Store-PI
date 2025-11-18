@@ -17,12 +17,12 @@ public class EmployeeRequest {
     @Size(min = 6, message = "Password minimal 6 karakter")
     private String password;
 
+    @NotBlank(message = "Username tidak boleh kosong")
+    private String username;
+
     @NotBlank(message = "Email tidak boleh kosong")
     @Email(message = "Format email tidak valid")
     private String email;
-
-    @NotBlank(message = "Username tidak boleh kosong")
-    private String username;
 
     private String img_url;
 }

@@ -69,18 +69,17 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employees newEmployee = convertToEntity(request);
         newEmployee.setPassword(passwordEncoder.encode(request.getPassword()));
-        newEmployee.setImg_url(null);
         newEmployee.setVerificationToken(token);
         newEmployee.setIs_verified(false);
 
-        employeeRepository.save(newEmployee);
+        Employees saved = employeeRepository.save(newEmployee);
         log.info("New employee saved with ID: {}", newEmployee.getIdEmployee());
 
         emailService.sendEmpVerificationEmail(newEmployee.getEmail(), token);
         log.info("Verification email sent to: {}", newEmployee.getEmail());
 
         log.info("ADD EMPLOYEE SUCCESS");
-        return convertToResponse(newEmployee);
+        return convertToResponse(saved);
     }
 
     @Override
@@ -257,15 +256,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private Employees convertToEntity(EmployeeRequest request) {
         log.debug("Converting request to entity for email: {}", request.getEmail());
-        Roles role = rolesRepository.findByName("CASHIER")
+        Roles role = rolesRepository.findByName("ADMIN")
                 .orElseThrow(() -> {
-                    log.error("ROLE_CASHIER not found in database");
-                    return new RoleNotFoundException("CASHIER Role not found");
+                    log.error("ROLE_ADMIN not found in database");
+                    return new RoleNotFoundException("ADMIN Role not found");
                 });
 
         return Employees.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
+                .username(request.getUsername().trim())
+                .email(request.getEmail().trim())
                 .img_url(request.getImg_url())
                 .empRoles(role)
                 .build();
@@ -285,9 +284,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // Password
-        if (request.getPassword() == null || request.getPassword().length() < 6) {
+        if (request.getPassword() == null || request.getPassword().length() < 8) {
             log.warn("Password too short: {} chars", request.getPassword() != null ? request.getPassword().length() : 0);
-            throw new PasswordMinLengthException("Password harus minimal 6 karakter");
+            throw new PasswordMinLengthException("Password harus minimal 8 karakter");
         }
 
         // Username
