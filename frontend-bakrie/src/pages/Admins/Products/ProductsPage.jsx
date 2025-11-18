@@ -54,10 +54,10 @@ const ProductsPage = () => {
   return (
     <div className="min-h-screen w-full bg-ookay/20 py-10 px-6 md:px-10">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* ===== Header ===== */}
+        {/* header */}
         <ProductHeader />
 
-        {/* ===== Products Table ===== */}
+        {/*tabelnyaaw*/}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -121,7 +121,7 @@ const ProductsPage = () => {
         </motion.div>
       </div>
 
-      {/* ===== Delete Confirmation Modal ===== */}
+      {/* buat kayak delete pop-up gituch*/}
       <AnimatePresence>
         {showDeleteModal && (
           <motion.div
