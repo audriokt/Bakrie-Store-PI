@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { addCustomer, profileCustomer } from "../../../services/customerService";
 import { useAuth } from "../../../hooks/useAuth";
 import Loading from "../../../components/loader/Loading";
+import Swal from 'sweetalert2'
 
 const SignUpPage = () => {
   const [data, setData] = useState({
@@ -30,10 +31,26 @@ const SignUpPage = () => {
     setLoading(true);
     try {
       const resRegister = await addCustomer(data);
-      navigate("/login");
+      Swal.fire({
+        title: "Registration Successful",
+        text: "You have to verify your email before logging in. Check your email please!",
+        icon: "success",
+        confirmButtonText: "Go to Login",
+        confirmButtonColor: "#C31D1D"
+      }).then((result) => {
+        if(result.isConfirmed) {
+          navigate("/login");
+        }
+      });
       }
       catch (err) {
         console.error("Registration failed:", err);
+        Swal.fire({
+          title: "Registration Failed",
+          text: "Please verify your email before logging in. Check your email please!",
+          icon: "error",
+          confirmButtonColor: "#C31D1D"
+        })
         setRegisterError(true);
       } finally {
         setLoading(false);
