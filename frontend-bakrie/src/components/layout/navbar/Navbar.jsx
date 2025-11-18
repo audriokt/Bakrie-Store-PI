@@ -78,7 +78,7 @@ const Navbar = () => {
       </div>
 
       {/* Profile + Cart Icons */}
-      <div className="flex gap-5 min-w-fit justify-end w-20">
+      <div className="flex gap-5 min-w-fit justify-end w-auto">
         {user ? (
           <>
             <Link to="/profile">
