@@ -44,7 +44,6 @@ export const AuthProvider = ({children}) => {
             token : null,
             role : null
         })
-
         setUser(null)
     }
 

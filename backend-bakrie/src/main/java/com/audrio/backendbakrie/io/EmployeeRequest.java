@@ -14,15 +14,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmployeeRequest {
     @NotBlank(message = "Password tidak boleh kosong")
-    @Size(min = 6, message = "Password minimal 6 karakter")
+    @Size(min = 8, message = "Password minimal 8 karakter")
     private String password;
+
+    @NotBlank(message = "Username tidak boleh kosong")
+    private String username;
 
     @NotBlank(message = "Email tidak boleh kosong")
     @Email(message = "Format email tidak valid")
     private String email;
-
-    @NotBlank(message = "Username tidak boleh kosong")
-    private String username;
 
     private String img_url;
 }

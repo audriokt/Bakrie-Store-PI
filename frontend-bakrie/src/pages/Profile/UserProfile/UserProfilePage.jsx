@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth.js"
+import Swal from "sweetalert2";
 
 const ProfilePage = () => {
   const { user, logout } = useAuth()
@@ -10,7 +11,17 @@ const ProfilePage = () => {
 
   const handleLogout = () => {
     logout(); 
-    navigate("/"); 
+    Swal.fire({
+      title: "Logout Successful",
+      text: "You have successfully logged out.",
+      icon: "success",
+      confirmButtonText: "Ok",
+      confirmButtonColor: "#C31D1D"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        navigate("/"); 
+      }
+    })
   };
 
   if (!user) {
