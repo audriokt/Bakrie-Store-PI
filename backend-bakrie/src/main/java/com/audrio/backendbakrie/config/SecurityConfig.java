@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/req/signup/**").permitAll()
                         .requestMatchers("/employee/**").hasAnyRole("CASHIER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/customer/**").hasRole("CUSTOMER")
+                        .requestMatchers("/customer/**").hasAnyRole("CUSTOMER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

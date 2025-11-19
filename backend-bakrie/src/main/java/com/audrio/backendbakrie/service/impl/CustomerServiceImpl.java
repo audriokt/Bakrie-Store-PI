@@ -75,6 +75,8 @@ public class CustomerServiceImpl implements CustomerService {
                     .email(existing.getEmail())
                     .token(token)
                     .verificationUrl(verificationUrl2)
+                    .subject("Verifikasi Email Bakrie Store")
+                    .message("Terima kasih telah mendaftar di Bakrie Store. Silahkan klik link berikut untuk verifikasi email anda.")
                     .build());
 
             log.info("Verification email resent to: {}", email);
@@ -100,6 +102,8 @@ public class CustomerServiceImpl implements CustomerService {
                 .email(saved.getEmail())
                 .token(saved.getVerificationToken())
                 .verificationUrl(verificationUrl)
+                .subject("Verifikasi Email Bakrie Store")
+                .message("Terima kasih telah mendaftar di Bakrie Store. Silahkan klik link berikut untuk verifikasi email anda.")
                 .build());
         log.info("Verification email sent to: {}", newCustomer.getEmail());
 

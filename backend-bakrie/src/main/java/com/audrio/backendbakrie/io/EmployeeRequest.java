@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmployeeRequest {
     @NotBlank(message = "Password tidak boleh kosong")
-    @Size(min = 6, message = "Password minimal 6 karakter")
+    @Size(min = 8, message = "Password minimal 8 karakter")
     private String password;
 
     @NotBlank(message = "Username tidak boleh kosong")
