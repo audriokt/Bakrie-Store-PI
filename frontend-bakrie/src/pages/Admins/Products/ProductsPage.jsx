@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HiPencilAlt, HiTrash } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import { Button } from "flowbite-react";
-import ProductHeader from "../../../components/productAdmin/ProductHeader";
+import ProductHeader from "../../../components/Header/ProductHeader";
 import { fetchProducts, deleteProduct } from "../../../services/productService";
 
 const ProductsPage = () => {

@@ -7,7 +7,8 @@ import EditProductPage from "../pages/Admins/Products/EditProductPage";
 import EmployeesPage from "../pages/Admins/Employees/EmployeesPage";
 import AddEmployeePage from "../pages/Admins/Employees/AddEmployeePage";
 import EditEmployeePage from "../pages/Admins/Employees/EditEmployeePage";
-
+import OrdersPage from "../pages/Admins/Orders/OrdersPage";
+import OrderDetailPage from "../pages/Admins/Orders/OrderDetailPage";
 function AdminRoutes() {
   return (
     <Routes>
@@ -24,6 +25,10 @@ function AdminRoutes() {
         <Route path="employees" element={<EmployeesPage />} />
         <Route path="employees/add" element={<AddEmployeePage />} />
         <Route path="employees/edit/:id" element={<EditEmployeePage />} />
+
+        {/* Orders */}
+        <Route path="orders" element={<OrdersPage/>}/>
+        <Route path="/admin/orders/detail/:id" element={<OrderDetailPage />} />
       </Route>
     </Routes>
   );
