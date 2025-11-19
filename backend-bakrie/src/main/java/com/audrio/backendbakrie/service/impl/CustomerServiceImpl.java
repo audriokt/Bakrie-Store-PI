@@ -1,12 +1,9 @@
 package com.audrio.backendbakrie.service.impl;
 
 import com.audrio.backendbakrie.events.EmailVerificationEvent;
-import com.audrio.backendbakrie.io.AuthResponse;
-import com.audrio.backendbakrie.io.CustomerAuthRequest;
+import com.audrio.backendbakrie.io.*;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.entity.Customers;
-import com.audrio.backendbakrie.io.CustomerRequest;
-import com.audrio.backendbakrie.io.CustomerResponse;
 import com.audrio.backendbakrie.repository.RolesRepository;
 import com.audrio.backendbakrie.roles.Roles;
 import com.audrio.backendbakrie.service.CloudinaryService;
@@ -112,46 +109,42 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public CustomerResponse update(UUID id, CustomerRequest request, MultipartFile file) {
-        log.info("UPDATE CUSTOMER START | ID: {}", id);
-        log.debug("Update request: {}", request);
-
+    public CustomerResponse update(UUID id, UpdateProfileCusRequest request, MultipartFile file) {
         Customers customer = customerRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Customer not found for update: {}", id);
-                    return new CustomerNotFoundException("Customer tidak ditemukan: " + id);
-                });
+                .orElseThrow(() -> new CustomerNotFoundException("Customer tidak ditemukan"));
 
-        log.debug("Validating file size and type");
-        if (file.getSize() > 5 * 1024 * 1024) {
-            log.warn("File too large: {} bytes", file.getSize());
-            throw new ImageSizeUnaproriateException("File maksimal 5MB");
-        }
-        if (!Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
-            log.warn("Invalid file type: {}", file.getContentType());
-            throw new ImageInvalidExtentionException("Hanya file gambar");
-        }
-        String idImg = UUID.randomUUID().toString();
-        log.debug("Uploading image to Cloudinary with ID: {}", idImg);
-        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
-        log.debug("Image uploaded successfully: {}", imgUrl);
-        if (imgUrl == null) {
-            log.warn("Image upload failed");
-        }
-        customer.setImg_url(imgUrl);
-        customer.setUsername(request.getUsername().trim());
-        customer.setEmail(request.getEmail().trim());
-        customer.setAddress(request.getAddress().trim());
-        customer.setPhone_num(request.getPhone_num().trim());
+        // Upload foto kalau ada file baru
+        if (file != null && !file.isEmpty()) {
+            if (file.getSize() > 5 * 1024 * 1024) {
+                throw new ImageSizeUnaproriateException("File maksimal 5MB");
+            }
+            if (!file.getContentType().startsWith("image/")) {
+                throw new ImageInvalidExtentionException("Hanya file gambar");
+            }
 
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            log.debug("Updating password for customer: {}", id);
+            String imgId = UUID.randomUUID().toString();
+            String imgUrl = cloudinaryService.uploadFile(file, imgId).getUrl();
+            customer.setImg_url(imgUrl);
+        }
+
+        // Update field lain (hanya yang diisi)
+        if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
+            customer.setUsername(request.getUsername().trim());
+        }
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+            customer.setEmail(request.getEmail().trim());
+        }
+        if (request.getAddress() != null && !request.getAddress().trim().isEmpty()) {
+            customer.setAddress(request.getAddress().trim());
+        }
+        if (request.getPhone_num() != null && !request.getPhone_num().trim().isEmpty()) {
+            customer.setPhone_num(request.getPhone_num().trim());
+        }
+        if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
             customer.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
         customerRepository.save(customer);
-        log.info("Customer updated successfully: {}", id);
-        log.info("UPDATE CUSTOMER SUCCESS");
         return convertToResponse(customer);
     }
 
