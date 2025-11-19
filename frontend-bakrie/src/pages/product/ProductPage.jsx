@@ -9,7 +9,7 @@ const ProductPage = () => {
       <h1 className='text-5xl text-yes font-extrabold'>Our Products</h1>
       <h1 className='mt-4 text-yes'>All the goods flavours for you to try!</h1>
       <hr class="h-[2px] my-8 bg-ookay border-0"/>
-      <div className='py-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'>
         {products.length > 0 ? (
           products.map((product) => (
             <ItemsCard key={product.id} product={product} />

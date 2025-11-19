@@ -29,7 +29,7 @@ function App() {
   const location = useLocation();
 
   // halaman yang tidak menampilkan navbar & footer
-  const hideLayoutPaths = ["/login", "/signup"];
+  const hideLayoutPaths = ["/login", "/signup", "/login-employee"];
   const shouldHideLayout = hideLayoutPaths.includes(location.pathname);
 
   // // deteksi halaman admin

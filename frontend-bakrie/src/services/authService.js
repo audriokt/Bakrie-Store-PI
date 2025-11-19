@@ -11,5 +11,3 @@ export const logoutUser = () => {
     localStorage.removeItem("role");
     window.location.href = "/login"; // atau navigate pake useNavigate kalau di komponen
 };
-
-export const loginAdmin = async (data) => { return await axios.post(`${URL_BASE}/public/auth/login/admin`, data) }

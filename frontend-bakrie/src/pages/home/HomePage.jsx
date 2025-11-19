@@ -40,26 +40,39 @@ const HomePage = () => {
       </div>
 
       {/* Product Section */}
-      <div className="flex flex-col justify-center items-center mt-32 w-full">
-        <h1 className="font-extrabold text-5xl text-yes mb-14">
-          Checkout Our Products
-        </h1>
-          {products.length > 0 ? (
-              products.map((product) => (
-                  <ItemsCard key={product.id} product={product} />
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border border-[#FFDADA] rounded-2xl shadow-md w-[80%] max-w-xl py-16 px-10 text-center mb-10">              
-              <h2 className="text-2xl font-semibold text-red-600 mb-3">
-                <img src="/waiting/waiting.svg" alt="waiting" />
-                <p>There's no product right now</p>
-              </h2>
-              <p className="text-gray-500">
-                Please check back later or explore our store right away!
-              </p>
+        {/* Product Section – Judul di luar grid */}
+        <section className="py-20">
+            <div className="max-w-7xl mx-auto px-6 lg:px-10 text-center">
+                {/* JUDUL INI DI LUAR GRID */}
+                <h1 className="font-extrabold text-4xl sm:text-5xl text-yes mb-16">
+                    Checkout Our Products
+                </h1>
+
+                {/* GRID HANYA UNTUK PRODUK */}
+                {loading ? (
+                    <div className="text-center py-20">
+                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yes border-t-transparent"></div>
+                        <p className="mt-4 text-gray-600">Loading products...</p>
+                    </div>
+                ) : products.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+                        {products.map((product) => (
+                            <ItemsCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border-2 border-dashed border-[#FFDADA] rounded-3xl shadow-lg max-w-2xl mx-auto py-20 px-10 text-center">
+                        <img src="/waiting/waiting.svg" alt="No products" className="w-32 mb-6" />
+                        <h2 className="text-2xl font-bold text-red-600 mb-3">
+                            There's no product right now
+                        </h2>
+                        <p className="text-gray-500">
+                            Please check back later or explore our store right away!
+                        </p>
+                    </div>
+                )}
             </div>
-          )}
-      </div>
+        </section>
 
       {/* About Us Section */}
       <div className="flex justify-center items-center min-h-screen bg-white-100">

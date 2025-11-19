@@ -1,6 +1,7 @@
 // src/context/EmployeeContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import {
+    loginEmployee,
     addEmployee,
     fetchEmployees,
     updateEmployeeProfile,
@@ -11,10 +12,46 @@ export const EmployeeContext = createContext(null);
 
 export const EmployeeProvider = ({ children }) => {
     const [employees, setEmployees] = useState([]);
+    const [currentEmployee, setCurrentEmployee] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem('token') || null);
+    const [role, setRole] = useState(localStorage.getItem('role') || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Fetch semua karyawan
+    const login = async (email, password) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await loginEmployee({ email, password });
+            const data = res.data;
+
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('role', data.role || 'EMPLOYEE');
+            localStorage.setItem('employee_id', data.employee_id);
+
+            setToken(data.token);
+            setRole(data.role || 'EMPLOYEE');
+            setCurrentEmployee(data); // biasanya backend kasih data employee langsung
+
+            return data;
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Login gagal. Email/password salah.';
+            setError(msg);
+            throw new Error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('employee_id');
+        setToken(null);
+        setRole(null);
+        setCurrentEmployee(null);
+    };
+
     const getAllEmployees = async () => {
         setLoading(true);
         setError(null);
@@ -107,10 +144,22 @@ export const EmployeeProvider = ({ children }) => {
 
     // Load data saat pertama kali mount
     useEffect(() => {
-        getAllEmployees();
-    }, []);
+        if (token && role === 'ADMIN') {
+            getAllEmployees();
+        }
+    }, [token, role]);
 
     const value = {
+        // Auth
+        currentEmployee,
+        setCurrentEmployee,
+        token,
+        role,
+        isAuthenticated: !!token,
+        login,
+        logout,
+
+        // CRUD
         employees,
         loading,
         error,
