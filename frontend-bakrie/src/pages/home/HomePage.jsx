@@ -40,15 +40,12 @@ const HomePage = () => {
       </div>
 
       {/* Product Section */}
-        {/* Product Section – Judul di luar grid */}
         <section className="py-20">
             <div className="max-w-7xl mx-auto px-6 lg:px-10 text-center">
-                {/* JUDUL INI DI LUAR GRID */}
                 <h1 className="font-extrabold text-4xl sm:text-5xl text-yes mb-16">
                     Checkout Our Products
                 </h1>
 
-                {/* GRID HANYA UNTUK PRODUK */}
                 {loading ? (
                     <div className="text-center py-20">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yes border-t-transparent"></div>
