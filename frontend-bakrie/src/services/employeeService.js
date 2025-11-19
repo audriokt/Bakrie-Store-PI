@@ -17,11 +17,11 @@ export const deleteEmployee = async (employeeId) => {
     return await axios.delete(`${URL_BASE}/admin/employees/delete/${employeeId}`)
 }
 
-export const fetchEmployeeById = async (employeeId) => { return await axios.get(`${URL_BASE}/admin/employees/fetchEmployeeById/${employeeId}`) }
+export const getEmployeeById = async (employeeId) => { return await axios.get(`${URL_BASE}/admin/employees/fetchEmployeeById/${employeeId}`) }
 
 export const updateEmployeeProfile = async (employeeId, formData) => {
     // formData harus berupa FormData (karena ada file)
-    return await axios.put(`${API_BASE}/admin/employee/update/${employeeId}`, formData, {
+    return await axios.put(`${URL_BASE}/admin/employee/update/${employeeId}`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },

@@ -34,7 +34,7 @@ const LoginPageEmployee = () => {
                 icon: "success",
                 confirmButtonColor: "#C31D1D",
             }).then(() => {
-                navigate("/"); // atau "/" atau route yang kamu mau
+                navigate("/dashboard"); // atau "/" atau route yang kamu mau
             });
 
         } catch (err) {

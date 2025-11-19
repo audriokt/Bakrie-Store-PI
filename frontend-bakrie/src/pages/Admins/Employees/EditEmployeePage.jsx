@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { HiUpload } from "react-icons/hi";
 import { useParams, useNavigate } from "react-router-dom";
-import { getEmployeeById, updateEmployee } from "../../../services/employeeService";
+import { getEmployeeById, updateEmployeeProfile } from "../../../services/employeeService";
 
 const EditEmployeePage = () => {
   const { id } = useParams();

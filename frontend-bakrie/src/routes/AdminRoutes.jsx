@@ -9,34 +9,43 @@ import AddEmployeePage from "../pages/Admins/Employees/AddEmployeePage";
 import EditEmployeePage from "../pages/Admins/Employees/EditEmployeePage";
 import OrdersPage from "../pages/Admins/Orders/OrdersPage";
 import OrderDetailPage from "../pages/Admins/Orders/OrderDetailPage";
-import CustomerPage from "../pages/Admins/Customers/CustomerPage"
+import CustomerPage from "../pages/Admins/Customers/CustomerPage";
 
 function AdminRoutes() {
-  return (
-    <Routes>
-      <Route path="/" element={<AdminLayout />}>
-        <Route index element={<DashBoardPage />} />
-        <Route path="dashboard" element={<DashBoardPage />} />
+    return (
+        <Routes>
+            {/* Semua route admin di-wrap oleh AdminLayout */}
+            <Route path="/admin" element={<AdminLayout />}>
+                {/* Dashboard */}
+                <Route index element={<DashBoardPage />} /> {/* /admin */}
+                <Route path="dashboard" element={<DashBoardPage />} /> {/* /admin/dashboard */}
 
-        {/* Products */}
-        <Route path="products" element={<ProductsPage />} />
-        <Route path="products/add" element={<AddProductsPage />} />
-        <Route path="products/edit/:id" element={<EditProductPage />} />
+                {/* Products */}
+                <Route path="products">
+                    <Route index element={<ProductsPage />} /> {/* /admin/products */}
+                    <Route path="add" element={<AddProductsPage />} /> {/* /admin/products/add */}
+                    <Route path="edit/:id" element={<EditProductPage />} /> {/* /admin/products/edit/123 */}
+                </Route>
 
-        {/* Employees */}
-        <Route path="employees" element={<EmployeesPage />} />
-        <Route path="employees/add" element={<AddEmployeePage />} />
-        <Route path="employees/edit/:id" element={<EditEmployeePage />} />
+                {/* Employees */}
+                <Route path="employees">
+                    <Route index element={<EmployeesPage />} />
+                    <Route path="add" element={<AddEmployeePage />} />
+                    <Route path="edit/:id" element={<EditEmployeePage />} />
+                </Route>
 
-        {/* Orders */}
-        <Route path="orders" element={<OrdersPage/>}/>
-        <Route path="/admin/orders/detail" element={<OrderDetailPage />} />
+                {/* Orders */}
+                <Route path="orders">
+                    <Route index element={<OrdersPage />} /> {/* /admin/orders */}
+                    <Route path=":id" element={<OrderDetailPage />} /> {/* /admin/orders/123 */}
+                    {/* atau jika mau lebih jelas: <Route path="detail/:id" element={<OrderDetailPage />} /> */}
+                </Route>
 
-        {/* Customers */}
-        <Route path="customers" element={<CustomerPage/>}/>
-      </Route>
-    </Routes>
-  );
+                {/* Customers */}
+                <Route path="customers" element={<CustomerPage />} /> {/* /admin/customers */}
+            </Route>
+        </Routes>
+    );
 }
 
 export default AdminRoutes;

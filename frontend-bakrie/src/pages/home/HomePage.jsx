@@ -69,6 +69,7 @@ const HomePage = () => {
                     </div>
                 )}
             </div>
+
         </section>
 
       {/* About Us Section */}
