@@ -1,7 +1,7 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 
-// Layouts
+//  Layouts
 import Footer from "./components/layout/footer/Footer";
 import Navbar from "./components/layout/navbar/Navbar";
 
@@ -28,17 +28,19 @@ import AdminRoutes from "./routes/AdminRoutes";
 function App() {
   const location = useLocation();
 
+  // // deteksi halaman admin
+  // const isAdminPage = location.pathname.startsWith("/admin");
   // deteksi halaman yang tidak menampilkan navbar/footer
   const hideNavbarFooter =
     location.pathname.startsWith("/admin") ||
     location.pathname === "/login" ||
-    location.pathname === "/signup";
+    location.pathname === "/signup" ||
+    location.pathname === "/login-employee";
 
   return (
     <>
     {/* klo true di halaman login signup maka navbar dihilangin */}
       {!hideNavbarFooter && <Navbar />}
-
         <Routes>
             {/* Route untuk user biasa */}
             <Route path="/" element={<HomePage />} />

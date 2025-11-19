@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProductCarousel from "@/components/core/ProductCarousel.jsx";
+import { useAuth } from "../../../hooks/useAuth";
+import Swal from "sweetalert2";
 
 const ProductDetailPage = () => {
-  const { state } = useLocation(); // ← ambil data produk dari Link
+  const { state } = useLocation(); 
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
 
   const handleDecrease = () => {
@@ -13,6 +17,26 @@ const ProductDetailPage = () => {
 
   const handleIncrease = () => {
     setQuantity(quantity + 1);
+  };
+
+  const handleAddToCart = () => {
+    if (!user) {
+      Swal.fire({
+        icon: "warning",
+        title: "Login Required",
+        text: "You need to login to add items to your cart.",
+        confirmButtonText: "Login Now",
+        showCancelButton: true,
+        confirmButtonColor: "#C31D1D",
+        cancelButtonColor: "#6b7280",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/login");
+        }
+      });
+      return;
+    }
+    navigate("/carts");
   };
 
   if (!state) {
@@ -86,15 +110,16 @@ const ProductDetailPage = () => {
               </button>
             </div>
 
-            <Link to="/carts" className="w-full">
+            <div className="w-full">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={handleAddToCart}
                 className="w-full bg-red-600 text-white py-3 rounded-full font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md"
               >
                 Add to Cart
               </motion.button>
-            </Link>
+            </div>
           </div>
         </div>
       </motion.div>

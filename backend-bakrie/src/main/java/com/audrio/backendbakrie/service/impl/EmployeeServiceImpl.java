@@ -1,24 +1,26 @@
 package com.audrio.backendbakrie.service.impl;
 
 import com.audrio.backendbakrie.entity.Employees;
+import com.audrio.backendbakrie.events.EmailVerificationEvent;
 import com.audrio.backendbakrie.io.*;
 import com.audrio.backendbakrie.repository.EmployeeRepository;
 import com.audrio.backendbakrie.repository.RolesRepository;
 import com.audrio.backendbakrie.roles.Roles;
 import com.audrio.backendbakrie.service.CloudinaryService;
-import com.audrio.backendbakrie.service.EmailService;
 import com.audrio.backendbakrie.service.EmployeeService;
 import com.audrio.backendbakrie.utils.Exceptions.*;
 import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.*;
 
@@ -28,28 +30,35 @@ import java.util.*;
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final CloudinaryService cloudinaryService;
-    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final RolesRepository rolesRepository;
     private final AuthenticationManager authenticationManager;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public EmployeeResponse add(EmployeeRequest request) {
-        log.info("ADD EMPLOYEE START");
+        long totalStart = System.currentTimeMillis();
+        log.info("=== ADD EMPLOYEE START ===");
+
         log.debug("Request: {}", request);
 
+        // Validasi request
+        long step1 = System.currentTimeMillis();
         validateRequest(request);
 
         String email = request.getEmail().trim();
+
+        // Cek email sudah ada atau belum
         log.debug("Checking email existence: {}", email);
         Optional<Employees> optionalEmployee = employeeRepository.findByEmail(email);
 
+        // Generate JWT token
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("purpose", "email-verification");
         String token = jwtUtils.generateToken(claims, email);
-        log.debug("Generated verification token (first 20 chars): {}", token.length() > 20 ? token.substring(0, 20) + "..." : token);
 
+        // Kalau email sudah ada (unverified) → update token + kirim ulang email
         if (optionalEmployee.isPresent()) {
             Employees existing = optionalEmployee.get();
             log.info("Employee already exists: {}", existing.getEmail());
@@ -59,28 +68,55 @@ public class EmployeeServiceImpl implements EmployeeService {
                 throw new UserAlreadyVerifiedException("Email sudah terverifikasi dan terdaftar");
             }
 
-            log.info("Updating verification token for existing unverified employee");
             existing.setVerificationToken(token);
             employeeRepository.save(existing);
-            emailService.sendEmpVerificationEmail(existing.getEmail(), token);
-            log.info("Verification email resent to: {}", email);
+
+            String verificationUrl2 = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/req/signup/emp/verify")
+                    .queryParam("token", token)
+                    .toUriString();
+
+            eventPublisher.publishEvent(EmailVerificationEvent.builder()
+                    .email(existing.getEmail())
+                    .token(token)
+                    .verificationUrl(verificationUrl2)
+                            .subject("Verifikasi Email Bakrie Store")
+                            .message("Terima kasih telah mendaftar di Bakrie Store. Silahkan klik link berikut untuk verifikasi email anda.")
+                    .build());
+
+            log.info("ADD EMPLOYEE SUCCESS (existing unverified)");
             return convertToResponse(existing);
         }
 
+        // User baru → hash password
         Employees newEmployee = convertToEntity(request);
         newEmployee.setPassword(passwordEncoder.encode(request.getPassword()));
-        newEmployee.setImg_url(null);
+
         newEmployee.setVerificationToken(token);
         newEmployee.setIs_verified(false);
 
-        employeeRepository.save(newEmployee);
-        log.info("New employee saved with ID: {}", newEmployee.getIdEmployee());
+        // Save ke database
+        long step7 = System.currentTimeMillis();
+        Employees saved = employeeRepository.save(newEmployee);
 
-        emailService.sendEmpVerificationEmail(newEmployee.getEmail(), token);
-        log.info("Verification email sent to: {}", newEmployee.getEmail());
+        String verificationUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/req/signup/emp/verify")
+                .queryParam("token", saved.getVerificationToken())
+                .toUriString();
 
-        log.info("ADD EMPLOYEE SUCCESS");
-        return convertToResponse(newEmployee);
+        // Kirim email verifikasi
+        eventPublisher.publishEvent(EmailVerificationEvent.builder()
+                .email(saved.getEmail())
+                .token(saved.getVerificationToken())
+                .verificationUrl(verificationUrl)
+                        .subject("Verifikasi Email Bakrie Store")
+                        .message("Terima kasih telah mendaftar di Bakrie Store. Silahkan klik link berikut untuk verifikasi email anda.")
+                .build());
+
+        log.info("ADD EMPLOYEE SUCCESS (new user)");
+        log.info("=== TOTAL WAKTU ADD EMPLOYEE: {} ms ===", System.currentTimeMillis() - totalStart);
+
+        return convertToResponse(saved);
     }
 
     @Override
@@ -257,15 +293,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private Employees convertToEntity(EmployeeRequest request) {
         log.debug("Converting request to entity for email: {}", request.getEmail());
-        Roles role = rolesRepository.findByName("CASHIER")
+        Roles role = rolesRepository.findByName("ADMIN")
                 .orElseThrow(() -> {
-                    log.error("ROLE_CASHIER not found in database");
-                    return new RoleNotFoundException("CASHIER Role not found");
+                    log.error("ROLE_ADMIN not found in database");
+                    return new RoleNotFoundException("ADMIN Role not found");
                 });
 
         return Employees.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
+                .username(request.getUsername().trim())
+                .email(request.getEmail().trim())
                 .img_url(request.getImg_url())
                 .empRoles(role)
                 .build();
@@ -285,9 +321,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // Password
-        if (request.getPassword() == null || request.getPassword().length() < 6) {
+        if (request.getPassword() == null || request.getPassword().length() < 8) {
             log.warn("Password too short: {} chars", request.getPassword() != null ? request.getPassword().length() : 0);
-            throw new PasswordMinLengthException("Password harus minimal 6 karakter");
+            throw new PasswordMinLengthException("Password harus minimal 8 karakter");
         }
 
         // Username

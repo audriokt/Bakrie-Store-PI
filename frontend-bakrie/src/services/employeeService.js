@@ -1,36 +1,29 @@
-import axios from "axios";
+import axios from '../utils/axiosConfig'
 
-const URL_BASE = "http://localhost:9090/api/v1.0";
+const URL_BASE = "http://localhost:9090/api/v1.0"
 
-//add employee
-export const addEmployee = (formData) => {
-  return axios.post(`${API_URL}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-};
+export const loginEmployee = async (data) => { return await axios.post(`${URL_BASE}/public/auth/login/employee`, data) }
 
-// Update employee
-export const updateEmployee = (id, formData) => {
-  return axios.put(`${API_URL}/${id}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-};
+// defaultnya kasir
+export const addEmployee = async (data) => {
+    return await axios.post(`${URL_BASE}/admin/auth/register/employee`, data)
+}
 
-// ambil semua employee
-export const getEmployees = () => {
-  return axios.get(API_URL);
-};
+export const fetchEmployees = async () => {
+    return await axios.get(`${URL_BASE}/admin/employees/fetchEmployees`)
+}
 
-// ambil detail employee
-export const getEmployeeById = (id) => {
-  return axios.get(`${API_URL}/${id}`);
-};
+export const deleteEmployee = async (employeeId) => {
+    return await axios.delete(`${URL_BASE}/admin/employees/delete/${employeeId}`)
+}
 
-//delete employee
-export const deleteEmployee = (id) => {
-  return axios.delete(`${API_URL}/${id}`);
+export const fetchEmployeeById = async (employeeId) => { return await axios.get(`${URL_BASE}/admin/employees/fetchEmployeeById/${employeeId}`) }
+
+export const updateEmployeeProfile = async (employeeId, formData) => {
+    // formData harus berupa FormData (karena ada file)
+    return await axios.put(`${API_BASE}/admin/employee/update/${employeeId}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
 };
