@@ -1,8 +1,8 @@
 package com.audrio.backendbakrie.service;
 
-import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.io.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -16,5 +16,5 @@ public interface CustomerService {
     ResponseEntity<String> verifyEmail(String token);
     AuthResponse login(CustomerAuthRequest request);
     CustomerResponse customerProfile(String token);
-    Customers getCurrentCustomer();
+    UserDetails getCurrentCustomer();
 }

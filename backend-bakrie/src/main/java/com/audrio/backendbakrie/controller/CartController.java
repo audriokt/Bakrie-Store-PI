@@ -16,6 +16,7 @@ import com.audrio.backendbakrie.utils.Exceptions.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -56,10 +57,11 @@ public class CartController {
     }
 
     @DeleteMapping("/delete/itemCart/{itemCartId}")
-    @ResponseStatus(value = HttpStatus.OK,reason = "Item removed from cart successfully")
-    public void deleteItemCart(@PathVariable String itemCartId) {
+    public ResponseEntity<Void> deleteItemCart(@PathVariable String itemCartId) {
         log.info("DELETE /customer/cart/delete/itemCart/{}", itemCartId);
         itemCartService.removeItemFromCartIfOwnedByUser(itemCartId);
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/add/itemCart")

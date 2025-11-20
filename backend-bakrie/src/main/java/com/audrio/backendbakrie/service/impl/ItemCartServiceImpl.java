@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -88,13 +89,14 @@ public class
 
     @Override
     public void removeItemFromCartIfOwnedByUser(String itemCartId) {
-        Customers currentCustomer = customerService.getCurrentCustomer();
+        String currentCustomer = customerService.getCurrentCustomer().getUsername();
         Item_Carts item = itemCartRepository.findById(UUID.fromString(itemCartId))
                 .orElseThrow(() -> new RuntimeException("Item in not found in your cart"));
 
-        if (!item.getCart().getCustomer().equals(currentCustomer)) {
+        if (!item.getCart().getCustomer().getEmail().equals(currentCustomer)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own cart items");
         }
+        log.info("current user: {}", currentCustomer);
         itemCartRepository.delete(item);
         cartService.recalculateTotal(item.getCart());
     }

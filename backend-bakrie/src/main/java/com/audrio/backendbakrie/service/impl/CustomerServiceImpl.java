@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -285,12 +286,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customers getCurrentCustomer() {
+    public UserDetails getCurrentCustomer() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof Customers customer) {
+        if (auth != null && auth.getPrincipal() instanceof UserDetails customer) {
             return customer;
         }
-        log.debug("Current user: {}", auth.getName());
+        log.info("Current user: {} is instace of Customers : {}", auth.getName(), auth.getPrincipal() instanceof UserDetails);
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
     }
 
