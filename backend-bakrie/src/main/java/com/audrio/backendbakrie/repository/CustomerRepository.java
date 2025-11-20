@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface CustomerRepository extends JpaRepository<Customers, UUID> {
     Optional<Customers> findByIdCustomer(UUID idCustomer);
     @Modifying
-    @Query("UPDATE Customers c SET c.username = :username, c.password = :password, c.address = :address, c.email = :email, c.phone_num = :phoneNum WHERE c.idCustomer = :id_customer")
+    @Query("UPDATE Customers c SET c.fullname = :username, c.password = :password, c.address = :address, c.email = :email, c.phone_num = :phoneNum WHERE c.idCustomer = :id_customer")
     void updateCustomerFields(
             @Param("idCustomer") UUID idCustomer,
             @Param("username") String username,
@@ -25,5 +25,5 @@ public interface CustomerRepository extends JpaRepository<Customers, UUID> {
     );
     Optional<Customers> findByVerificationToken(String token);
     Optional<Customers> findByEmail(String email);
-    Optional<Customers> findByUsername(String username);
+    Optional<Customers> findByFullname(String username);
 }

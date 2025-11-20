@@ -9,12 +9,14 @@ import com.audrio.backendbakrie.io.CartResponse;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.repository.ProductRepository;
 import com.audrio.backendbakrie.service.CartService;
+import com.audrio.backendbakrie.service.CustomerService;
 import com.audrio.backendbakrie.service.ItemCartService;
 import com.audrio.backendbakrie.utils.Exceptions.CustomerNotFoundException;
 import com.audrio.backendbakrie.utils.Exceptions.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,8 +30,8 @@ import java.util.UUID;
 public class CartController {
 
     private final CartService cartService;
-    private final CustomerRepository customerRepository;
     private final ItemCartService itemCartService;
+    private final CustomerService customerService;
 
     @GetMapping("/mycart/{customerId}")
     @ResponseStatus(HttpStatus.OK)
@@ -54,10 +56,10 @@ public class CartController {
     }
 
     @DeleteMapping("/delete/itemCart/{itemCartId}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteItemCart(@PathVariable UUID itemCartId) {
+    @ResponseStatus(value = HttpStatus.OK,reason = "Item removed from cart successfully")
+    public void deleteItemCart(@PathVariable String itemCartId) {
         log.info("DELETE /customer/cart/delete/itemCart/{}", itemCartId);
-        itemCartService.removeItemFromCart(itemCartId);
+        itemCartService.removeItemFromCartIfOwnedByUser(itemCartId);
     }
 
     @PostMapping("/add/itemCart")

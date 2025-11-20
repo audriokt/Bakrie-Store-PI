@@ -131,7 +131,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                     return new EmployeeNotFoundException("Employee not found: " + id);
                 });
 
-        employee.setUsername(request.getUsername().trim());
+        employee.setFullname(request.getUsername().trim());
         employee.setEmail(request.getEmail().trim());
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             log.debug("Updating password for employee: {}", id);
@@ -300,7 +300,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 });
 
         return Employees.builder()
-                .username(request.getUsername().trim())
+                .fullname(request.getUsername().trim())
                 .email(request.getEmail().trim())
                 .img_url(request.getImg_url())
                 .empRoles(role)

@@ -9,6 +9,6 @@ import java.util.UUID;
 
 public interface ItemCartService {
     public CartResponse addItemToCart(AddItemCartRequest cartRequest);
-    public void removeItemFromCart(UUID itemCartId);
+    public void removeItemFromCartIfOwnedByUser(String itemCartId);
     public void updateItemQuantity(UUID itemCartId, int newQuantity);
 }

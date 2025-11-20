@@ -14,12 +14,16 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.*;
@@ -67,7 +71,7 @@ public class CustomerServiceImpl implements CustomerService {
             customerRepository.save(existing);
 
             String verificationUrl2 = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/req/signup/emp/verify")
+                    .path("/req/signup/verify")
                     .queryParam("token", token)
                     .toUriString();
 
@@ -93,7 +97,7 @@ public class CustomerServiceImpl implements CustomerService {
         log.info("New customer saved with ID: {}", newCustomer.getIdCustomer());
 
         String verificationUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/req/signup/emp/verify")
+                .path("/req/signup/verify")
                 .queryParam("token", saved.getVerificationToken())
                 .toUriString();
 
@@ -133,7 +137,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         // Update field lain (hanya yang diisi)
         if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
-            customer.setUsername(request.getUsername().trim());
+            customer.setFullname(request.getUsername().trim());
         }
         if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
             customer.setEmail(request.getEmail().trim());
@@ -280,6 +284,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
+    @Override
+    public Customers getCurrentCustomer() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof Customers customer) {
+            return customer;
+        }
+        log.debug("Current user: {}", auth.getName());
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+    }
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
         log.debug("Converting entity to response for customer ID: {}", newCustomer.getIdCustomer());
@@ -304,7 +317,7 @@ public class CustomerServiceImpl implements CustomerService {
                 });
 
         return Customers.builder()
-                .username(request.getUsername())
+                .fullname(request.getUsername())
                 .password(request.getPassword())
                 .address(request.getAddress())
                 .email(request.getEmail())

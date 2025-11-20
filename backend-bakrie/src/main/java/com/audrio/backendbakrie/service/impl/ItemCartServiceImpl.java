@@ -13,6 +13,7 @@ import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.repository.ItemCartsRepository;
 import com.audrio.backendbakrie.repository.ProductRepository;
 import com.audrio.backendbakrie.service.CartService;
+import com.audrio.backendbakrie.service.CustomerService;
 import com.audrio.backendbakrie.service.ItemCartService;
 import com.audrio.backendbakrie.utils.Exceptions.CustomerNotFoundException;
 import com.audrio.backendbakrie.utils.Exceptions.ProductNotFoundException;
@@ -21,9 +22,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,13 +41,14 @@ import static org.aspectj.runtime.internal.Conversions.doubleValue;
 @Service
 @RequiredArgsConstructor
 public class
-   ItemCartServiceImpl implements ItemCartService {
+     ItemCartServiceImpl implements ItemCartService {
 
     private final ItemCartsRepository itemCartRepository;
     private final CartRepository cartRepository;
     private final CustomerRepository customerRepository;
     private final CartService cartService;
     private final ProductRepository productRepository;
+    private final CustomerService customerService;
 
     @SneakyThrows
     @Transactional
@@ -80,12 +87,16 @@ public class
     }
 
     @Override
-    public void removeItemFromCart(UUID itemCartId) {
-        Item_Carts item = itemCartRepository.findById(itemCartId)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
-        Carts cart = item.getCart();
+    public void removeItemFromCartIfOwnedByUser(String itemCartId) {
+        Customers currentCustomer = customerService.getCurrentCustomer();
+        Item_Carts item = itemCartRepository.findById(UUID.fromString(itemCartId))
+                .orElseThrow(() -> new RuntimeException("Item in not found in your cart"));
+
+        if (!item.getCart().getCustomer().equals(currentCustomer)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own cart items");
+        }
         itemCartRepository.delete(item);
-        cartService.recalculateTotal(cart);
+        cartService.recalculateTotal(item.getCart());
     }
 
     @Override

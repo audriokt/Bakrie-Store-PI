@@ -34,7 +34,7 @@ public class Employees implements UserDetails{
 
     @NotNull
     @Column(unique = true, name = "username")
-    private String username;
+    private String fullname;
 
     @NotNull
     @Size(max = 100)
@@ -98,5 +98,30 @@ public class Employees implements UserDetails{
     @ManyToOne
     @JoinColumn(name = "roles_id", nullable = false)
     private Roles empRoles;
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(this.is_verified);
+    }
 
 }

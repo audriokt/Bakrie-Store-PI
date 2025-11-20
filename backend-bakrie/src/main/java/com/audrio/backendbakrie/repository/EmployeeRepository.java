@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface EmployeeRepository extends JpaRepository<Employees, UUID> {
     Optional<Employees> findByIdEmployee(UUID idEmployee);
     @Modifying
-    @Query("UPDATE Employees e SET e.username = :username, e.email = :email, e.password = :password, e.img_url = :img_url WHERE e.idEmployee = :id_employee")
+    @Query("UPDATE Employees e SET e.fullname = :username, e.email = :email, e.password = :password, e.img_url = :img_url WHERE e.idEmployee = :id_employee")
     void updateEmployeeFields(
             @Param("idEmployee") UUID idEmployee,
             @Param("username") String username,
@@ -24,5 +24,5 @@ public interface EmployeeRepository extends JpaRepository<Employees, UUID> {
     );
     Optional<Employees> findByVerificationToken(String token);
     Optional<Employees> findByEmail(String email);
-    Optional<Employees> findByUsername(String username);
+    Optional<Employees> findByFullname(String username);
 }
