@@ -15,19 +15,9 @@ public class OrdersRequest {
     @NotNull(message = "ID customer wajib diisi")
     private UUID customerId;
 
-    @NotNull(message = "ID karyawan wajib diisi")
-    private UUID employeeId;
-
     @NotBlank(message = "Alamat pengiriman tidak boleh kosong")
     private String deliverAddress;
 
-    @NotBlank(message = "Nomor pesanan tidak boleh kosong")
-    private String orderNumber;
-
-    @NotBlank(message = "Status pesanan tidak boleh kosong")
-    private String orderStatus;
-
     @NotNull(message = "Detail pesanan wajib diisi")
     private List<OrderDetailRequest> orderDetails;
-
 }

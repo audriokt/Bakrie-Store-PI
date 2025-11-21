@@ -30,10 +30,6 @@ public class Orders {
     @JoinColumn(name = "id_customer")
     private Customers customers;
 
-    @ManyToOne
-    @JoinColumn(name = "id_employee", nullable = false)
-    private Employees employees;
-
     @NotNull
     @Size(max = 100)
     @Column(name = "deliver_address")
@@ -52,6 +48,10 @@ public class Orders {
     @Size(max = 20)
     @Column(name = "order_status")
     private String orderStatus;
+
+    @NotNull
+    @Column(name = "total", precision = 10, scale = 2)
+    private Double total;
 
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails;

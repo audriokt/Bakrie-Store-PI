@@ -11,12 +11,12 @@ import java.util.UUID;
 public class OrdersResponse {
 
     private UUID idOrder;
-    private UUID customerId;
-    private UUID employeeId;
-    private String deliverAddress;
     private String orderNumber;
     private Timestamp orderDate;
+    private UUID customerId;
+    private String deliverAddress;
     private String orderStatus;
+    private double totalPrice;
     private List<OrderDetailRequest> orderDetails;
 }
 
