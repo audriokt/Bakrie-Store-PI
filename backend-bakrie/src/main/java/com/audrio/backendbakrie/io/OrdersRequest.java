@@ -20,4 +20,5 @@ public class OrdersRequest {
 
     @NotNull(message = "Detail pesanan wajib diisi")
     private List<OrderDetailRequest> orderDetails;
+
 }
