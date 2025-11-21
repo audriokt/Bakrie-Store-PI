@@ -27,7 +27,7 @@ public class Orders {
     private UUID id_order;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer") // nama kolom foreign key di tabel Orders
+    @JoinColumn(name = "id_customer")
     private Customers customers;
 
     @ManyToOne
@@ -52,9 +52,6 @@ public class Orders {
     @Size(max = 20)
     @Column(name = "order_status")
     private String orderStatus;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Transactions transaction;
 
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails;

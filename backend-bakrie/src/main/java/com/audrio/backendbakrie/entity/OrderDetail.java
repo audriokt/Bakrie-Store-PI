@@ -19,7 +19,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDetail {
+public class  OrderDetail {
 
     @Id
     @Column(name = "id_order_detail", length = 100, nullable = false)
@@ -36,7 +36,9 @@ public class OrderDetail {
     @JoinColumn(name = "id_product", nullable = false)
     private Products product;
 
-    @ManyToOne
-    @JoinColumn(name = "id_cart", nullable = false)
-    private Carts cart;
+    @Column(name = "unit_price", nullable = false)
+    private double unitPrice;
+
+    @Column(name = "subtotal", nullable = false)
+    private double subtotal;
 }
