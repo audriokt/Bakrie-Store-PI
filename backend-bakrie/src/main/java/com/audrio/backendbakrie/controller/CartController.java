@@ -1,38 +1,26 @@
 package com.audrio.backendbakrie.controller;
 
-import com.audrio.backendbakrie.entity.Carts;
-import com.audrio.backendbakrie.entity.Customers;
-import com.audrio.backendbakrie.entity.Products;
 import com.audrio.backendbakrie.io.AddItemCartRequest;
-import com.audrio.backendbakrie.io.CartRequest;
 import com.audrio.backendbakrie.io.CartResponse;
-import com.audrio.backendbakrie.repository.CustomerRepository;
-import com.audrio.backendbakrie.repository.ProductRepository;
+import com.audrio.backendbakrie.io.UpdateItemRequest;
 import com.audrio.backendbakrie.service.CartService;
 import com.audrio.backendbakrie.service.CustomerService;
 import com.audrio.backendbakrie.service.ItemCartService;
-import com.audrio.backendbakrie.utils.Exceptions.CustomerNotFoundException;
-import com.audrio.backendbakrie.utils.Exceptions.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.security.Principal;
-import java.util.UUID;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/customer/cart")
-public class CartController {
+public class   CartController {
 
     private final CartService cartService;
     private final ItemCartService itemCartService;
-    private final CustomerService customerService;
 
     @GetMapping("/mycart/{customerId}")
     @ResponseStatus(HttpStatus.OK)
@@ -71,4 +59,10 @@ public class CartController {
         return itemCartService.addItemToCart(cartRequest);
     }
 
+    @PutMapping("/update/itemCart")
+    @ResponseStatus(HttpStatus.OK)
+    public CartResponse updateQuantityItemCart(@RequestBody UpdateItemRequest request) {
+        log.info("PUT /customer/cart/update/itemCart - Request: {}", request);
+        return itemCartService.updateItemQuantity(request);
+    }
 }

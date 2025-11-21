@@ -4,10 +4,7 @@ import com.audrio.backendbakrie.entity.Carts;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.entity.Item_Carts;
 import com.audrio.backendbakrie.entity.Products;
-import com.audrio.backendbakrie.io.AddItemCartRequest;
-import com.audrio.backendbakrie.io.CartRequest;
-import com.audrio.backendbakrie.io.CartResponse;
-import com.audrio.backendbakrie.io.ItemCartResponse;
+import com.audrio.backendbakrie.io.*;
 import com.audrio.backendbakrie.repository.CartRepository;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.repository.ItemCartsRepository;
@@ -103,7 +100,9 @@ public class
 
     @Override
     @Transactional
-    public void updateItemQuantity(UUID itemCartId, int newQuantity) {
+    public CartResponse updateItemQuantity(UpdateItemRequest request) {
+        int newQuantity = request.getQuantity();
+        UUID itemCartId = request.getItemCartId();
         try {
             log.info("Updating item quantity. ItemCart ID: {}, New Quantity: {}", itemCartId, newQuantity);
             validateQuantity(newQuantity);
@@ -123,6 +122,7 @@ public class
 
             cartService.recalculateTotal(item.getCart());
             log.info("Cart total recalculated for Customer ID: {}", item.getCart().getCustomer().getIdCustomer());
+            return convertToResponse(item.getCart());
 
         } catch (Exception e) {
             log.error("Failed to update item quantity. ItemCart ID: {}, Error: {}", itemCartId, e.getMessage(), e);
