@@ -2,13 +2,18 @@ package com.audrio.backendbakrie.controller;
 
 import com.audrio.backendbakrie.io.CustomerRequest;
 import com.audrio.backendbakrie.io.CustomerResponse;
-import com.audrio.backendbakrie.io.ProductRequest;
+import com.audrio.backendbakrie.io.UpdateProfileCusRequest;
 import com.audrio.backendbakrie.service.CustomerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,18 +28,10 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @PostMapping("/public/auth/register/customer")
+    @PostMapping(value = "/public/auth/register/customer", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public CustomerResponse createCustomer(@RequestPart("customer") String customerString,
-                                           @RequestPart("file")MultipartFile file){
-        ObjectMapper mapper = new ObjectMapper();
-        CustomerRequest request = null;
-        try{
-            request = mapper.readValue(customerString,CustomerRequest.class);
-            return customerService.add(request, file);
-        }catch(JsonProcessingException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to customer request"+e.getMessage());
-        }
+    public CustomerResponse createCustomer(@Valid @RequestBody CustomerRequest customerRequest){
+            return customerService.add(customerRequest);
     }
 
     @GetMapping("/admin/customers/fetchCustomers")
@@ -45,23 +42,23 @@ public class CustomerController {
 
     @PutMapping("/customer/update/{custId}")
     @ResponseStatus(HttpStatus.OK)
-    public CustomerResponse updateCustomer(@PathVariable String custId,
+    public CustomerResponse updateCustomer(@Valid @PathVariable String custId,
                                            @RequestPart("customer") String customerString,
-                                           @RequestPart("file") MultipartFile file) {
+                                           @RequestPart(name = "file", required = false) MultipartFile file) {
         ObjectMapper mapper = new ObjectMapper();
-        CustomerRequest request = null;
+        UpdateProfileCusRequest request = null;
         try{
-            request = mapper.readValue(customerString, CustomerRequest.class);
+            request = mapper.readValue(customerString, UpdateProfileCusRequest.class);
+            return customerService.update(UUID.fromString(custId), request, file);
         } catch(JsonProcessingException e) {
             log.error("JsonProcessingException : {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occur while parsing json to product request"+e.getMessage());
         }
-        return customerService.update(UUID.fromString(custId), request);
     }
 
     @DeleteMapping("/customer/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCustomer(@PathVariable String id) {
+    public void deleteCustomer(@Valid @PathVariable String id) {
         try {
             customerService.delete(UUID.fromString(id));
         } catch (Exception e){
@@ -71,7 +68,7 @@ public class CustomerController {
 
     @GetMapping("/customer/myprofile")
     @ResponseStatus(HttpStatus.OK)
-    public CustomerResponse myProfile(@RequestHeader("Authorization") String token){
+    public CustomerResponse myProfile(@Valid @RequestHeader("Authorization") String token){
         try{
             log.info("Method : GET | Endpoint : /customer/myprofile | Payload : {}", token);
             return customerService.customerProfile(token);
@@ -79,5 +76,4 @@ public class CustomerController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
-
 }

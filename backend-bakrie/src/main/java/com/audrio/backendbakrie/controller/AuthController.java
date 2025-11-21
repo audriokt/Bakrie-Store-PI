@@ -5,6 +5,7 @@ import com.audrio.backendbakrie.io.CustomerAuthRequest;
 import com.audrio.backendbakrie.io.EmployeeAuthRequest;
 import com.audrio.backendbakrie.service.CustomerService;
 import com.audrio.backendbakrie.service.EmployeeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class AuthController {
      * Endpoint untuk Customer Login
      */
     @PostMapping("/auth/login/customer")
-    public AuthResponse customerLogin(@RequestBody CustomerAuthRequest request) {
+    public AuthResponse customerLogin(@Valid @RequestBody CustomerAuthRequest request) {
         return customerService.login(request);
     }
 
@@ -30,7 +31,7 @@ public class AuthController {
      * Endpoint untuk Employee Login
      */
     @PostMapping("/auth/login/employee")
-    public AuthResponse employeeLogin(@RequestBody EmployeeAuthRequest request) {
+    public AuthResponse employeeLogin(@Valid @RequestBody EmployeeAuthRequest request) {
         return employeeService.login(request);
     }
 }

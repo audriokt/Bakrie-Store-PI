@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProductCarousel from "@/components/core/ProductCarousel.jsx";
+import { useAuth } from "../../../hooks/useAuth";
+import Swal from "sweetalert2";
 
 const ProductDetailPage = () => {
-  const { state } = useLocation(); // ← ambil data produk dari Link
+  const { state } = useLocation(); 
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
 
   const handleDecrease = () => {
@@ -15,13 +19,52 @@ const ProductDetailPage = () => {
     setQuantity(quantity + 1);
   };
 
+  const handleAddToCart = () => {
+    if (!user) {
+      Swal.fire({
+        icon: "warning",
+        title: "Login Required",
+        text: "You need to login to add items to your cart.",
+        confirmButtonText: "Login Now",
+        showCancelButton: true,
+        confirmButtonColor: "#C31D1D",
+        cancelButtonColor: "#6b7280",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/login");
+        }
+      });
+      return;
+    }
+    navigate("/carts");
+  };
+
   if (!state) {
-    return (
-      <div className="min-h-screen flex justify-center items-center text-red-600">
-        <p>Product not found 😢</p>
+  return (
+    <div className="min-h-screen flex justify-center items-center bg-[#fff] px-6">
+      <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border border-[#FFDADA] rounded-2xl shadow-md w-[80%] max-w-xl py-16 px-10 text-center">
+        <h2 className="text-2xl font-semibold text-red-600 mb-3">
+          Product Not Found 😢
+        </h2>
+        <p className="text-gray-500 mb-5">
+          We couldn't find the product you're looking for...
+        </p>
+
+        <Link
+          to="/products"
+          className="bg-red-600 text-white py-3 px-8 rounded-full font-semibold hover:bg-red-700 transition-colors duration-200"
+        >
+          Back to Products
+        </Link>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+
+    const formatPrice = (price) => {
+    return price.toLocaleString("id-ID");
+    };
 
   return (
     <div className="max-w-screen min-h-screen flex items-center justify-center bg-[#fff] px-8 py-16 pt-32">
@@ -43,7 +86,7 @@ const ProductDetailPage = () => {
             {state.description}
           </p>
 
-          <p className="text-lg font-semibold mb-4">{state.product_price}</p>
+          <p className="text-lg font-semibold mb-4">Rp{formatPrice(state.product_price)}</p>
 
           {/* Quantity Selector & Add to Cart */}
           <div className="flex flex-col w-full h-20 items-start gap-4 mt-6">
@@ -67,15 +110,16 @@ const ProductDetailPage = () => {
               </button>
             </div>
 
-            <Link to="/carts" className="w-full">
+            <div className="w-full">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={handleAddToCart}
                 className="w-full bg-red-600 text-white py-3 rounded-full font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md"
               >
                 Add to Cart
               </motion.button>
-            </Link>
+            </div>
           </div>
         </div>
       </motion.div>

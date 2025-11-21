@@ -1,64 +1,82 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { loginCustomer } from "../../../services/authService.js"
-import { profileCustomer } from "../../../services/customerService.js"
-import { useAuth } from "../../../hooks/useAuth.js"
+import { Link, useNavigate } from "react-router-dom";
+import { loginCustomer } from "../../../services/authService.js";
+import { profileCustomer } from "../../../services/customerService.js";
+import { useAuth } from "../../../hooks/useAuth.js";
+import Loading from "../../../components/loader/Loading.jsx";
+import Swal from "sweetalert2";
+import { useFormik } from "formik";
+import * as yup from "yup";
 
 const LoginPage = () => {
-    // akses fungsi yang ada di useContext lewat hook useAuth
-    const {setAuthData, setUser} = useAuth()
+  const { setAuthData, setUser } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState(false);
 
-    // pake useNavigate untuk navigasi ke halaman lain setelah login
-    const navigate = useNavigate()
+  const validationSchema = yup.object().shape({
+    email: yup.string()
+      .email("Invalid email format")
+      .min(15, "Email must be at least 15 characters") 
+      .max(100, "Email cannot exceed 100 characters") 
+      .required("Email is required"),
+    password: yup.string()
+      .min(6, "Password must be at least 6 characters") 
+      .required("Password is required"),
+  });
 
-    // loading untuk sebagai penanda jika prose blm selesai loading bernilai true
-    // klo selesai loading bernilai false
-    const [loading, setLoading] = useState(false)
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      setLoading(true);
+      setLoginError(false);
 
-    // data untuk menampung nilai dari form login
-    // nilai awal kosong
-    const [data, setData] = useState({
-        email: "",
-        password: "",
-    })
+      try {
+        // Mengirim data values (email & password) ke API
+        const resLogin = await loginCustomer(values);
+        const { token, role } = resLogin.data;
+        
+        setAuthData(token, role);
+        
+        const resUser = await profileCustomer();
+        setUser(resUser.data);
 
-    // fungsi akan dipanggil ketika ada perubahan pada komponen input email dan password
-    // perubahan akan disimpan ke dalam data login "data"
-    const onChangeHandler = (e) => {
-        const {name, value} = e.target
-        setData((prev)=> ({...prev, [name]:value}))
-    }
-
-    // fungsi bakal dipanggil klo form di submit
-    // fungsi ini akan mengirim data login ke server dan mengembalikan token dan role di "res"
-    // lalu data tersebut di simpan di localSorage pake function setAuthData
-    // lalu ambil data user yang baru login pake function profileCustomer
-    // trus isi nilai user
-    // klo berhasil bakal di arahin ke halaman utama
-    const onSubmitHandler = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const resLogin = await loginCustomer(data);
-            const { token, role } = resLogin.data;
-            setAuthData(token, role);
-            const resUser = await profileCustomer();
-            setUser(resUser.data);
+        Swal.fire({
+          title: "Login Successful",
+          text: "You have successfully logged in.",
+          icon: "success",
+          confirmButtonText: "Ok",
+          confirmButtonColor: "#C31D1D"
+        }).then((result) => {
+          if (result.isConfirmed) {
             navigate("/");
-        } catch (err) {
-            console.error("Login gagal:", err);
-        } finally {
-            setLoading(false);
-        }
-    }
+          }
+        });
+      } catch (err) {
+        console.error("Login Failed:", err);
+        setLoginError(true);
+        Swal.fire({
+            title: "Login Failed",
+            text: err.response?.data?.message || "Invalid email or password",
+            icon: "error",
+            confirmButtonColor: "#C31D1D"
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+  });
 
   return (
-    <div className="flex h-screen items-center justify-center bg-ookay">
+    <div className="flex h-screen items-center justify-center bg-pink-100">
       {/* Container utama */}
       <div className="flex bg-white rounded-[40px] shadow-2xl overflow-hidden w-[80%] max-w-5xl">
+        
         {/* Bagian kiri: form login */}
         <motion.div
           className="flex flex-col justify-center items-center w-[50%] px-10 py-10"
@@ -69,53 +87,75 @@ const LoginPage = () => {
           {/* Logo dan teks */}
           <img src="./logo/login.svg" alt="Logo" className="w-32 mb-2" />
           <p className="text-red-600 text-sm mb-6">
-            Sign in to your account here!
+            Login to your account here!
           </p>
 
-          {/* Form login */}
-          <form className="space-y-4 w-full max-w-sm" onSubmit={onSubmitHandler}>
+          {/* Form login menggunakan formik.handleSubmit */}
+          <form className="space-y-4 w-full max-w-sm" onSubmit={formik.handleSubmit}>
+            
+            {/* EMAIL INPUT */}
             <div>
               <label htmlFor="email" className="block text-sm text-red-700 mb-2 font-medium">
                 Email
               </label>
               <input
                 type="email"
-                className="w-full border border-red-500 rounded-md py-3 px-4 
-                          focus:outline-none focus:ring-2 focus:ring-red-400 
-                          text-gray-700 placeholder-gray-400"
+                className={`w-full border rounded-md py-3 px-4 focus:outline-none focus:ring-2 
+                  ${formik.touched.email && formik.errors.email 
+                    ? "border-red-600 focus:ring-red-600" 
+                    : "border-red-500 focus:ring-red-400"} 
+                  text-gray-700 placeholder-gray-400`}
                 placeholder="Email"
                 name="email"
                 id="email"
-                onChange={onChangeHandler}
-                value={data.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.email}
               />
+              {formik.touched.email && formik.errors.email && (
+                <p className="text-xs text-red-600 mt-1 ml-1">{formik.errors.email}</p>
+              )}
             </div>
 
+            {/* PASSWORD INPUT */}
             <div>
               <label className="block text-sm text-red-700 mb-2 font-medium" htmlFor="password">
                 Password
               </label>
               <input
                 type="password"
-                className="w-full border border-red-500 rounded-md py-3 px-4 
-                          focus:outline-none focus:ring-2 focus:ring-red-400 
-                          text-gray-700 placeholder-gray-400"
+                className={`w-full border rounded-md py-3 px-4 focus:outline-none focus:ring-2 
+                  ${formik.touched.password && formik.errors.password 
+                    ? "border-red-600 focus:ring-red-600" 
+                    : "border-red-500 focus:ring-red-400"} 
+                  text-gray-700 placeholder-gray-400`}
                 placeholder="Password"
                 name="password"
                 id="password"
-                onChange={onChangeHandler}
-                value={data.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.password}
               />
+              {formik.touched.password && formik.errors.password && (
+                <p className="text-xs text-red-600 mt-1 ml-1">{formik.errors.password}</p>
+              )}
             </div>
+
+            {loginError && (
+              <p className="text-red-600 text-sm mt-2 text-center">
+                Login failed. Please check your email and password.
+              </p>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              className="w-full bg-red-600 text-white py-3 rounded-full 
+              className="w-full h-12 bg-red-600 text-white py-3 rounded-full 
                 hover:bg-red-700 transition-all duration-200 font-semibold shadow-md"
+              disabled={loading}
             >
-              Login
+              {loading ? <Loading /> : "Login"}
             </motion.button>
           </form>
 
@@ -128,7 +168,7 @@ const LoginPage = () => {
         </motion.div>
 
         {/* Bagian kanan: animasi video */}
-        <div className="w-[50%] bg-pink-50 flex justify-center items-center">
+        <div className="w-[50%] bg-pink-50 flex justify-center items-center relative">
           <motion.video
             className="w-[80%] h-auto object-contain drop-shadow-lg rounded-2xl"
             autoPlay
@@ -141,6 +181,8 @@ const LoginPage = () => {
           >
             <source src="/logo/baker-animation.mp4" type="video/mp4" />
           </motion.video>
+           {/* Overlay agar konsisten dengan signup page */}
+           <div className="absolute inset-0 bg-pink-100/60 mix-blend-soft-light rounded-2xl"></div>
         </div>
       </div>
     </div>

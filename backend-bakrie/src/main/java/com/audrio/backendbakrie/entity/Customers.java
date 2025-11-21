@@ -40,7 +40,7 @@ public class Customers implements UserDetails {
     @NotNull
     @Size(max = 30, min = 5, message = "Username tidak boleh kurang dari 5 karakter atau/dan tidak boleh lebih dari 30 karakter")
     @Column(name = "username")
-    private String  username;
+    private String  fullname;
 
     @NotNull
     @Size(max = 300, min = 20, message = "Alamat tidak boleh kurang dari 20 karakter")
@@ -54,6 +54,7 @@ public class Customers implements UserDetails {
 
     @NotNull
     @Column(name = "password")
+    @Size(min = 6, message = "Password minimal 6 karakter")
     private String password;
 
     @Column(name="image_url")
@@ -83,7 +84,12 @@ public class Customers implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return AuthorityUtils.createAuthorityList(cusRoles.getName()); // "CUSTOMER"
+        return AuthorityUtils.createAuthorityList(cusRoles.getName());
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
     }
 
     @ManyToOne
@@ -102,5 +108,31 @@ public class Customers implements UserDetails {
     public int hashCode() {
         return Objects.hash(idCustomer);
     }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(this.is_verified); // atau return true kalau semua user aktif
+    }
+
 
 }

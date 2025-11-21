@@ -1,31 +1,32 @@
 package com.audrio.backendbakrie.service.impl;
 
-import com.audrio.backendbakrie.entity.Carts;
-import com.audrio.backendbakrie.io.AuthResponse;
-import com.audrio.backendbakrie.io.CustomerAuthRequest;
-import com.audrio.backendbakrie.repository.CartRepository;
+import com.audrio.backendbakrie.events.EmailVerificationEvent;
+import com.audrio.backendbakrie.io.*;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.entity.Customers;
-import com.audrio.backendbakrie.io.CustomerRequest;
-import com.audrio.backendbakrie.io.CustomerResponse;
 import com.audrio.backendbakrie.repository.RolesRepository;
 import com.audrio.backendbakrie.roles.Roles;
 import com.audrio.backendbakrie.service.CloudinaryService;
 import com.audrio.backendbakrie.service.CustomerService;
-import com.audrio.backendbakrie.service.EmailService;
 import com.audrio.backendbakrie.utils.Exceptions.*;
 import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -35,20 +36,18 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CloudinaryService cloudinaryService;
-    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final RolesRepository rolesRepository;
     private final AuthenticationManager authenticationManager;
-    private final CartRepository cartRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public CustomerResponse add(CustomerRequest request, MultipartFile file) {
+    public CustomerResponse add(CustomerRequest request) {
         log.info("=== ADD CUSTOMER START ===");
         log.debug("Request: {}", request);
-        log.debug("File: {} (size: {} bytes)", file.getOriginalFilename(), file.getSize());
 
-        validateRequest(request, file);
+        validateRequest(request);
 
         String email = request.getEmail().trim();
         log.debug("Checking email existence: {}", email);
@@ -71,43 +70,46 @@ public class CustomerServiceImpl implements CustomerService {
             log.info("Updating verification token for existing unverified user");
             existing.setVerificationToken(token);
             customerRepository.save(existing);
-            emailService.sendVerificationEmail(existing.getEmail(), token);
+
+            String verificationUrl2 = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/req/signup/verify")
+                    .queryParam("token", token)
+                    .toUriString();
+
+            eventPublisher.publishEvent(EmailVerificationEvent.builder()
+                    .email(existing.getEmail())
+                    .token(token)
+                    .verificationUrl(verificationUrl2)
+                    .subject("Verifikasi Email Bakrie Store")
+                    .message("Terima kasih telah mendaftar di Bakrie Store. Silahkan klik link berikut untuk verifikasi email anda.")
+                    .build());
+
             log.info("Verification email resent to: {}", email);
             return convertToResponse(existing);
         }
 
-        log.debug("Validating file size and type");
-        if (file.getSize() > 5 * 1024 * 1024) {
-            log.warn("File too large: {} bytes", file.getSize());
-            throw new ImageSizeUnaproriateException("File maksimal 5MB");
-        }
-        if (!file.getContentType().startsWith("image/")) {
-            log.warn("Invalid file type: {}", file.getContentType());
-            throw new ImageInvalidExtentionException("Hanya file gambar");
-        }
-
-        String idImg = UUID.randomUUID().toString();
-        log.debug("Uploading image to Cloudinary with ID: {}", idImg);
-        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
-        log.debug("Image uploaded successfully: {}", imgUrl);
-
         Customers newCustomer = convertToEntity(request);
         newCustomer.setPassword(passwordEncoder.encode(request.getPassword()));
-        newCustomer.setImg_url(imgUrl);
+        newCustomer.setImg_url(null);
         newCustomer.setVerificationToken(token);
         newCustomer.setIs_verified(false);
 
-        newCustomer = customerRepository.save(newCustomer);
+        Customers saved = customerRepository.save(newCustomer);
         log.info("New customer saved with ID: {}", newCustomer.getIdCustomer());
 
-        Carts cart = new Carts();
-        cart.setCustomer(optionalCustomer.get());
-        cart.setTotalPrice(0.0);
-        cartRepository.save(cart);
-        log.info("Cart created for new customer {}", newCustomer.getIdCustomer());
+        String verificationUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/req/signup/verify")
+                .queryParam("token", saved.getVerificationToken())
+                .toUriString();
 
-
-        emailService.sendVerificationEmail(newCustomer.getEmail(), token);
+        // Kirim email verifikasi
+        eventPublisher.publishEvent(EmailVerificationEvent.builder()
+                .email(saved.getEmail())
+                .token(saved.getVerificationToken())
+                .verificationUrl(verificationUrl)
+                .subject("Verifikasi Email Bakrie Store")
+                .message("Terima kasih telah mendaftar di Bakrie Store. Silahkan klik link berikut untuk verifikasi email anda.")
+                .build());
         log.info("Verification email sent to: {}", newCustomer.getEmail());
 
         log.info("ADD CUSTOMER SUCCESS");
@@ -116,29 +118,42 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public CustomerResponse update(UUID id, CustomerRequest request) {
-        log.info("UPDATE CUSTOMER START | ID: {}", id);
-        log.debug("Update request: {}", request);
-
+    public CustomerResponse update(UUID id, UpdateProfileCusRequest request, MultipartFile file) {
         Customers customer = customerRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Customer not found for update: {}", id);
-                    return new CustomerNotFoundException("Customer tidak ditemukan: " + id);
-                });
+                .orElseThrow(() -> new CustomerNotFoundException("Customer tidak ditemukan"));
 
-        customer.setUsername(request.getUsername().trim());
-        customer.setEmail(request.getEmail().trim());
-        customer.setAddress(request.getAddress().trim());
-        customer.setPhone_num(request.getPhone_num().trim());
+        // Upload foto kalau ada file baru
+        if (file != null && !file.isEmpty()) {
+            if (file.getSize() > 5 * 1024 * 1024) {
+                throw new ImageSizeUnaproriateException("File maksimal 5MB");
+            }
+            if (!file.getContentType().startsWith("image/")) {
+                throw new ImageInvalidExtentionException("Hanya file gambar");
+            }
 
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            log.debug("Updating password for customer: {}", id);
+            String imgId = UUID.randomUUID().toString();
+            String imgUrl = cloudinaryService.uploadFile(file, imgId).getUrl();
+            customer.setImg_url(imgUrl);
+        }
+
+        // Update field lain (hanya yang diisi)
+        if (request.getUsername() != null && !request.getUsername().trim().isEmpty()) {
+            customer.setFullname(request.getUsername().trim());
+        }
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+            customer.setEmail(request.getEmail().trim());
+        }
+        if (request.getAddress() != null && !request.getAddress().trim().isEmpty()) {
+            customer.setAddress(request.getAddress().trim());
+        }
+        if (request.getPhone_num() != null && !request.getPhone_num().trim().isEmpty()) {
+            customer.setPhone_num(request.getPhone_num().trim());
+        }
+        if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
             customer.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
         customerRepository.save(customer);
-        log.info("Customer updated successfully: {}", id);
-        log.info("UPDATE CUSTOMER SUCCESS");
         return convertToResponse(customer);
     }
 
@@ -255,7 +270,7 @@ public class CustomerServiceImpl implements CustomerService {
         String pureToken = token.replace("Bearer ", "").trim();
         String email = jwtUtils.extractEmail(pureToken);
         try{
-            log.info("GET CUSTOMER PROFILE START | ID: {}");
+            log.info("GET CUSTOMER PROFILE START | EMAIL: {}", email);
             System.out.println(email);
             Customers customer = customerRepository.findByEmail(email)
                     .orElseThrow(() -> {
@@ -270,6 +285,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
+    @Override
+    public UserDetails getCurrentCustomer() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserDetails customer) {
+            return customer;
+        }
+        log.info("Current user: {} is instace of Customers : {}", auth.getName(), auth.getPrincipal() instanceof UserDetails);
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+    }
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
         log.debug("Converting entity to response for customer ID: {}", newCustomer.getIdCustomer());
@@ -287,14 +311,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     private Customers convertToEntity(CustomerRequest request) {
         log.debug("Converting request to entity for email: {}", request.getEmail());
-        Roles role = rolesRepository.findByName("ROLE_CUSTOMER")
+        Roles role = rolesRepository.findByName("CUSTOMER")
                 .orElseThrow(() -> {
-                    log.error("ROLE_CUSTOMER not found in database");
+                    log.error("CUSTOMER not found in database");
                     return new RoleNotFoundException("Customer Role not found");
                 });
 
         return Customers.builder()
-                .username(request.getUsername())
+                .fullname(request.getUsername())
                 .password(request.getPassword())
                 .address(request.getAddress())
                 .email(request.getEmail())
@@ -304,7 +328,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
     }
 
-    private void validateRequest(CustomerRequest request, MultipartFile file) {
+    private void validateRequest(CustomerRequest request) {
         log.debug("VALIDATING CUSTOMER REQUEST");
         if (request == null) {
             log.warn("Request is null");
@@ -319,9 +343,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         // Password
-        if (request.getPassword() == null || request.getPassword().length() < 8) {
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
             log.warn("Password too short: {} chars", request.getPassword() != null ? request.getPassword().length() : 0);
-            throw new PasswordMinLengthException("Password minimal 8 karakter");
+            throw new PasswordMinLengthException("Password minimal 6 karakter");
         }
 
         // Username
@@ -362,20 +386,6 @@ public class CustomerServiceImpl implements CustomerService {
         if (address.length() < 10 || address.length() > 255) {
             log.warn("Address length invalid: {}", address.length());
             throw new AddressInvalidLengthException("Alamat 10-255 karakter");
-        }
-
-        // File
-        if (file == null || file.isEmpty()) {
-            log.warn("Image file is empty");
-            throw new ImageFileEmptyException("File gambar wajib diisi");
-        }
-        if (file.getSize() > 5 * 1024 * 1024) {
-            log.warn("File too large: {} bytes", file.getSize());
-            throw new ImageSizeUnaproriateException("File maksimal 5MB");
-        }
-        if (!file.getContentType().startsWith("image/")) {
-            log.warn("Invalid file type: {}", file.getContentType());
-            throw new ImageInvalidExtentionException("Hanya file gambar yang diizinkan");
         }
 
         log.debug("VALIDATION PASSED");

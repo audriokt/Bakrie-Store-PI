@@ -17,18 +17,20 @@ const HomePage = () => {
       <Carousel />
 
       {/* Favorite Choices */}
-      <div className="w-full bg-ookay mt-20 py-10">
-        <div className="min-w-full flex justify-between items-center">
-          <h1 className="w-auto font-extrabold text-5xl text-yes pl-10">
+      <div className="w-full bg-ookay mt-20 py-10 overflow-hidden">
+        <div className="w-full flex justify-between items-center px-10">
+          <h1 className="w-full font-extrabold text-5xl text-yes">
             Favorites Choices
           </h1>
-          <div className="w-20 self-end relative right-5">
+          <div>
+          <div className="self-end">
             <Link to="/products">
               <button className="bg-yes text-white text-sm w-28 h-9 rounded-full border border-yes hover:bg-transparent hover:text-yes font-medium transition duration-300">
                 Shop All
               </button>
             </Link>
           </div>
+        </div>
         </div>
 
         {/* Infinite Swiper */}
@@ -38,25 +40,36 @@ const HomePage = () => {
       </div>
 
       {/* Product Section */}
-      <div className="flex flex-col justify-center items-center mt-32 w-full">
-        <h1 className="font-extrabold text-5xl text-yes mb-14">
-          Checkout Our Products
-        </h1>
-          {products.length > 0 ? (
-              products.map((product) => (
-                  <ItemsCard key={product.id} product={product} />
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border border-[#FFDADA] rounded-2xl shadow-md w-[80%] max-w-xl py-16 px-10 text-center">
-              <h2 className="text-2xl font-semibold text-red-600 mb-3">
-                There's no product right now
-              </h2>
-              <p className="text-gray-500">
-                Please check back later or explore our favorites above!
-              </p>
+        <section className="py-20">
+            <div className="max-w-7xl mx-auto px-6 lg:px-10 text-center">
+                <h1 className="font-extrabold text-4xl sm:text-5xl text-yes mb-16">
+                    Checkout Our Products
+                </h1>
+
+                {loading ? (
+                    <div className="text-center py-20">
+                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yes border-t-transparent"></div>
+                        <p className="mt-4 text-gray-600">Loading products...</p>
+                    </div>
+                ) : products.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+                        {products.map((product) => (
+                            <ItemsCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border-2 border-dashed border-[#FFDADA] rounded-3xl shadow-lg max-w-2xl mx-auto py-20 px-10 text-center">
+                        <img src="/waiting/waiting.svg" alt="No products" className="w-32 mb-6" />
+                        <h2 className="text-2xl font-bold text-red-600 mb-3">
+                            There's no product right now
+                        </h2>
+                        <p className="text-gray-500">
+                            Please check back later or explore our store right away!
+                        </p>
+                    </div>
+                )}
             </div>
-          )}
-      </div>
+        </section>
 
       {/* About Us Section */}
       <div className="flex justify-center items-center min-h-screen bg-white-100">

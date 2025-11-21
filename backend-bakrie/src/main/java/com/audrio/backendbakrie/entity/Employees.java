@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.audrio.backendbakrie.roles.Roles;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,8 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
-@Table(name = "employees")
+@Table(name = "employees",
+uniqueConstraints = @UniqueConstraint(columnNames = {"username", "email"}))
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,21 +33,20 @@ public class Employees implements UserDetails{
     private UUID idEmployee;
 
     @NotNull
-    @Column(name = "username")
-    private String username;
+    @Column(unique = true, name = "username")
+    private String fullname;
 
     @NotNull
     @Size(max = 100)
-    @Column(name = "email", unique = true)
+    @Column(unique = true,  name= "email")
     private String email;
 
     @NotNull
-    @Size(max = 200)
+    @Size(max = 200, min = 8)
     @Column(name = "password")
     private String password;
 
-    @NotNull
-    @Column(name = "img_url")
+    @Column(name = "img_url", nullable = true)
     private String img_url;
 
     @Column(name = "verification_token", unique = true)
@@ -97,5 +98,30 @@ public class Employees implements UserDetails{
     @ManyToOne
     @JoinColumn(name = "roles_id", nullable = false)
     private Roles empRoles;
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(this.is_verified);
+    }
 
 }

@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "carts")
@@ -33,21 +35,14 @@ public class Carts {
     @Column(name = "total_price")
     private double totalPrice;
 
-    @NotNull
+    @CreationTimestamp
     @Column(name = "created_at")
     private Timestamp createdAt;
 
-    @NotNull
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp  updatedAt;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item_Carts> itemCarts;
-
-    public Item_Carts findItemByProductId(UUID productId) {
-        return itemCarts.stream()
-                .filter(item -> item.getProduct().getIdProduct().equals(productId))
-                .findFirst()
-                .orElse(null);
-    }
 }

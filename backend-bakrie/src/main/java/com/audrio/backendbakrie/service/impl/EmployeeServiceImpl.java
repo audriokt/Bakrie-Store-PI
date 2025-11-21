@@ -1,109 +1,127 @@
 package com.audrio.backendbakrie.service.impl;
 
 import com.audrio.backendbakrie.entity.Employees;
+import com.audrio.backendbakrie.events.EmailVerificationEvent;
 import com.audrio.backendbakrie.io.*;
 import com.audrio.backendbakrie.repository.EmployeeRepository;
 import com.audrio.backendbakrie.repository.RolesRepository;
 import com.audrio.backendbakrie.roles.Roles;
 import com.audrio.backendbakrie.service.CloudinaryService;
-import com.audrio.backendbakrie.service.EmailService;
 import com.audrio.backendbakrie.service.EmployeeService;
 import com.audrio.backendbakrie.utils.Exceptions.*;
 import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;  // TAMBAHAN
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j  // TAMBAHAN: Aktifkan logging
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final CloudinaryService cloudinaryService;
-    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final RolesRepository rolesRepository;
     private final AuthenticationManager authenticationManager;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public EmployeeResponse add(EmployeeRequest request, MultipartFile file) {
-        log.info("ADD EMPLOYEE START");
-        log.debug("Request: {}", request);
-        log.debug("File: {} (size: {} bytes)", file.getOriginalFilename(), file.getSize());
+    public EmployeeResponse add(EmployeeRequest request) {
+        long totalStart = System.currentTimeMillis();
+        log.info("=== ADD EMPLOYEE START ===");
 
-        validateRequest(request, file);
+        log.debug("Request: {}", request);
+
+        // Validasi request
+        long step1 = System.currentTimeMillis();
+        validateRequest(request);
 
         String email = request.getEmail().trim();
+
+        // Cek email sudah ada atau belum
         log.debug("Checking email existence: {}", email);
         Optional<Employees> optionalEmployee = employeeRepository.findByEmail(email);
 
+        // Generate JWT token
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("purpose", "email-verification");
         String token = jwtUtils.generateToken(claims, email);
-        log.debug("Generated verification token (first 20 chars): {}", token.length() > 20 ? token.substring(0, 20) + "..." : token);
 
+        // Kalau email sudah ada (unverified) → update token + kirim ulang email
         if (optionalEmployee.isPresent()) {
             Employees existing = optionalEmployee.get();
             log.info("Employee already exists: {}", existing.getEmail());
 
             if (existing.getIs_verified()) {
                 log.warn("Attempt to re-register verified email: {}", email);
-                throw new UserAlreadyVerifiedException("Email sudah terverifikasi");
+                throw new UserAlreadyVerifiedException("Email sudah terverifikasi dan terdaftar");
             }
 
-            log.info("Updating verification token for existing unverified employee");
             existing.setVerificationToken(token);
             employeeRepository.save(existing);
-            emailService.sendEmpVerificationEmail(existing.getEmail(), token);
-            log.info("Verification email resent to: {}", email);
+
+            String verificationUrl2 = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/req/signup/emp/verify")
+                    .queryParam("token", token)
+                    .toUriString();
+
+            eventPublisher.publishEvent(EmailVerificationEvent.builder()
+                    .email(existing.getEmail())
+                    .token(token)
+                    .verificationUrl(verificationUrl2)
+                            .subject("Verifikasi Email Bakrie Store")
+                            .message("Terima kasih telah mendaftar di Bakrie Store. Silahkan klik link berikut untuk verifikasi email anda.")
+                    .build());
+
+            log.info("ADD EMPLOYEE SUCCESS (existing unverified)");
             return convertToResponse(existing);
         }
 
-        // Upload file
-        log.debug("Validating file size and type");
-        if (file.getSize() > 5 * 1024 * 1024) {
-            log.warn("File too large: {} bytes", file.getSize());
-            throw new ImageSizeUnaproriateException("File maksimal 5MB");
-        }
-        if (!file.getContentType().startsWith("image/")) {
-            log.warn("Invalid file type: {}", file.getContentType());
-            throw new ImageInvalidExtentionException("Hanya file gambar");
-        }
-
-        String idImg = UUID.randomUUID().toString();
-        log.debug("Uploading image to Cloudinary with ID: {}", idImg);
-        String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
-        log.debug("Image uploaded successfully: {}", imgUrl);
-
+        // User baru → hash password
         Employees newEmployee = convertToEntity(request);
         newEmployee.setPassword(passwordEncoder.encode(request.getPassword()));
-        newEmployee.setImg_url(imgUrl);
+
         newEmployee.setVerificationToken(token);
         newEmployee.setIs_verified(false);
 
-        employeeRepository.save(newEmployee);
-        log.info("New employee saved with ID: {}", newEmployee.getIdEmployee());
+        // Save ke database
+        long step7 = System.currentTimeMillis();
+        Employees saved = employeeRepository.save(newEmployee);
 
-        emailService.sendEmpVerificationEmail(newEmployee.getEmail(), token);
-        log.info("Verification email sent to: {}", newEmployee.getEmail());
+        String verificationUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/req/signup/emp/verify")
+                .queryParam("token", saved.getVerificationToken())
+                .toUriString();
 
-        log.info("ADD EMPLOYEE SUCCESS");
-        return convertToResponse(newEmployee);
+        // Kirim email verifikasi
+        eventPublisher.publishEvent(EmailVerificationEvent.builder()
+                .email(saved.getEmail())
+                .token(saved.getVerificationToken())
+                .verificationUrl(verificationUrl)
+                        .subject("Verifikasi Email Bakrie Store")
+                        .message("Terima kasih telah mendaftar di Bakrie Store. Silahkan klik link berikut untuk verifikasi email anda.")
+                .build());
+
+        log.info("ADD EMPLOYEE SUCCESS (new user)");
+        log.info("=== TOTAL WAKTU ADD EMPLOYEE: {} ms ===", System.currentTimeMillis() - totalStart);
+
+        return convertToResponse(saved);
     }
 
     @Override
     @Transactional
-    public EmployeeResponse update(UUID id, EmployeeRequest request) {
+    public EmployeeResponse update(UUID id, EmployeeRequest request, MultipartFile file) {
         log.info("UPDATE EMPLOYEE START | ID: {}", id);
         log.debug("Update request: {}", request);
 
@@ -113,15 +131,32 @@ public class EmployeeServiceImpl implements EmployeeService {
                     return new EmployeeNotFoundException("Employee not found: " + id);
                 });
 
-        employee.setUsername(request.getUsername().trim());
+        employee.setFullname(request.getUsername().trim());
         employee.setEmail(request.getEmail().trim());
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             log.debug("Updating password for employee: {}", id);
             employee.setPassword(passwordEncoder.encode(request.getPassword()));
         }
-        if (request.getImg_url() != null) {
-            log.debug("Updating image URL for employee: {}", id);
-            employee.setImg_url(request.getImg_url());
+
+        if (file != null && !file.isEmpty()){
+            if (file.getSize() > 5 * 1024 * 1024) {
+                log.warn("File too large: {} bytes", file.getSize());
+                throw new ImageSizeUnaproriateException("File maksimal 5MB");
+            }
+            if (!Objects.requireNonNull(file.getContentType()).startsWith("image/")) {
+                log.warn("Invalid file type: {}", file.getContentType());
+                throw new ImageInvalidExtentionException("Hanya file gambar");
+            }else{
+                String idImg = UUID.randomUUID().toString();
+                String imgUrl = cloudinaryService.uploadFile(file, idImg).getUrl();
+                if (imgUrl == null) {
+                    log.warn("Image upload failed");
+                } else {
+                    log.debug("Image uploaded successfully: {}", imgUrl);
+                }
+                employee.setImg_url(imgUrl);
+                log.debug("Uploading image to Cloudinary with ID: {}", idImg);
+            }
         }
 
         employeeRepository.save(employee);
@@ -258,21 +293,21 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private Employees convertToEntity(EmployeeRequest request) {
         log.debug("Converting request to entity for email: {}", request.getEmail());
-        Roles role = rolesRepository.findByName("ROLE_CASHIER")
+        Roles role = rolesRepository.findByName("ADMIN")
                 .orElseThrow(() -> {
-                    log.error("ROLE_CASHIER not found in database");
-                    return new RoleNotFoundException("CASHIER Role not found");
+                    log.error("ROLE_ADMIN not found in database");
+                    return new RoleNotFoundException("ADMIN Role not found");
                 });
 
         return Employees.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
+                .fullname(request.getUsername().trim())
+                .email(request.getEmail().trim())
                 .img_url(request.getImg_url())
                 .empRoles(role)
                 .build();
     }
 
-    private void validateRequest(EmployeeRequest request, MultipartFile file) {
+    private void validateRequest(EmployeeRequest request) {
         log.debug("VALIDATING EMPLOYEE REQUEST");
         if (request == null) {
             log.warn("Request is null");
@@ -280,7 +315,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // Email
-        if (request.getEmail() == null || !request.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+        if (request.getEmail() == null || !request.getEmail().matches("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             log.warn("Invalid email format: {}", request.getEmail());
             throw new EmailNotValidException("Email tidak valid");
         }
@@ -305,12 +340,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (username.matches(".*\\d.*") || username.matches(".*[^a-zA-Z0-9].*")) {
             log.warn("Username contains invalid characters: {}", username);
             throw new UsernameContainNumberOrDigitsException("Username hanya boleh mengandung huruf");
-        }
-
-        // File
-        if (file == null || file.isEmpty()) {
-            log.warn("Image file is empty");
-            throw new ImageFileEmptyException("File tidak boleh kosong");
         }
 
         log.debug("VALIDATION PASSED");

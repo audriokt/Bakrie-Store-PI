@@ -21,4 +21,12 @@ export const profileCustomer = async () => {
     return await axios.get(`${URL_BASE}/customer/myprofile`)
 }
 
+export const updateCustomerProfile = async (customer_id, formData) => {
+    return await axios.put(`/customer/update/${customer_id}`, formData);
+};
+
+export const changeCustomerPassword = async (payload) => {
+    return await axios.post("/customer/change-password", payload);
+};
+
 

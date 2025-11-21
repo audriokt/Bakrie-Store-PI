@@ -14,16 +14,17 @@ export const AuthProvider = ({children}) => {
 
     // variabel untuk menyimpan data user yang sedang login diisi null semua
     // data buat isinya diambil dari api profileCustomer
-    const [user, setUser] = useState({
-        id : null,
-        username : null,
-        address : null,
-        email : null,
-        phone_num : null,
-        img_url : null,
-        updatedAt : null,
-        createdAt : null,
-    })
+    const [user, setUser] = useState(null)
+    // const [user, setUser] = useState({
+    //     id : null,
+    //     username : null,
+    //     address : null,
+    //     email : null,
+    //     phone_num : null,
+    //     img_url : null,
+    //     updatedAt : null,
+    //     createdAt : null,
+    // })
 
     // fungsi wrapper setAuth untuk ngatur nilai otentikasi
     // jadi token dan role disimpan di local storage juga
@@ -43,7 +44,6 @@ export const AuthProvider = ({children}) => {
             token : null,
             role : null
         })
-
         setUser(null)
     }
 
