@@ -222,4 +222,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden");
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<?> handleResourceNotFound(ResourceNotFoundException ex) {
+        log.warn("Resource not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Resource not found");
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<?> handleInsufficientStock(InsufficientStockException ex) {
+        log.warn("Insufficient stock: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient stock");
+    }
+
+
 }
