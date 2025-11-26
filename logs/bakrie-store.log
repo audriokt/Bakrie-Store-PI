@@ -4151,3 +4151,122 @@ Caused by: java.sql.SQLException: Incorrect string value: '\x9A\xD1x)\xB4G...' f
 2025-11-26 14:56:58.211 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
 2025-11-26 14:56:58.212 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
 2025-11-26 14:56:58.217 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-11-26 14:57:01.505 [restartedMain] INFO  c.a.b.BackendBakrieApplication - Starting BackendBakrieApplication using Java 21.0.8 with PID 42920 (D:\Documents\Bakrie-Store-PI\backend-bakrie\target\classes started by LEGION in D:\Documents\Bakrie-Store-PI)
+2025-11-26 14:57:01.505 [restartedMain] DEBUG c.a.b.BackendBakrieApplication - Running with Spring Boot v3.5.7, Spring v6.2.12
+2025-11-26 14:57:01.506 [restartedMain] INFO  c.a.b.BackendBakrieApplication - No active profile set, falling back to 1 default profile: "default"
+2025-11-26 14:57:01.536 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-11-26 14:57:01.536 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-11-26 14:57:01.918 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-26 14:57:01.961 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 38 ms. Found 8 JPA repository interfaces.
+2025-11-26 14:57:02.279 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 9090 (http)
+2025-11-26 14:57:02.287 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-11-26 14:57:02.287 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-11-26 14:57:02.313 [restartedMain] INFO  o.a.c.c.C.[.[localhost].[/api/v1.0] - Initializing Spring embedded WebApplicationContext
+2025-11-26 14:57:02.313 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 777 ms
+2025-11-26 14:57:02.391 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-11-26 14:57:02.421 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.33.Final
+2025-11-26 14:57:02.436 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-11-26 14:57:02.581 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-26 14:57:02.595 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-11-26 14:57:02.768 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5baf28e7
+2025-11-26 14:57:02.769 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-11-26 14:57:02.798 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-11-26 14:57:02.799 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-11-26 14:57:02.809 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-11-26 14:57:03.461 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-11-26 14:57:03.584 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-26 14:57:03.758 [restartedMain] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-11-26 14:57:04.122 [restartedMain] DEBUG c.a.b.config.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2025-11-26 14:57:04.195 [restartedMain] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer - Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-11-26 14:57:04.195 [restartedMain] WARN  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-11-26 14:57:04.289 [restartedMain] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-26 14:57:04.452 [restartedMain] DEBUG o.s.s.web.DefaultSecurityFilterChain - Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, CorsFilter, LogoutFilter, JwtAuthenticationFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2025-11-26 14:57:04.592 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-11-26 14:57:04.619 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 9090 (http) with context path '/api/v1.0'
+2025-11-26 14:57:04.624 [restartedMain] INFO  c.a.b.BackendBakrieApplication - Started BackendBakrieApplication in 3.403 seconds (process running for 3.778)
+2025-11-26 15:12:07.788 [http-nio-9090-exec-2] INFO  o.a.c.c.C.[.[localhost].[/api/v1.0] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-11-26 15:12:07.788 [http-nio-9090-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-11-26 15:12:07.789 [http-nio-9090-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-11-26 15:12:07.804 [http-nio-9090-exec-2] DEBUG o.s.security.web.FilterChainProxy - Securing GET /public/products/fetchProducts
+2025-11-26 15:12:07.804 [http-nio-9090-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing GET /public/products/fetchProducts
+2025-11-26 15:12:07.823 [http-nio-9090-exec-2] DEBUG c.a.b.config.JwtAuthenticationFilter - >>> Request GET /api/v1.0/public/products/fetchProducts
+2025-11-26 15:12:07.823 [http-nio-9090-exec-1] DEBUG c.a.b.config.JwtAuthenticationFilter - >>> Request GET /api/v1.0/public/products/fetchProducts
+2025-11-26 15:12:07.823 [http-nio-9090-exec-1] WARN  c.a.b.config.JwtAuthenticationFilter - Missing or invalid Authorization header | Header: null
+2025-11-26 15:12:07.823 [http-nio-9090-exec-2] WARN  c.a.b.config.JwtAuthenticationFilter - Missing or invalid Authorization header | Header: null
+2025-11-26 15:12:07.824 [http-nio-9090-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-26 15:12:07.824 [http-nio-9090-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-26 15:12:07.826 [http-nio-9090-exec-2] DEBUG o.s.security.web.FilterChainProxy - Secured GET /public/products/fetchProducts
+2025-11-26 15:12:07.826 [http-nio-9090-exec-1] DEBUG o.s.security.web.FilterChainProxy - Secured GET /public/products/fetchProducts
+2025-11-26 15:12:07.838 [http-nio-9090-exec-2] INFO  c.a.b.controller.ProductController - Method : GET | Endpoint : /public/products/fetchProducts | Payload : 200 OK
+2025-11-26 15:12:07.838 [http-nio-9090-exec-1] INFO  c.a.b.controller.ProductController - Method : GET | Endpoint : /public/products/fetchProducts | Payload : 200 OK
+2025-11-26 15:29:36.969 [http-nio-9090-exec-5] DEBUG o.s.security.web.FilterChainProxy - Securing OPTIONS /public/auth/login/customer
+2025-11-26 15:29:37.004 [http-nio-9090-exec-6] DEBUG o.s.security.web.FilterChainProxy - Securing POST /public/auth/login/customer
+2025-11-26 15:29:37.004 [http-nio-9090-exec-6] DEBUG c.a.b.config.JwtAuthenticationFilter - >>> Request POST /api/v1.0/public/auth/login/customer
+2025-11-26 15:29:37.004 [http-nio-9090-exec-6] WARN  c.a.b.config.JwtAuthenticationFilter - Missing or invalid Authorization header | Header: null
+2025-11-26 15:29:37.004 [http-nio-9090-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-26 15:29:37.004 [http-nio-9090-exec-6] DEBUG o.s.security.web.FilterChainProxy - Secured POST /public/auth/login/customer
+2025-11-26 15:29:37.102 [http-nio-9090-exec-6] INFO  c.a.b.s.impl.CustomerServiceImpl - CUSTOMER LOGIN START | Email: audrio8802@gmail.com
+2025-11-26 15:29:37.502 [http-nio-9090-exec-6] DEBUG o.s.s.a.d.DaoAuthenticationProvider - Authenticated user
+2025-11-26 15:29:37.502 [http-nio-9090-exec-6] DEBUG c.a.b.s.impl.CustomerServiceImpl - Spring Security authentication passed for: audrio8802@gmail.com
+2025-11-26 15:29:37.532 [http-nio-9090-exec-6] DEBUG c.a.b.s.impl.CustomerServiceImpl - Access token generated (first 20 chars): eyJhbGciOiJIUzI1NiJ9...
+2025-11-26 15:29:37.532 [http-nio-9090-exec-6] INFO  c.a.b.s.impl.CustomerServiceImpl - Customer login successful: audrio8802@gmail.com | Role: CUSTOMER
+2025-11-26 15:29:37.532 [http-nio-9090-exec-6] INFO  c.a.b.s.impl.CustomerServiceImpl - CUSTOMER LOGIN SUCCESS
+2025-11-26 15:29:37.552 [http-nio-9090-exec-7] DEBUG o.s.security.web.FilterChainProxy - Securing OPTIONS /customer/myprofile
+2025-11-26 15:29:37.556 [http-nio-9090-exec-8] DEBUG o.s.security.web.FilterChainProxy - Securing GET /customer/myprofile
+2025-11-26 15:29:37.557 [http-nio-9090-exec-8] DEBUG c.a.b.config.JwtAuthenticationFilter - >>> Request GET /api/v1.0/customer/myprofile
+2025-11-26 15:29:37.557 [http-nio-9090-exec-8] DEBUG c.a.b.config.JwtAuthenticationFilter - Token received (first 20 chars): eyJhbGciOiJIUzI1NiJ9...
+2025-11-26 15:29:37.603 [http-nio-9090-exec-8] INFO  c.a.b.config.JwtAuthenticationFilter - Authorities for audrio8802@gmail.com: [ROLE_CUSTOMER]
+2025-11-26 15:29:37.603 [http-nio-9090-exec-8] DEBUG c.a.b.config.JwtAuthenticationFilter - Authenticated user from JWT: audrio8802@gmail.com
+2025-11-26 15:29:37.603 [http-nio-9090-exec-8] INFO  c.a.b.config.JwtAuthenticationFilter - Authenticated user: audrio8802@gmail.com
+2025-11-26 15:29:37.603 [http-nio-9090-exec-8] INFO  c.a.b.config.JwtAuthenticationFilter - Authorities: [ROLE_CUSTOMER]
+2025-11-26 15:29:37.603 [http-nio-9090-exec-8] DEBUG o.s.security.web.FilterChainProxy - Secured GET /customer/myprofile
+2025-11-26 15:29:37.612 [http-nio-9090-exec-8] INFO  c.a.b.controller.CustomerController - Method : GET | Endpoint : /customer/myprofile | Payload : Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQ1VTVE9NRVIiLCJwdXJwb3NlIjoiYWNjZXNzIiwic3ViIjoiYXVkcmlvODgwMkBnbWFpbC5jb20iLCJpYXQiOjE3NjQxNDU3NzcsImV4cCI6MTc2NDIzMjE3N30.LYr1uIWY0SIC27ccFLqO45VONMHmT1nJaRWu8V3OiUM
+2025-11-26 15:29:37.612 [http-nio-9090-exec-8] INFO  c.a.b.s.impl.CustomerServiceImpl - GET CUSTOMER PROFILE START | EMAIL: audrio8802@gmail.com
+2025-11-26 15:29:37.622 [http-nio-9090-exec-8] INFO  c.a.b.s.impl.CustomerServiceImpl - GET CUSTOMER PROFILE SUCCESS
+2025-11-26 15:29:37.622 [http-nio-9090-exec-8] DEBUG c.a.b.s.impl.CustomerServiceImpl - Converting entity to response for customer ID: 49b697a8-c144-4145-a894-e32477c12451
+2025-11-26 15:29:37.642 [http-nio-9090-exec-9] DEBUG o.s.security.web.FilterChainProxy - Securing OPTIONS /customer/cart/mycart/49b697a8-c144-4145-a894-e32477c12451
+2025-11-26 15:29:37.653 [http-nio-9090-exec-10] DEBUG o.s.security.web.FilterChainProxy - Securing GET /customer/cart/mycart/49b697a8-c144-4145-a894-e32477c12451
+2025-11-26 15:29:37.653 [http-nio-9090-exec-10] DEBUG c.a.b.config.JwtAuthenticationFilter - >>> Request GET /api/v1.0/customer/cart/mycart/49b697a8-c144-4145-a894-e32477c12451
+2025-11-26 15:29:37.653 [http-nio-9090-exec-10] DEBUG c.a.b.config.JwtAuthenticationFilter - Token received (first 20 chars): eyJhbGciOiJIUzI1NiJ9...
+2025-11-26 15:29:37.662 [http-nio-9090-exec-10] INFO  c.a.b.config.JwtAuthenticationFilter - Authorities for audrio8802@gmail.com: [ROLE_CUSTOMER]
+2025-11-26 15:29:37.662 [http-nio-9090-exec-10] DEBUG c.a.b.config.JwtAuthenticationFilter - Authenticated user from JWT: audrio8802@gmail.com
+2025-11-26 15:29:37.662 [http-nio-9090-exec-10] INFO  c.a.b.config.JwtAuthenticationFilter - Authenticated user: audrio8802@gmail.com
+2025-11-26 15:29:37.662 [http-nio-9090-exec-10] INFO  c.a.b.config.JwtAuthenticationFilter - Authorities: [ROLE_CUSTOMER]
+2025-11-26 15:29:37.662 [http-nio-9090-exec-10] DEBUG o.s.security.web.FilterChainProxy - Secured GET /customer/cart/mycart/49b697a8-c144-4145-a894-e32477c12451
+2025-11-26 15:29:37.662 [http-nio-9090-exec-10] INFO  c.a.b.controller.CartController - GET /customer/mycart/49b697a8-c144-4145-a894-e32477c12451
+2025-11-26 15:29:37.682 [http-nio-9090-exec-10] WARN  o.s.w.s.m.a.ResponseStatusExceptionResolver - Resolved [org.springframework.web.server.ResponseStatusException: 404 NOT_FOUND "Cart not found by customer id: 49b697a8-c144-4145-a894-e32477c12451"]
+2025-11-26 15:29:37.698 [http-nio-9090-exec-10] DEBUG o.s.security.web.FilterChainProxy - Securing GET /error
+2025-11-26 15:29:37.698 [http-nio-9090-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-26 15:36:41.391 [http-nio-9090-exec-1] DEBUG o.s.security.web.FilterChainProxy - Securing OPTIONS /customer/cart/add/itemCart
+2025-11-26 15:36:41.397 [http-nio-9090-exec-4] DEBUG o.s.security.web.FilterChainProxy - Securing POST /customer/cart/add/itemCart
+2025-11-26 15:36:41.397 [http-nio-9090-exec-4] DEBUG c.a.b.config.JwtAuthenticationFilter - >>> Request POST /api/v1.0/customer/cart/add/itemCart
+2025-11-26 15:36:41.397 [http-nio-9090-exec-4] DEBUG c.a.b.config.JwtAuthenticationFilter - Token received (first 20 chars): eyJhbGciOiJIUzI1NiJ9...
+2025-11-26 15:36:41.407 [http-nio-9090-exec-4] INFO  c.a.b.config.JwtAuthenticationFilter - Authorities for audrio8802@gmail.com: [ROLE_CUSTOMER]
+2025-11-26 15:36:41.407 [http-nio-9090-exec-4] DEBUG c.a.b.config.JwtAuthenticationFilter - Authenticated user from JWT: audrio8802@gmail.com
+2025-11-26 15:36:41.407 [http-nio-9090-exec-4] INFO  c.a.b.config.JwtAuthenticationFilter - Authenticated user: audrio8802@gmail.com
+2025-11-26 15:36:41.407 [http-nio-9090-exec-4] INFO  c.a.b.config.JwtAuthenticationFilter - Authorities: [ROLE_CUSTOMER]
+2025-11-26 15:36:41.407 [http-nio-9090-exec-4] DEBUG o.s.security.web.FilterChainProxy - Secured POST /customer/cart/add/itemCart
+2025-11-26 15:36:41.417 [http-nio-9090-exec-4] INFO  c.a.b.controller.CartController - POST /customer/cart/add/itemCart - Request: AddItemCartRequest(customerId=49b697a8-c144-4145-a894-e32477c12451, productId=1b1d7cdd-b551-468e-b399-bcf98cdf8051, quantity=1)
+2025-11-26 15:36:41.423 [http-nio-9090-exec-4] INFO  c.a.b.s.impl.ItemCartServiceImpl - Add item to cart initiated. Customer ID: 49b697a8-c144-4145-a894-e32477c12451, Product ID: 1b1d7cdd-b551-468e-b399-bcf98cdf8051, Quantity: 1
+2025-11-26 15:36:41.534 [http-nio-9090-exec-4] INFO  c.a.b.s.impl.ItemCartServiceImpl - Created new item. Product ID: 1b1d7cdd-b551-468e-b399-bcf98cdf8051, Quantity: 1, SubPrice: 25000.0
+2025-11-26 15:36:41.549 [http-nio-9090-exec-4] INFO  c.a.b.s.impl.ItemCartServiceImpl - Returning CartResponse: {"cartId":"0f9cdd6a-5a72-4701-9a2e-cf7649cff7a3","customerId":"49b697a8-c144-4145-a894-e32477c12451","totalPrice":25000.0,"item_carts":[{"itemCartId":"f4cb4ec8-de90-4a57-8b7d-c871e32227e9","productId":"1b1d7cdd-b551-468e-b399-bcf98cdf8051","productName":"Cinnamon Roll Classic","productImgUrl":"https://res.cloudinary.com/drpairos5/image/upload/v1763523952/bakrie/c0d9cf0d-c27c-40d2-b9f3-9f17b170d5bd.jpg","quantity":1,"subPrice":25000.0}]}
+2025-11-26 15:36:52.274 [http-nio-9090-exec-3] DEBUG o.s.security.web.FilterChainProxy - Securing OPTIONS /customer/cart/update/itemCart
+2025-11-26 15:36:52.277 [http-nio-9090-exec-5] DEBUG o.s.security.web.FilterChainProxy - Securing PUT /customer/cart/update/itemCart
+2025-11-26 15:36:52.277 [http-nio-9090-exec-5] DEBUG c.a.b.config.JwtAuthenticationFilter - >>> Request PUT /api/v1.0/customer/cart/update/itemCart
+2025-11-26 15:36:52.277 [http-nio-9090-exec-5] DEBUG c.a.b.config.JwtAuthenticationFilter - Token received (first 20 chars): eyJhbGciOiJIUzI1NiJ9...
+2025-11-26 15:36:52.291 [http-nio-9090-exec-5] INFO  c.a.b.config.JwtAuthenticationFilter - Authorities for audrio8802@gmail.com: [ROLE_CUSTOMER]
+2025-11-26 15:36:52.291 [http-nio-9090-exec-5] DEBUG c.a.b.config.JwtAuthenticationFilter - Authenticated user from JWT: audrio8802@gmail.com
+2025-11-26 15:36:52.291 [http-nio-9090-exec-5] INFO  c.a.b.config.JwtAuthenticationFilter - Authenticated user: audrio8802@gmail.com
+2025-11-26 15:36:52.291 [http-nio-9090-exec-5] INFO  c.a.b.config.JwtAuthenticationFilter - Authorities: [ROLE_CUSTOMER]
+2025-11-26 15:36:52.291 [http-nio-9090-exec-5] DEBUG o.s.security.web.FilterChainProxy - Secured PUT /customer/cart/update/itemCart
+2025-11-26 15:36:52.291 [http-nio-9090-exec-5] INFO  c.a.b.controller.CartController - PUT /customer/cart/update/itemCart - Request: UpdateItemRequest(itemCartId=f4cb4ec8-de90-4a57-8b7d-c871e32227e9, quantity=2)
+2025-11-26 15:36:52.297 [http-nio-9090-exec-5] INFO  c.a.b.s.impl.ItemCartServiceImpl - Updating item quantity. ItemCart ID: f4cb4ec8-de90-4a57-8b7d-c871e32227e9, New Quantity: 2
+2025-11-26 15:36:52.307 [http-nio-9090-exec-5] INFO  c.a.b.s.impl.ItemCartServiceImpl - Item updated. Product ID: 1b1d7cdd-b551-468e-b399-bcf98cdf8051, Quantity: 2, SubPrice: 50000.0
+2025-11-26 15:36:52.312 [http-nio-9090-exec-5] INFO  c.a.b.s.impl.ItemCartServiceImpl - Cart total recalculated for Customer ID: 49b697a8-c144-4145-a894-e32477c12451
