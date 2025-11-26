@@ -234,5 +234,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient stock");
     }
 
-
+    @ExceptionHandler(RestrictionInOrderOperationException.class)
+    public ResponseEntity<?> handleRestrictionInOrderOperationException(Exception ex) {
+        log.error("Restriction Operation in Order: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+    }
 }

@@ -11,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -43,7 +44,7 @@ public class Transactions {
     @NotNull
     @CreationTimestamp
     @Column(name = "payment_date")
-    private Timestamp paymentDate;
+    private LocalDateTime paymentDate;
 
     @NotNull
     @Column(name = "total", precision = 10, scale = 2)

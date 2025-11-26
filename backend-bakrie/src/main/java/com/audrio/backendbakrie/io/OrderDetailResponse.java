@@ -1,5 +1,6 @@
 package com.audrio.backendbakrie.io;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,5 +13,5 @@ public class OrderDetailResponse {
     private String productName;
     private int quantity;
     private double unitPrice;
-    private double subPrice;
+    private double subtotal;
 }

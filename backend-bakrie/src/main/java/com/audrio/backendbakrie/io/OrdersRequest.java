@@ -9,7 +9,6 @@ import java.util.List;
 
 @Builder
 @Data
-
 public class OrdersRequest {
 
     @NotNull(message = "ID customer wajib diisi")
