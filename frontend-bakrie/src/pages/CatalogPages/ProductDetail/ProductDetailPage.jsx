@@ -1,15 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProductCarousel from "@/components/core/ProductCarousel.jsx";
 import { useAuth } from "../../../hooks/useAuth";
 import Swal from "sweetalert2";
+import { useCart } from "../../../hooks/useCart";
 
 const ProductDetailPage = () => {
   const { state } = useLocation(); 
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // 1. Panggil langsung sesuai nama di Context: 'addItemToCart'
+  const { addItemToCart, loading } = useCart(); 
+  
   const [quantity, setQuantity] = useState(1);
+
+  // --- DEBUGGING PRODUK (Cek Console F12) ---
+  useEffect(() => {
+    console.group("🔍 DEBUG DETAIL PAGE: PRODUCT DATA");
+    console.log("Raw Product State:", state);
+    // Cek mana ID yang berisi data
+    const detecetedId = state?.id_product || state?.id || state?.productId;
+    console.log("Detected Product ID:", detecetedId || "❌ TIDAK KETEMU");
+    console.groupEnd();
+  }, [state]);
 
   const handleDecrease = () => {
     if (quantity > 1) setQuantity(quantity - 1);
@@ -19,7 +34,8 @@ const ProductDetailPage = () => {
     setQuantity(quantity + 1);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    // A. Cek Login
     if (!user) {
       Swal.fire({
         icon: "warning",
@@ -28,43 +44,72 @@ const ProductDetailPage = () => {
         confirmButtonText: "Login Now",
         showCancelButton: true,
         confirmButtonColor: "#C31D1D",
-        cancelButtonColor: "#6b7280",
       }).then((result) => {
-        if (result.isConfirmed) {
-          navigate("/login");
-        }
+        if (result.isConfirmed) navigate("/login");
       });
       return;
     }
-    navigate("/carts");
+
+    // B. Ambil ID Product (Prioritas: id_product sesuai log kamu sebelumnya)
+    const productId = state.id_product || state.id || state.productId;
+
+    if (!productId) {
+        console.error("❌ Product ID Missing!", state);
+        Swal.fire({
+            icon: "error",
+            title: "Data Error",
+            text: "Product ID tidak ditemukan. Cek Console.",
+        });
+        return;
+    }
+
+    try {
+      console.log("🚀 Mengirim Request Add to Cart...", { productId, quantity });
+      
+      // 2. Panggil fungsi dengan nama asli
+      await addItemToCart(productId, quantity);
+
+      // C. Sukses
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: `${state.product_name} added to cart!`,
+        confirmButtonColor: "#C31D1D",
+        confirmButtonText: "Go to Cart",
+        showCancelButton: true,
+        cancelButtonText: "Continue Shopping"
+      }).then((result) => {
+        if (result.isConfirmed) navigate("/carts"); 
+      });
+
+    } catch (error) {
+      // Error detail sudah di-log di Context, disini tampilkan UI saja
+      console.error("❌ Gagal di Page:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: error.message || "Failed to add item to cart.",
+        confirmButtonColor: "#C31D1D",
+      });
+    }
   };
 
   if (!state) {
-  return (
-    <div className="min-h-screen flex justify-center items-center bg-[#fff] px-6">
-      <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border border-[#FFDADA] rounded-2xl shadow-md w-[80%] max-w-xl py-16 px-10 text-center">
-        <h2 className="text-2xl font-semibold text-red-600 mb-3">
-          Product Not Found 😢
-        </h2>
-        <p className="text-gray-500 mb-5">
-          We couldn't find the product you're looking for...
-        </p>
-
-        <Link
-          to="/products"
-          className="bg-red-600 text-white py-3 px-8 rounded-full font-semibold hover:bg-red-700 transition-colors duration-200"
-        >
-          Back to Products
-        </Link>
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-[#fff] px-6">
+        <div className="flex flex-col items-center justify-center bg-[#FFF5F5] border border-[#FFDADA] rounded-2xl shadow-md w-[80%] max-w-xl py-16 px-10 text-center">
+          <h2 className="text-2xl font-semibold text-red-600 mb-3">Product Not Found 😢</h2>
+          <Link to="/products" className="bg-red-600 text-white py-3 px-8 rounded-full font-semibold hover:bg-red-700 transition-colors duration-200">
+            Back to Products
+          </Link>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-
-    const formatPrice = (price) => {
-    return price.toLocaleString("id-ID");
-    };
+  const formatPrice = (price) => {
+    return price?.toLocaleString("id-ID");
+  };
 
   return (
     <div className="max-w-screen min-h-screen flex items-center justify-center bg-[#fff] px-8 py-16 pt-32">
@@ -74,10 +119,8 @@ const ProductDetailPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        {/* Carousel Produk */}
         <ProductCarousel images={[state.image_url]} />
 
-        {/* Info Produk */}
         <div className="flex flex-col text-red-700 w-full">
           <h2 className="text-2xl font-semibold">{state.product_name}</h2>
           <div className="border-b border-red-300 mt-2 mb-4 w-full"></div>
@@ -88,36 +131,24 @@ const ProductDetailPage = () => {
 
           <p className="text-lg font-semibold mb-4">Rp{formatPrice(state.product_price)}</p>
 
-          {/* Quantity Selector & Add to Cart */}
           <div className="flex flex-col w-full h-20 items-start gap-4 mt-6">
             <div className="flex w-full items-center justify-between border border-red-400 rounded-full py-3 px-6 shadow-sm bg-white/70 backdrop-blur-sm">
-              <button
-                onClick={handleDecrease}
-                className="text-red-600 font-bold text-2xl hover:text-red-800 transition-all duration-150 hover:scale-110 active:scale-95"
-              >
-                −
-              </button>
-
-              <span className="text-red-700 font-semibold text-lg select-none text-center w-6">
-                {quantity}
-              </span>
-
-              <button
-                onClick={handleIncrease}
-                className="text-red-600 font-bold text-2xl hover:text-red-800 transition-all duration-150 hover:scale-110 active:scale-95"
-              >
-                +
-              </button>
+              <button onClick={handleDecrease} className="text-red-600 font-bold text-2xl hover:text-red-800 transition-all duration-150 hover:scale-110 active:scale-95">−</button>
+              <span className="text-red-700 font-semibold text-lg select-none text-center w-6">{quantity}</span>
+              <button onClick={handleIncrease} className="text-red-600 font-bold text-2xl hover:text-red-800 transition-all duration-150 hover:scale-110 active:scale-95">+</button>
             </div>
 
             <div className="w-full">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleAddToCart}
-                className="w-full bg-red-600 text-white py-3 rounded-full font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md"
+                onClick={handleAddToCart} 
+                disabled={loading} 
+                className={`w-full py-3 rounded-full font-semibold transition-colors duration-200 shadow-md ${
+                    loading ? "bg-red-400 cursor-not-allowed text-white" : "bg-red-600 hover:bg-red-700 text-white"
+                }`}
               >
-                Add to Cart
+                {loading ? "Adding..." : "Add to Cart"}
               </motion.button>
             </div>
           </div>

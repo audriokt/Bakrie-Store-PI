@@ -43,12 +43,6 @@ public class Item_Carts {
     private Integer quantity;
 
     @NotNull
-    @Column(name = "price_per_unit")
-    @Positive
-    @Min(1)
-    private Double pricePerUnit;
-
-    @NotNull
     @Column(name = "sub_price")
     @Positive
     private Double subPrice;

@@ -20,6 +20,7 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setMaxPoolSize(20);
         executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("EmailAsync-");
+        executor.setTaskDecorator(new SecurityContextTaskDecorator());
         executor.initialize();
         return executor;
     }

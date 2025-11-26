@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsServiceImpl userDetailsService;
 
     private static final List<String> WHITELIST = List.of(
-            "/public/**",
+            "/public/auth/**",
             "/req/signup/**"
     );
 
@@ -124,7 +124,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         log.debug("Authenticated user from JWT: {}", email);
-        log.info("Authenticated user: {}", userDetails.getUsername());
+        log.info("Authenticated user: {}", SecurityContextHolder.getContext().getAuthentication().getName());
         log.info("Authorities: {}", userDetails.getAuthorities());
 
 

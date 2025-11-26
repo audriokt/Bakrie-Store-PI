@@ -3,13 +3,18 @@ package com.audrio.backendbakrie.service.impl;
 import com.audrio.backendbakrie.entity.Carts;
 import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.entity.Item_Carts;
+import com.audrio.backendbakrie.io.CartResponse;
+import com.audrio.backendbakrie.io.ItemCartResponse;
 import com.audrio.backendbakrie.repository.CartRepository;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.service.CartService;
+import com.audrio.backendbakrie.utils.Exceptions.CartNotFoundException;
+import com.audrio.backendbakrie.utils.Exceptions.CustomerNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,26 +36,49 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void deleteCart(Carts cart) {
-        Optional<Customers> existingCustomer = customerRepository.findByIdCustomer(cart.getCustomer().getIdCustomer());
-        if(existingCustomer.isPresent()){
-            try{
-                cartRepository.delete(cart);
-            } catch (Exception e){
-                log.error("Error deleting cart for customer {}: {}", existingCustomer.get().getIdCustomer(), e.getMessage());
-                throw new RuntimeException("Error deleting cart");
-            }
-            log.info("Berhasil menghapus keranjang user: {} ", existingCustomer.get().getIdCustomer());
-        }else{
-            log.warn("Customer tidak ditemukan");
-            throw new RuntimeException("Customer not found");
+    public void deleteCart(String customerId) {
+        Customers customer = customerRepository.findByIdCustomer(UUID.fromString(customerId))
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+        Carts cart = cartRepository.findByCustomer(customer)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found by customer id: " + customerId));
+        try {
+            cartRepository.delete(cart);
+            log.info("Berhasil menghapus keranjang user: {}", customerId);
+        } catch (Exception e) {
+            log.error("Error deleting cart for customer {}: {}", customerId, e.getMessage());
+            throw new RuntimeException("Error deleting cart");
         }
+
     }
 
     @Override
-    public Carts getCartByCustomerId(Customers customer) {
-        return cartRepository.findByCustomer(customer)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+    public CartResponse getCartByCustomerId(String customerId) {
+        Customers customer = customerRepository.findByIdCustomer(UUID.fromString(customerId))
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+        Carts cart = cartRepository.findByCustomer(customer)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found by customer id: " + customer.getIdCustomer()));
+
+        return convertToResponse(cart);
+    }
+
+    private CartResponse convertToResponse(Carts cart) {
+        List<ItemCartResponse> itemResponses = cart.getItemCarts().stream()
+                .map(item -> ItemCartResponse.builder()
+                        .productId(UUID.fromString(item.getProduct().getIdProduct().toString()))
+                        .itemCartId(item.getIdItemCarts())
+                        .quantity(item.getQuantity())
+                        .subPrice(item.getSubPrice())
+                        .productName(item.getProduct().getProduct_name())
+                        .productImgUrl(item.getProduct().getImage_url())
+                        .build())
+                .toList();
+
+        return CartResponse.builder()
+                .customerId(cart.getCustomer().getIdCustomer().toString())
+                .cartId(String.valueOf(cart.getCartId()))
+                .totalPrice(cart.getTotalPrice())
+                .item_carts(itemResponses)
+                .build();
     }
 }
 

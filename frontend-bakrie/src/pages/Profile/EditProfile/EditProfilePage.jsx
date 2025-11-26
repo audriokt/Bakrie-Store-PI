@@ -65,8 +65,8 @@ const EditProfilePage = () => {
         try {
             await updateCustomerProfile(user.customer_id, data);
             Swal.fire({
-                title: "Berhasil!",
-                text: "Profil kamu berhasil diperbarui",
+                title: "Successful!",
+                text: "Your profile has been updated",
                 icon: "success",
                 confirmButtonText: "OK",
                 confirmButtonColor: "#C31D1D",
@@ -78,13 +78,13 @@ const EditProfilePage = () => {
                 }
             });
         } catch (err) {
-            const errorMessage = err.response?.data?.message || err.message || "Terjadi kesalahan";
+            const errorMessage = err.response?.data?.message || err.message || "something went wrong";
 
             Swal.fire({
-                title: "Gagal!",
+                title: "Failed!",
                 text: errorMessage,
                 icon: "error",
-                confirmButtonText: "Coba Lagi",
+                confirmButtonText: "Try Again Babe!!!!!",
                 confirmButtonColor: "#C31D1D",
             });
         } finally {
@@ -204,7 +204,7 @@ const EditProfilePage = () => {
                         disabled={loading}
                         className="w-full bg-red-600 text-white py-3 rounded-full font-semibold mt-6 hover:bg-red-700 transition shadow-md disabled:opacity-70"
                     >
-                        {loading ? "Menyimpan..." : "Save Changes"}
+                        {loading ? "Loading..." : "Save Changes"}
                     </motion.button>
                 </form>
             </motion.div>

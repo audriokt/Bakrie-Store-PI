@@ -6,14 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
-import java.util.UUID;
 
 @AllArgsConstructor
 @Builder
 @Data
 public class CartResponse {
-    private UUID cartId;
-    private UUID customerId;
+    private String cartId;
+    private String customerId;
     private double totalPrice;
-    private List<Item_Carts> item_carts;
+    private List<ItemCartResponse> item_carts;
 }

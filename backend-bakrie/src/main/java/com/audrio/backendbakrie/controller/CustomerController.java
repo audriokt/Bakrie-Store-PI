@@ -34,7 +34,7 @@ public class CustomerController {
             return customerService.add(customerRequest);
     }
 
-    @GetMapping("/admin/customers/fetchCustomers")
+    @GetMapping("/employee/customers/fetchCustomers")
     @ResponseStatus(HttpStatus.OK)
     public List<CustomerResponse> fetchAllCustomers() {
         return customerService.getAll();
