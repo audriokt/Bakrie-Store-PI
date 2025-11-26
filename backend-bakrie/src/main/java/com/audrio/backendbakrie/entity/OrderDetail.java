@@ -14,7 +14,8 @@ import java.util.UUID;
 public class OrderDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id_order_detail", columnDefinition = "VARCHAR(36)")
     private UUID idOrderDetail;
 
     @ManyToOne
