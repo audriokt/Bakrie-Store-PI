@@ -1,62 +1,51 @@
 package com.audrio.backendbakrie.entity;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "orders")
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class Orders {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id_order")
     private UUID id_order;
 
-    @ManyToOne
-    @JoinColumn(name = "id_customer") // nama kolom foreign key di tabel Orders
-    private Customers customers;
+    @Column(name = "order_number", unique = true, nullable = false)
+    private String orderNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "id_employee", nullable = false)
-    private Employees employees;
+    @Column(name = "order_date", updatable = false)
+    private LocalDateTime orderDate = LocalDateTime.now();
 
-    @NotNull
-    @Size(max = 100)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_status")
+    private OrderStatus orderStatus = OrderStatus.PENDING;
+
     @Column(name = "deliver_address")
     private String deliverAddress;
 
-    @NotNull
-    @Size(max = 100)
-    @Column(name = "order_number", unique = true)
-    private String orderNumber;
+    @Column(name = "total")
+    private Double total;
 
-    @NotNull
-    @Column(name = "order_date", updatable = false)
-    private Timestamp orderDate;
-
-    @NotNull
-    @CreationTimestamp
-    @Size(max = 20)
-    @Column(name = "order_status")
-    private String orderStatus;
-
-    @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Transactions transaction;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_customer", nullable = false)
+    private Customers customers;
 
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderDetail> orderDetails;
+    @Builder.Default
+    private List<OrderDetail> orderDetails = new ArrayList<>();
+
+    public enum OrderStatus {
+        PENDING, PAID, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, COMPLETED, CANCELLED, REFUNDED, FAILED
+    }
 }

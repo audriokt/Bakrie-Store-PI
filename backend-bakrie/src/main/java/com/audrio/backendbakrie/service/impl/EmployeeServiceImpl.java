@@ -293,10 +293,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private Employees convertToEntity(EmployeeRequest request) {
         log.debug("Converting request to entity for email: {}", request.getEmail());
-        Roles role = rolesRepository.findByName("ADMIN")
+        Roles role = rolesRepository.findByName("CASHIER")
                 .orElseThrow(() -> {
-                    log.error("ROLE_ADMIN not found in database");
-                    return new RoleNotFoundException("ADMIN Role not found");
+                    log.error("ROLE_CASHIER not found in database");
+                    return new RoleNotFoundException("CASHIER Role not found");
                 });
 
         return Employees.builder()

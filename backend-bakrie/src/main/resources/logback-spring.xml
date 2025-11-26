@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- ====================== ASYNC LOGGER SETUP ====================== -->
+    <!-- Semua log akan masuk ke queue dulu, diproses di background thread -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- Async Appender (utama) -->
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="CONSOLE"/>
+        <!-- Queue size besar biar aman saat traffic tinggi -->
+        <queueSize>1024</queueSize>
+        <!-- Kalau queue penuh 80%, log berikutnya dibuang (daripada blokir aplikasi) -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- Jumlah thread worker (biasanya 1–2 cukup) -->
+        <maxFlushTime>2000</maxFlushTime>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <!-- Async File Appender (log ke file) -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>1024</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <!-- File Appender (rolling harian + compress) -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/bakrie-store.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Roll over setiap hari atau 100MB -->
+            <fileNamePattern>logs/archived/bakrie-store.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory> <!-- simpan 30 hari -->
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ====================== ROOT LOGGER ====================== -->
+    <root level="INFO">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+    </root>
+
+    <!-- ====================== PAKET KAMU LEBIH DETAIL ====================== -->
+    <logger name="com.audrio.backendbakrie" level="DEBUG" additivity="false">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+    </logger>
+
+    <!-- Hibernate SQL (opsional, aktifkan kalau butuh debug query) -->
+    <!--
+    <logger name="org.hibernate.SQL" level="DEBUG"/>
+    <logger name="org.hibernate.type.descriptor.sql" level="TRACE"/>
+    -->
+
+    <!-- Spring Security (bisa diubah ke INFO kalau terlalu berisik) -->
+    <logger name="org.springframework.security" level="INFO"/>
+
+</configuration>

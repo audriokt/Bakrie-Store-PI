@@ -65,9 +65,6 @@ public class Employees implements UserDetails{
     @UpdateTimestamp
     private Timestamp updated_at;
 
-    @OneToMany(mappedBy = "employees")
-    private List<Orders> orders;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String roleName = empRoles.getName();
