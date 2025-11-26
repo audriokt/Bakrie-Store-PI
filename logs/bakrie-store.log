@@ -4270,3 +4270,9 @@ Caused by: java.sql.SQLException: Incorrect string value: '\x9A\xD1x)\xB4G...' f
 2025-11-26 15:36:52.297 [http-nio-9090-exec-5] INFO  c.a.b.s.impl.ItemCartServiceImpl - Updating item quantity. ItemCart ID: f4cb4ec8-de90-4a57-8b7d-c871e32227e9, New Quantity: 2
 2025-11-26 15:36:52.307 [http-nio-9090-exec-5] INFO  c.a.b.s.impl.ItemCartServiceImpl - Item updated. Product ID: 1b1d7cdd-b551-468e-b399-bcf98cdf8051, Quantity: 2, SubPrice: 50000.0
 2025-11-26 15:36:52.312 [http-nio-9090-exec-5] INFO  c.a.b.s.impl.ItemCartServiceImpl - Cart total recalculated for Customer ID: 49b697a8-c144-4145-a894-e32477c12451
+2025-11-26 17:29:54.979 [HikariPool-1:housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h5m22s896ms593µs800ns).
+2025-11-26 17:34:43.772 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-11-26 17:34:43.852 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-11-26 17:34:43.927 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-11-26 17:34:44.069 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-11-26 17:34:44.150 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
