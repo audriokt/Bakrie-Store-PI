@@ -15,5 +15,4 @@ public class TopProductDto {
     private Long totalQuantity;
     private Long totalOrders;
     private Double totalRevenue;
-    private String category; // optional
 }

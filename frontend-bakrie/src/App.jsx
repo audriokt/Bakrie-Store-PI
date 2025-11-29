@@ -21,6 +21,8 @@ import UserProfilePage from "./pages/Profile/UserProfile/UserProfilePage";
 import EditProfilePage from "./pages/Profile/EditProfile/EditProfilePage";
 import EditPasswordPage from "./pages/Profile/EditProfile/EditPasswordPage";
 import LoginPageEmployee from "./pages/AuthPages/Login/LoginPageEmployee";
+import TransactionPage from "./pages/transaction/TransactionPage";
+import OrderConfirmationPage from "./pages/transaction/OrderConfirmationPage";
 
 // Admin Routes
 // import AdminRoutes from "./routes/AdminRoutes";
@@ -47,8 +49,11 @@ function App() {
           <Route path='/products' element={<ProductPage/>}></Route>
           <Route path='/product-detail' element={<ProductDetailPage/>}/>
 
-            {/* route untuk carts */}
-            <Route path='/carts' element={<CartsPage/>}/>
+          {/* route untuk carts */}
+          <Route path='/carts' element={<CartsPage/>}/>
+
+          <Route path="order" element={<TransactionPage />}></Route>
+          <Route path="order-confirmation" element={<OrderConfirmationPage />}></Route>
 
          {/* route untuk login sama sign up */}
           <Route path='/login' element={<LoginPage/>}/>
