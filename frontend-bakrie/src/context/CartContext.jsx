@@ -104,6 +104,13 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+    // const clearCart = async () => {
+    //     setCartItems([]);
+    //     setCartTotal(0);
+    //     // Opsional: panggil API untuk hapus semua item di backend (jika ada endpoint)
+    //     // await axios.delete(`${URL_BASE}/clear/${customerId}`);
+    // };
+
   useEffect(() => {
     if (token && customerId) {
       refreshCart();
@@ -122,6 +129,7 @@ export const CartProvider = ({ children }) => {
       addItemToCart,
       updateQty,
       removeFromCart,
+        // clearCart,
       token 
      }}>
       {children}

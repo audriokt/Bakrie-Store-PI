@@ -1,314 +1,350 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../../hooks/useCart";
+import { useAuth } from "../../hooks/useAuth";
+import { createOrder } from "../../services/orderService"
 import Swal from "sweetalert2";
 
 const TransactionPage = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const { cartItems, cartTotal, clearCart } = useCart();
+    const { user } = useAuth();
 
-  const mockCartItems = [
-    {
-      id: 1,
-      productName: "Premium Chocolate Croissant",
-      price: 35000,
-      quantity: 2,
-      imgUrl: "https://images.unsplash.com/photo-1555507036-ab1f40388085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
-    },
-    {
-      id: 2,
-      productName: "Strawberry Shortcake Slice",
-      price: 45000,
-      quantity: 1,
-      imgUrl: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
-    },
-    {
-      id: 3,
-      productName: "Blueberry Muffin",
-      price: 28000,
-      quantity: 3,
-      imgUrl: "https://images.unsplash.com/photo-1558401391-7899b4bd5bbf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
-    }
-  ];
+    const shippingFee = 15000;
+    const serviceFee = 2000;
+    const grandTotal = cartTotal + shippingFee + serviceFee;
 
-  const subtotal = mockCartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const shippingFee = 15000;
-  const serviceFee = 2000;
-  const grandTotal = subtotal + shippingFee + serviceFee;
+    const [address, setAddress] = useState(user?.address || "");
+    const [note, setNote] = useState("");
+    const [isSnapLoaded, setIsSnapLoaded] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-  const [formData, setFormData] = useState({
-    fullName: "Priscilla Sudiyantoro", 
-    phone: "081234567890",
-    address: "Jl. Kenangan Mantan No. 12, South Jakarta",
-    paymentMethod: "BCA", 
-    note: ""
-  });
+    const formatPrice = (price) =>
+        price.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
 
-  const paymentOptions = [
-    { id: 'BCA', name: 'BCA Virtual Account', image: '/banks/bca-icon.png' },
-    { id: 'BRI', name: 'BRI Virtual Account', image: '/banks/bri-icon.png' },
-    { id: 'BNI', name: 'BNI Virtual Account', image: '/banks/bni-icon.png' },
-    { id: 'MANDIRI', name: 'Mandiri Virtual Account', image: '/banks/mandiri-icon.png' },
-  ];
+    // Load Midtrans Snap Script (dengan fallback & loading state)
+    useEffect(() => {
+        if (window.snap) {
+            setIsSnapLoaded(true);
+            return;
+        }
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+        const midtransScriptUrl =
+            import.meta.env.VITE_MIDTRANS_ENV === "production"
+                ? "https://app.midtrans.com/snap/snap.js"
+                : "https://app.sandbox.midtrans.com/snap/snap.js";
 
-  const handlePaymentSelect = (id) => {
-    setFormData({ ...formData, paymentMethod: id });
-  };
+        const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
 
-  const handlePlaceOrder = (e) => {
-    e.preventDefault();
-    
-    const transactionPayload = {
-        invoice_number: `INV-${Date.now()}`, 
-        payment_date: new Date().toISOString(), 
-        payment_method: formData.paymentMethod, 
-        total: grandTotal, 
-        shipping_details: { ...formData }
+        if (!clientKey) {
+            console.error("VITE_MIDTRANS_CLIENT_KEY tidak ditemukan di .env");
+            Swal.fire({
+                icon: "error",
+                title: "Konfigurasi Bermasalah",
+                text: "Client key Midtrans belum diatur.",
+            });
+            return;
+        }
+
+        const script = document.createElement("script");
+        script.src = midtransScriptUrl;
+        script.setAttribute("data-client-key", clientKey);
+        script.async = true;
+
+        script.onload = () => {
+            console.log("Midtrans Snap loaded successfully");
+            setIsSnapLoaded(true);
+        };
+
+        script.onerror = () => {
+            console.error("Gagal memuat Midtrans Snap script");
+            Swal.fire({
+                icon: "error",
+                title: "Koneksi Bermasalah",
+                text: "Gagal memuat sistem pembayaran. Coba refresh halaman.",
+            });
+        };
+
+        document.body.appendChild(script);
+
+        return () => {
+            if (document.body.contains(script)) {
+                document.body.removeChild(script);
+            }
+        };
+    }, []);
+
+    const handlePayNow = async () => {
+        if (isProcessing) return;
+        if (!isSnapLoaded) {
+            Swal.fire({
+                icon: "warning",
+                title: "Sistem Pembayaran Belum Siap",
+                text: "Tunggu sebentar atau refresh halaman.",
+            });
+            return;
+        }
+
+        if (!address.trim()) {
+            Swal.fire({
+                icon: "error",
+                title: "Alamat Wajib Diisi!",
+                confirmButtonColor: "#C31D1D",
+            });
+            return;
+        }
+
+        setIsProcessing(true);
+
+        try {
+            const orderItems = cartItems.map((item) => ({
+                productId: item.productId,
+                quantity: item.quantity,
+            }));
+
+            const payload = {
+                customerId:
+                    user?.idCustomer ||
+                    user?.customer_id ||
+                    user?.id_customer ||
+                    user?.id,
+                deliverAddress: address,
+                note: note.trim(),
+                orderDetails: orderItems,
+            };
+
+            const { data } = await createOrder(payload);
+            const { transactionToken, orderNumber } = data;
+
+            if (!transactionToken) {
+                throw new Error("Token pembayaran tidak diterima dari server");
+            }
+
+            // Jalankan Midtrans Snap
+            window.snap.pay(transactionToken, {
+                onSuccess: async (result) => {
+                    console.log("Payment SUCCESS:", result);
+                    await clearCart();
+                    Swal.fire({
+                        icon: "success",
+                        title: "Pembayaran Berhasil!",
+                        text: `Pesanan ${orderNumber} sedang diproses.`,
+                        confirmButtonColor: "#C31D1D",
+                    }).then(() => {
+                        navigate("/order-success", { state: { orderNumber } });
+                    });
+                },
+                onPending: (result) => {
+                    console.log("Payment PENDING:", result);
+                    Swal.fire({
+                        icon: "info",
+                        title: "Menunggu Pembayaran",
+                        text: `Order ${orderNumber} menunggu pembayaran. Silakan selesaikan dalam 24 jam.`,
+                        confirmButtonColor: "#C31D1D",
+                    }).then(() => {
+                        navigate("/orders");
+                    });
+                },
+                onError: (result) => {
+                    console.error("Payment ERROR:", result);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Pembayaran Gagal",
+                        text: "Terjadi kesalahan sistem pembayaran.",
+                        confirmButtonColor: "#C31D1D",
+                    });
+                },
+                onClose: () => {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Pembayaran Dibatalkan",
+                        text: "Kamu menutup jendela pembayaran. Pesanan belum diproses.",
+                        confirmButtonColor: "#C31D1D",
+                    });
+                },
+            });
+        } catch (err) {
+            console.error("Error saat checkout:", err);
+            const msg =
+                err.response?.data?.message ||
+                err.message ||
+                "Gagal membuat pesanan. Coba lagi atau hubungi admin.";
+            Swal.fire({
+                icon: "error",
+                title: "Transaksi Gagal",
+                text: msg,
+                confirmButtonColor: "#C31D1D",
+            });
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
-    console.log("Transaction Payload:", transactionPayload); 
+    const handleCancel = () => {
+        Swal.fire({
+            icon: "question",
+            title: "Batalkan Pesanan?",
+            text: "Kamu akan kembali ke keranjang belanja.",
+            showCancelButton: true,
+            confirmButtonText: "Ya, batalkan",
+            cancelButtonText: "Lanjutkan checkout",
+            confirmButtonColor: "#C31D1D",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                navigate("/cart");
+            }
+        });
+    };
 
-    let timerInterval;
-    Swal.fire({
-      title: 'Processing Order...',
-      html: 'Generating Invoice & Virtual Account',
-      timer: 2000,
-      timerProgressBar: true,
-      didOpen: () => { Swal.showLoading() },
-      willClose: () => { clearInterval(timerInterval) }
-    }).then(() => {
-      Swal.fire({
-        icon: 'success',
-        title: 'Order Created!',
-        text: 'SPlease proceed to view payment instructions',
-        confirmButtonColor: '#C31D1D',
-        confirmButtonText: 'Proceed to Payment' 
-      }).then(() => {
-        navigate("/order-confirmation", { state: transactionPayload });
-      });
-    });
-  };
-
-  const handleCancel = () => {
-    navigate(-1);
-  };
-
-  const formatPrice = (price) =>
-    price.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
-
-  return (
-    <div className="min-h-screen mt-10 bg-gray-50 pt-28 pb-20 px-4 md:px-8 font-sans">
-      <div className="max-w-7xl mx-auto">
-        <motion.h1 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-4xl font-extrabold text-red-800 mb-8 text-center"
-        >
-            Checkout Transaction
-        </motion.h1>
-
-        {/* Layout Container */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex-1 w-full space-y-6"
-          >
-            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-200">
-                <div className="flex mb-6 pb-4 border-b border-gray-100">
-                    <div className="bg-red-50 rounded-xl text-red-600 w-12 h-12 flex items-center justify-center shrink-0 mr-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                    <h2 className="text-xl font-bold text-gray-800 w-full flex items-center">Shipping Address</h2>
-                </div>
-                
-                <form className="space-y-5">
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Recipient Name</label>
-                        <input 
-                            type="text" 
-                            name="fullName" 
-                            value={formData.fullName} 
-                            onChange={handleInputChange} 
-                            className="w-full border border-gray-300 text-gray-900 placeholder:text-gray-400 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 outline-none transition bg-white" 
-                            placeholder="Full Name" 
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
-                        <input 
-                            type="text" 
-                            name="phone" 
-                            value={formData.phone} 
-                            onChange={handleInputChange} 
-                      
-                            className="w-full border border-gray-300 text-gray-900 placeholder:text-gray-400 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 outline-none transition bg-white" 
-                            placeholder="08xxxxxxxx" 
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Full Address</label>
-                        <textarea 
-                            name="address" 
-                            value={formData.address} 
-                            onChange={handleInputChange} 
-                            rows="3" 
-                            className="w-full border border-gray-300 text-gray-900 placeholder:text-gray-400 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 outline-none transition resize-none bg-white" 
-                            placeholder="Street Name, Block, House Number..."
-                        ></textarea>
-                    </div>
-                </form>
+    if (cartItems.length === 0) {
+        return (
+            <div className="pt-40 text-center">
+                <p className="text-2xl font-medium text-gray-600 mb-6">Keranjang kosong</p>
+                <button onClick={() => navigate("/products")} className="text-red-700 underline text-lg">
+                    Belanja Sekarang
+                </button>
             </div>
+        );
+    }
+    return (
+        <div className="min-h-screen bg-gray-50 pt-28 pb-20 px-4 md:px-8">
+            <div className="max-w-7xl mx-auto">
+                <motion.h1
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-4xl font-extrabold text-red-800 text-center mb-10"
+                >
+                    Checkout Transaction
+                </motion.h1>
 
-            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-200">
-                <div className="flex mb-6 pb-4 border-b border-gray-100">
-                      <div className="bg-red-50 rounded-xl text-red-600 w-12 h-12 flex items-center justify-center shrink-0 mr-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                        </svg>
-                    </div>
-                    <h2 className="text-xl font-bold text-gray-800 w-full flex items-center">Select Bank</h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {paymentOptions.map((option) => (
-                        <label 
-                            key={option.id} 
-                            onClick={() => handlePaymentSelect(option.id)}
-                            className={`
-                                relative w-full flex items-center gap-3 p-2 rounded-2xl border-2 cursor-pointer transition-all duration-200
-                                ${formData.paymentMethod === option.id 
-                                    ? 'border-red-500 bg-red-50 shadow-sm' 
-                                    : 'border-gray-100 hover:border-red-200 hover:bg-gray-50'
-                                }
-                            `}
-                        >
-                            <div className="shrink-0">
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors
-                                    ${formData.paymentMethod === option.id ? 'border-red-600' : 'border-gray-300'}
-                                `}>
-                                    {formData.paymentMethod === option.id && (
-                                        <div className="w-2.5 h-2.5 rounded-full bg-red-600"></div>
-                                    )}
+                <div className="flex flex-col lg:flex-row gap-10 items-start">
+                    {/* LEFT - FORM */}
+                    <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} className="flex-1 space-y-8">
+                        <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
+                            <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+                                <div className="bg-red-50 rounded-xl p-3">
+                                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
                                 </div>
-                                <input 
-                                    type="radio" 
-                                    name="paymentMethod" 
-                                    value={option.id}
-                                    checked={formData.paymentMethod === option.id}
-                                    onChange={() => {}}
-                                    className="hidden" 
-                                />
+                                <h2 className="text-2xl font-bold text-gray-800">Shipping Address</h2>
                             </div>
 
-                            <div className="flex items-center w-full gap-x-2">
-                                <div className="w-14 h-9 flex items-center justify-start bg-white rounded-lg border border-gray-100 p-1 shrink-0">
-                                    <img 
-                                            src={option.image} 
-                                            alt={option.name} 
-                                            className="w-full h-full object-contain"
-                                            onError={(e) => {
-                                                e.target.style.display='none'; 
-                                            }} 
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Recipient Name</label>
+                                    <input
+                                        type="text"
+                                        value={user?.fullname || user?.username || "User"}
+                                        disabled
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-600 border border-gray-300"
                                     />
                                 </div>
-                                <p className={`w-full font-bold text-sm md:text-base truncate ${formData.paymentMethod === option.id ? 'text-gray-900' : 'text-gray-600'}`}>
-                                    {option.name}
-                                </p>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
+                                    <input
+                                        type="text"
+                                        value={user?.phone_num || "-"}
+                                        disabled
+                                        className="w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-600 border border-gray-300"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                                        Full Address <span className="text-red-600">*</span>
+                                    </label>
+                                    <textarea
+                                        rows={4}
+                                        value={address}
+                                        onChange={(e) => setAddress(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none resize-none"
+                                        placeholder="Contoh: Jl. Sudirman No.10, RT 01/RW 02, Kel. Senayan, Jakarta Selatan"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Order Note (opsional)</label>
+                                    <textarea
+                                        rows={3}
+                                        value={note}
+                                        onChange={(e) => setNote(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none resize-none"
+                                        placeholder="Contoh: Tolong bungkus rapi, taruh di pos satpam"
+                                    />
+                                </div>
                             </div>
-                        </label>
-                    ))}
-                </div>
-            </div>
-
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="w-full lg:w-[400px] xl:w-[450px] shrink-0 bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-red-100 h-fit"
-          >
-            <h2 className="text-xl md:text-2xl font-bold text-red-800 mb-6">Invoice Summary</h2>
-            
-            <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar mb-6">
-                {mockCartItems.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 border-b border-dashed border-gray-100 pb-4 last:border-0">
-                        <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-100">
-                            <img src={item.imgUrl} alt={item.productName} className="w-full h-full object-cover"/>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-gray-800 text-sm line-clamp-2 mb-1">{item.productName}</h4>
-                            <div className="flex justify-between items-end mt-2">
-                                <p className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
-                                    Qty: {item.quantity}
-                                </p>
-                                <p className="font-bold text-red-700 text-sm">{formatPrice(item.price * item.quantity)}</p>
+                    </motion.div>
+
+                    {/* RIGHT - SUMMARY */}
+                    <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} className="w-full lg:w-96 bg-white rounded-3xl shadow-lg border border-red-100 p-8">
+                        <h2 className="text-2xl font-bold text-red-800 mb-6">Invoice Summary</h2>
+
+                        <div className="max-h-96 overflow-y-auto space-y-4 mb-6">
+                            {cartItems.map((item) => (
+                                <div key={item.itemCartId} className="flex gap-4 pb-4 border-b border-dashed border-gray-200 last:border-0">
+                                    <img src={item.productImgUrl} alt={item.productName} className="w-20 h-20 object-cover rounded-xl shadow-sm" />
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-gray-800 text-sm line-clamp-2">{item.productName}</h4>
+                                        <div className="flex justify-between mt-2">
+                                            <span className="text-xs bg-gray-100 px-2 py-1 rounded">Qty: {item.quantity}</span>
+                                            <span className="font-bold text-red-700">{formatPrice(item.subPrice)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="border-t-2 border-dashed border-gray-300 pt-6 space-y-3">
+                            <div className="flex justify-between text-gray-600"><span>Subtotal</span><span>{formatPrice(cartTotal)}</span></div>
+                            <div className="flex justify-between text-gray-600"><span>Shipping Fee</span><span>{formatPrice(shippingFee)}</span></div>
+                            <div className="flex justify-between text-gray-600"><span>Service Fee</span><span>{formatPrice(serviceFee)}</span></div>
+                        </div>
+
+                        <div className="my-6 border-t border-gray-300 pt-6">
+                            <div className="flex justify-between text-xl font-bold">
+                                <span>Total Payment</span>
+                                <span className="text-red-700">{formatPrice(grandTotal)}</span>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
 
-            <div className="w-full pt-6 border-t-2 border-dashed border-gray-100">
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center text-sm font-medium text-gray-600">
-                        <p>Subtotal</p>
-                        <p className="text-gray-900">{formatPrice(subtotal)}</p>
-                    </div>
-                    <div className="flex justify-between items-center text-sm font-medium text-gray-600">
-                        <p>Shipping Fee</p>
-                        <p className="text-gray-900">{formatPrice(shippingFee)}</p>
-                    </div>
-                    <div className="flex justify-between items-center text-sm font-medium text-gray-600">
-                        <p>Service Fee</p>
-                        <p className="text-gray-900">{formatPrice(serviceFee)}</p>
-                    </div>
+                        <div className="space-y-3">
+                            <motion.button
+                                whileHover={{ scale: isProcessing ? 1 : 1.02 }}
+                                whileTap={{ scale: isProcessing ? 1 : 0.98 }}
+                                onClick={handlePayNow}
+                                disabled={isProcessing || !isSnapLoaded}
+                                className={`w-full font-bold py-4 rounded-2xl shadow-lg transition ${
+                                    isProcessing || !isSnapLoaded
+                                        ? "bg-gray-400 cursor-not-allowed text-white"
+                                        : "bg-gradient-to-r from-red-700 to-red-600 text-white hover:shadow-red-300"
+                                }`}
+                            >
+                                {isProcessing ? "Memproses..." : !isSnapLoaded ? "Loading Payment..." : "Pay Now"}
+                            </motion.button>
+
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleCancel}
+                                className="w-full border border-gray-300 text-gray-700 font-medium py-3.5 rounded-2xl hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition"
+                            >
+                                Cancel Order
+                            </motion.button>
+                        </div>
+
+                        {/* Debug Info (hapus saat production) */}
+                        {import.meta.env.DEV && (
+                            <div className="mt-4 text-xs text-gray-500 text-center">
+                                Mode: <span className="font-mono">{import.meta.env.VITE_MIDTRANS_ENV || "sandbox"}</span>
+                            </div>
+                        )}
+                    </motion.div>
                 </div>
-
-                <div className="border-t border-gray-200 my-6"></div>
-                
-                <div className="flex justify-between items-center">
-                    <p className="text-gray-900 font-bold text-lg">Total Payment</p>
-                    <p className="text-xl font-bold text-red-700">{formatPrice(grandTotal)}</p>
-                </div>
             </div>
-
-            <div className="mt-8 flex flex-col gap-3">
-                <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handlePlaceOrder}
-                    className="w-full bg-gradient-to-r from-red-700 to-red-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-200 hover:shadow-red-300 transition-all duration-300 text-lg"
-                >
-                    Pay Now
-                </motion.button>
-
-                <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleCancel}
-                    className="w-full bg-white border border-gray-300 text-gray-700 font-bold py-3.5 rounded-2xl hover:border-red-200 hover:text-red-600 hover:bg-red-50 transition-all duration-300 text-base"
-                >
-                    Cancel Order
-                </motion.button>
-            </div>
-
-          </motion.div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default TransactionPage;
