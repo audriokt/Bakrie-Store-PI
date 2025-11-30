@@ -15,7 +15,7 @@ public class OrderDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id_order_detail", columnDefinition = "VARCHAR(36)")
+    @Column(name = "id_order_detail")
     private UUID idOrderDetail;
 
     @ManyToOne

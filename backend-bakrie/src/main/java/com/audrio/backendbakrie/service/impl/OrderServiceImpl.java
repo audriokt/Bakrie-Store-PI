@@ -1,9 +1,6 @@
 package com.audrio.backendbakrie.service.impl;
 
-import com.audrio.backendbakrie.entity.Customers;
-import com.audrio.backendbakrie.entity.OrderDetail;
-import com.audrio.backendbakrie.entity.Orders;
-import com.audrio.backendbakrie.entity.Products;
+import com.audrio.backendbakrie.entity.*;
 import com.audrio.backendbakrie.events.OrderPaidEvent;
 import com.audrio.backendbakrie.events.OrderStatusChangedEvent;
 import com.audrio.backendbakrie.io.OrderDetailRequest;
@@ -13,7 +10,9 @@ import com.audrio.backendbakrie.io.OrdersResponse;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.repository.OrderRepository;
 import com.audrio.backendbakrie.repository.ProductRepository;
+import com.audrio.backendbakrie.repository.TransactionRepository;
 import com.audrio.backendbakrie.service.OrderService;
+import com.audrio.backendbakrie.service.PaymentService;
 import com.audrio.backendbakrie.utils.Exceptions.CustomerNotFoundException;
 import com.audrio.backendbakrie.utils.Exceptions.InsufficientStockException;
 import com.audrio.backendbakrie.utils.Exceptions.ResourceNotFoundException;
@@ -25,10 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -41,6 +39,8 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final OrderNumberGenerator orderNumberGenerator;
     private final ApplicationEventPublisher publisher;
+    private final PaymentService paymentService;
+    private final TransactionRepository transactionsRepository;
 
     @Override
     public OrdersResponse createOrder(OrdersRequest request) {
@@ -65,7 +65,6 @@ public class OrderServiceImpl implements OrderService {
         log.info("Order number yang digenerate: {}", order.getOrderNumber());
 
         double totalAmount = 0;
-
         for (OrderDetailRequest itemReq : request.getOrderDetails()) {
             Products product = productRepository.findById(itemReq.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + itemReq.getProductId()));
@@ -88,7 +87,6 @@ public class OrderServiceImpl implements OrderService {
                     .build();
 
             order.getOrderDetails().add(orderItem);
-
             totalAmount = totalAmount + orderItem.getSubtotal();
 
             log.info("Item ditambahkan → {} × {} (Rp {}, subtotal Rp {})",
@@ -97,7 +95,24 @@ public class OrderServiceImpl implements OrderService {
 
         order.setTotal(totalAmount);
         Orders savedOrder = orderRepository.save(order);
-        return convertToResponse(savedOrder);
+
+        Transactions transaction = Transactions.builder()
+                .orders(savedOrder)
+                .idTransaction(UUID.randomUUID())
+                .totalAmount(BigDecimal.valueOf(savedOrder.getTotal()))
+                .paymentMethod("MIDTRANS_SNAP")
+                .paymentStatus("PENDING")
+                .paymentTime(LocalDateTime.now())
+                .build();
+
+        Map<String, Object> midtransParams = buildMidtransParams(order);
+        String snapToken = paymentService.createTransactionToken(midtransParams);
+
+        transaction.setPaymentToken(snapToken);
+
+        OrdersResponse response = convertToResponse(savedOrder);
+        response.setTransactionToken(snapToken);
+        return response;
     }
 
     public OrdersResponse updateStatus(UUID orderId, Orders.OrderStatus newStatus) {
@@ -212,7 +227,8 @@ public class OrderServiceImpl implements OrderService {
                         .quantity(oi.getQuantity())
                         .unitPrice(oi.getUnitPrice())
                         .subtotal(oi.getSubtotal())
-                        .build()).toList();
+                        .build())
+                .toList();
 
         return OrdersResponse.builder()
                 .idOrder(order.getId_order())
@@ -220,9 +236,51 @@ public class OrderServiceImpl implements OrderService {
                 .orderDate(order.getOrderDate())
                 .orderStatus(String.valueOf(order.getOrderStatus()))
                 .deliverAddress(order.getDeliverAddress())
-                .totalPrice(order.getTotal())
+                .totalAmount(order.getTotal())
                 .customerId(order.getCustomers().getIdCustomer())
                 .orderDetails(items)
                 .build();
+    }
+
+    private Map<String, Object> buildMidtransParams(Orders order) {
+        Map<String, Object> params = new HashMap<>();
+
+        // Hitung ulang gross amount biar pasti sama
+        double subtotal = order.getOrderDetails().stream()
+                .mapToDouble(od -> od.getSubtotal())
+                .sum();
+
+        double shippingFee = 15000.0;
+        double serviceFee = 2000.0;
+        double grossAmount = subtotal + shippingFee + serviceFee;
+
+        Map<String, Object> transactionDetails = new HashMap<>();
+        transactionDetails.put("order_id", order.getOrderNumber());
+        transactionDetails.put("gross_amount", grossAmount); // PASTI SAMA DENGAN ITEM DETAILS
+        params.put("transaction_details", transactionDetails);
+
+        List<Map<String, Object>> itemDetails = new ArrayList<>();
+
+        for (OrderDetail od : order.getOrderDetails()) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", od.getProduct().getIdProduct().toString());
+            item.put("price", od.getUnitPrice());
+            item.put("quantity", od.getQuantity());
+            item.put("name", od.getProduct().getProduct_name());
+            itemDetails.add(item);
+        }
+
+        itemDetails.add(Map.of("id", "SHIPPING", "price", shippingFee, "quantity", 1, "name", "Biaya Pengiriman"));
+        itemDetails.add(Map.of("id", "SERVICE", "price", serviceFee, "quantity", 1, "name", "Biaya Layanan"));
+
+        params.put("item_details", itemDetails);
+
+        Map<String, String> customerDetails = new HashMap<>();
+        customerDetails.put("first_name", order.getCustomers().getFullname());
+        customerDetails.put("email", order.getCustomers().getEmail());
+        customerDetails.put("phone", order.getCustomers().getPhone_num());
+        params.put("customer_details", customerDetails);
+
+        return params;
     }
 }

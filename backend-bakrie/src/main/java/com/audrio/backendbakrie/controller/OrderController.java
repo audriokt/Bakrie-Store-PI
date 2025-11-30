@@ -33,14 +33,14 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/employee/order/getOrderById/{orderId}")
+    @GetMapping("/public/order/getOrderById/{orderId}")
     public ResponseEntity<OrdersResponse> getOrderById(@PathVariable UUID orderId) {
         log.debug("REQUEST ORDER DETAIL → id: {}", orderId);
         OrdersResponse response = orderService.getOrderById(orderId);
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/cashier/order/updateStatus/{orderId}/status")
+    @PatchMapping("/public/order/updateStatus/{orderId}/status")
     public ResponseEntity<OrdersResponse> updateStatus(
             @PathVariable UUID orderId,
             @RequestBody Map<String, String> body) {
@@ -67,7 +67,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/employee/order/getall")
+    @GetMapping("/public/order/getall")
     public ResponseEntity<List<OrdersResponse>> getAllOrders() {
         log.info("REQUEST ALL ORDERS LIST (ADMIN)");
         List<OrdersResponse> orders = orderService.getAll();

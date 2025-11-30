@@ -14,7 +14,8 @@ public class   OrdersResponse {
     private LocalDateTime orderDate;
     private String orderStatus;
     private String deliverAddress;
-    private Double totalPrice;
+    private Double totalAmount;
+    private String transactionToken;
     private UUID customerId;
     private List<OrderDetailResponse> orderDetails;
 }

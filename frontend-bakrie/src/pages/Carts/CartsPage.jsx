@@ -1,12 +1,15 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../../hooks/useCart";
+import { useAuth } from "../../hooks/useAuth"
 
 const CartsPage = () => {
   const { cartItems, cartTotal, loading, updateQty, removeFromCart } = useCart();
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [orderNote, setOrderNote] = useState("");
+    const { user } = useAuth();                 // <-- tambahkan
+    const navigate = useNavigate();
 
   // const handleQuantityChange = (id, newQty) => {
   //   if (newQty < 1) return;
@@ -24,6 +27,20 @@ const CartsPage = () => {
   //   (sum, item) => sum + item.price * item.quantity,
   //   0
   // );
+
+    const handleCheckout = () => {
+        if (!user) {
+            Swal.fire({
+                icon: "warning",
+                title: "Login Diperlukan",
+                text: "Silakan login terlebih dahulu untuk melanjutkan checkout.",
+                confirmButtonColor: "#C31D1D",
+            });
+            navigate("/login");
+            return;
+        }
+        navigate("/order");
+    };
 
   const formatPrice = (price) =>
     price.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
@@ -188,7 +205,7 @@ return (
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full bg-red-700 text-white font-medium py-3 rounded-full hover:bg-red-800 transition-colors shadow-lg"
-              onClick={() => alert("Checkout function coming soon!")}
+              onClick={handleCheckout}
             >
               Checkout
             </motion.button>
