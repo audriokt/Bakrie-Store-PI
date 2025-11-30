@@ -28,13 +28,13 @@ public class Transactions {
     private UUID idTransaction;
 
     @OneToOne
-    @JoinColumn(name = "id_order", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Orders orders;
 
     @NotNull
     @Size(max = 100)
-    @Column(name = "invoice_number", unique = true)
-    private String invoiceNumber;
+    @Column(name = "payment_token")
+    private String paymentToken;
 
     @NotNull
     @Size(max = 30)
@@ -42,11 +42,16 @@ public class Transactions {
     private String paymentMethod;
 
     @NotNull
-    @CreationTimestamp
-    @Column(name = "payment_date")
-    private LocalDateTime paymentDate;
+    @Size(max = 30)
+    @Column(name = "payment_status")
+    private String paymentStatus;
 
     @NotNull
-    @Column(name = "total", precision = 10, scale = 2)
-    private BigDecimal total;
+    @CreationTimestamp
+    @Column(name = "payment_time")
+    private LocalDateTime paymentTime;
+
+    @NotNull
+    @Column(name = "total_amount", precision = 10, scale = 2)
+    private BigDecimal totalAmount;
 }
