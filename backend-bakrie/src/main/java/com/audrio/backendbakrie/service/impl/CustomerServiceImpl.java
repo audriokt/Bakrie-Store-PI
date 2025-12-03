@@ -1,6 +1,7 @@
 package com.audrio.backendbakrie.service.impl;
 
 import com.audrio.backendbakrie.events.EmailVerificationEvent;
+import com.audrio.backendbakrie.events.PasswordResetEvent;
 import com.audrio.backendbakrie.io.*;
 import com.audrio.backendbakrie.repository.CustomerRepository;
 import com.audrio.backendbakrie.entity.Customers;
@@ -13,6 +14,7 @@ import com.audrio.backendbakrie.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,9 @@ public class CustomerServiceImpl implements CustomerService {
     private final AuthenticationManager authenticationManager;
     private final ApplicationEventPublisher eventPublisher;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     @Override
     public CustomerResponse add(CustomerRequest request) {
         log.info("=== ADD CUSTOMER START ===");
@@ -55,7 +60,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("purpose", "email-verification");
-        String token = jwtUtils.generateToken(claims, email);
+        String token = jwtUtils.generateToken(claims, email,60*60*1000);
         log.debug("Generated verification token (first 20 chars): {}", token.length() > 20 ? token.substring(0, 20) + "..." : token);
 
         if (optionalCustomer.isPresent()) {
@@ -71,10 +76,7 @@ public class CustomerServiceImpl implements CustomerService {
             existing.setVerificationToken(token);
             customerRepository.save(existing);
 
-            String verificationUrl2 = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/req/signup/verify")
-                    .queryParam("token", token)
-                    .toUriString();
+            String verificationUrl2 = frontendUrl + "/verify-email?token=" + token;
 
             eventPublisher.publishEvent(EmailVerificationEvent.builder()
                     .email(existing.getEmail())
@@ -97,10 +99,7 @@ public class CustomerServiceImpl implements CustomerService {
         Customers saved = customerRepository.save(newCustomer);
         log.info("New customer saved with ID: {}", newCustomer.getIdCustomer());
 
-        String verificationUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/req/signup/verify")
-                .queryParam("token", saved.getVerificationToken())
-                .toUriString();
+        String verificationUrl = frontendUrl + "/verify-email?token=" + token;
 
         // Kirim email verifikasi
         eventPublisher.publishEvent(EmailVerificationEvent.builder()
@@ -232,6 +231,10 @@ public class CustomerServiceImpl implements CustomerService {
         return ResponseEntity.ok("Email berhasil diverifikasi");
     }
 
+    public boolean isResetTokenValid(String token){
+        return jwtUtils.isResetTokenValid(token);
+    }
+
     @Override
     public AuthResponse login(CustomerAuthRequest request) {
         log.info("CUSTOMER LOGIN START | Email: {}", request.getEmail());
@@ -255,7 +258,7 @@ public class CustomerServiceImpl implements CustomerService {
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("purpose", "access");
         claims.put("role", customer.getCusRoles().getName());
-        String token = jwtUtils.generateToken(claims, customer.getEmail());
+        String token = jwtUtils.generateToken(claims, customer.getEmail(), 15*60*1000);
         String role = customer.getCusRoles().getName();
         Date expirationTime = jwtUtils.extractExpiration(token);
 
@@ -294,6 +297,105 @@ public class CustomerServiceImpl implements CustomerService {
         log.info("Current user: {} is instace of Customers : {}", auth.getName(), auth.getPrincipal() instanceof UserDetails);
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
     }
+
+    @Override
+    public ResponseEntity<String> forgotPassword(ForgotPasswordRequest request) {
+        log.info("FORGOT PASSWORD REQUEST | Email: {}", request.getEmail());
+        String email = request.getEmail();
+        System.out.println(email);
+
+        Optional<Customers> optCustomer = customerRepository.findByEmail(email);
+
+        // SELALU kasih respon sama (security by obscurity – tidak bocorin email terdaftar atau belum)
+        if (optCustomer.isPresent()) {
+            Customers customer = optCustomer.get();
+
+            // Hanya kirim link jika email sudah diverifikasi
+            if (customer.getIs_verified()) {
+                HashMap<String, Object> claims = new HashMap<>();
+                claims.put("purpose", "password-reset");
+
+                // Token expired dalam 15 menit
+                String token = jwtUtils.generatePasswordResetToken(email);
+                log.info("Generated reset token (first 20 chars): {}, email: {}", token.length() > 20 ? token.substring(0, 20) + "..." : token, jwtUtils.extractEmail(token));
+
+                customer.setReset_token(token);
+                customer.setPasswordResetExpiry(new Date(System.currentTimeMillis() + 15 * 60 * 1000));
+                customerRepository.save(customer);
+
+                String resetUrl = frontendUrl + "/reset-password?token=" + token;
+
+                eventPublisher.publishEvent(PasswordResetEvent.builder()
+                        .email(customer.getEmail())
+                        .token(token)
+                        .resetUrl(resetUrl)
+                        .build());
+
+                log.info("Password reset link sent: {}. Reset URL: {}", email, resetUrl);
+                log.info("Password reset link sent to: {}", email);
+            }
+            // Jika tidak terdaftar atau belum diverifikasi → tetap diam
+        }
+
+        // Respon selalu sama agar attacker tidak bisa enumerasi email
+        return ResponseEntity.ok("Jika email terdaftar dan sudah diverifikasi, link reset password telah dikirim ke email Anda.");
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<String> resetPassword(ResetPasswordRequest request) {
+        log.info("RESET PASSWORD REQUEST");
+
+        String token = request.getToken();
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.badRequest().body("Token wajib diisi");
+        }
+
+        String email = jwtUtils.validateAndExtractEmailFromResetToken(request.getToken());;
+        if (email == null) {
+            log.warn("Invalid JWT token in reset password");
+            return ResponseEntity.badRequest().body("Link reset tidak valid atau sudah kadaluarsa");
+        }
+
+        String purpose = jwtUtils.extractClaim(token, claims -> claims.get("purpose", String.class));
+        if (!"password-reset".equals(purpose)) {
+            log.warn("Token purpose mismatch: {}", purpose);
+            return ResponseEntity.badRequest().body("Link reset tidak valid");
+        }
+
+        Customers customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer tidak ditemukan"));
+
+        // Validasi token cocok & belum expired
+        if (!token.equals(customer.getReset_token())) {
+            log.warn("Token mismatch for user: {}", email);
+            return ResponseEntity.badRequest().body("Link reset tidak valid");
+        }
+
+        if (customer.getPasswordResetExpiry() == null ||
+                customer.getPasswordResetExpiry().before(new Date())) {
+            log.warn("Password reset token expired for: {}", email);
+            return ResponseEntity.badRequest().body("Link reset sudah kadaluarsa. Silakan request ulang.");
+        }
+
+        // Validasi password baru
+        if (request.getPassword() == null || request.getPassword().length() < 6) {
+            return ResponseEntity.badRequest().body("Password minimal 6 karakter");
+        }
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            return ResponseEntity.badRequest().body("Konfirmasi password tidak cocok");
+        }
+
+        // Update password
+        customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        customer.setReset_token(null);
+        customer.setPasswordResetExpiry(null);
+        customerRepository.save(customer);
+
+        log.info("Password berhasil direset untuk: {}", email);
+        return ResponseEntity.ok("Password berhasil diubah. Silakan login dengan password baru.");
+    }
+
 
     private CustomerResponse convertToResponse(Customers newCustomer) {
         log.debug("Converting entity to response for customer ID: {}", newCustomer.getIdCustomer());

@@ -15,10 +15,8 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Entity
 @Table(name = "customers")
@@ -65,6 +63,9 @@ public class Customers implements UserDetails {
 
     @Column(name = "reset_token")
     private String reset_token;
+
+    @Column(name = "password_reset_expiry")
+    private Date passwordResetExpiry;
 
     @Column(name = "is_verified")
     private Boolean is_verified;

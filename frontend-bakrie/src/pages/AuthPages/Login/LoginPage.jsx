@@ -8,6 +8,7 @@ import Loading from "../../../components/loader/Loading.jsx";
 import Swal from "sweetalert2";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { forgotPassword } from "../../../services/authService.js";
 
 const LoginPage = () => {
   const { setAuthData, setUser } = useAuth();
@@ -15,16 +16,43 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState(false);
 
-  const validationSchema = yup.object().shape({
-    email: yup.string()
-      .email("Invalid email format")
-      .min(15, "Email must be at least 15 characters") 
-      .max(100, "Email cannot exceed 100 characters") 
-      .required("Email is required"),
-    password: yup.string()
-      .min(6, "Password must be at least 6 characters") 
-      .required("Password is required"),
-  });
+    const ALLOWED_DOMAINS = [
+        "gmail.com",
+        "yahoo.com",
+        "outlook.com",
+        "hotmail.com",
+    ];
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    const validationSchema = yup.object().shape({
+        email: yup
+            .string()
+            .trim()
+            .lowercase()
+            .required("Email wajib diisi")
+            .matches(EMAIL_REGEX, "Format email tidak valid")
+            .test(
+                "allowed-domain",
+                "Maaf, hanya email dari domain tertentu yang diperbolehkan login (gmail, outlook, yahoo, hotmail)",
+                (value) => {
+                    if (!value) return false;
+                    const domain = value.split("@")[1];
+                    return domain ? ALLOWED_DOMAINS.includes(domain.toLowerCase()) : false;
+                }
+            )
+            .max(100, "Email tidak boleh lebih dari 100 karakter"),
+
+        password: yup
+            .string()
+            .required("Password wajib diisi")
+            .min(6, "Password minimal 6 karakter")
+            .max(100, "Password tidak boleh lebih dari 100 karakter")
+            .test(
+                "no-whitespace",
+                "Password tidak boleh mengandung spasi",
+                (value) => value && !/\s/.test(value)
+            ),
+    });
 
   const formik = useFormik({
     initialValues: {
@@ -71,6 +99,55 @@ const LoginPage = () => {
       }
     },
   });
+
+    const handleForgotPassword = () => {
+        Swal.fire({
+            title: "Lupa Password?",
+            input: "email",
+            inputLabel: "Masukkan email akun Anda",
+            inputPlaceholder: "contoh@gmail.com",
+            showCancelButton: true,
+            confirmButtonText: "Kirim Link Reset",
+            cancelButtonText: "Batal",
+            confirmButtonColor: "#C31D1D",
+            cancelButtonColor: "#gray",
+            inputValidator: (value) => {
+                if (!value) return "Email wajib diisi";
+                if (!EMAIL_REGEX.test(value)) return "Format email tidak valid";
+                const domain = value.split("@")[1];
+                if (!ALLOWED_DOMAINS.includes(domain.toLowerCase())) {
+                    return "Hanya email Gmail, Yahoo, Outlook, atau Hotmail yang diperbolehankan";
+                }
+            },
+            preConfirm: async (email) => {
+                try {
+                    setLoading(true);
+                    // Pastikan forgotPassword sudah di-import!
+                    await forgotPassword({ email: email.trim().toLowerCase() });
+                    return { success: true, email };
+                } catch (err) {
+                    const message = err.response?.data?.message || "Gagal mengirim link reset password";
+                    Swal.showValidationMessage(message);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value?.success) {
+                Swal.fire({
+                    title: "Link Terkirim!",
+                    html: `
+                  <p>Jika email <strong>${result.value.email}</strong> terdaftar dan sudah diverifikasi,</p>
+                  <p>link reset password telah dikirim ke email Anda.</p>
+                  <p class="text-sm text-gray-600 mt-3">Cek kotak masuk atau folder spam.</p>
+                `,
+                    icon: "success",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#C31D1D"
+                });
+            }
+        });
+    };
 
   return (
     <div className="flex h-screen items-center justify-center bg-pink-100">
@@ -140,6 +217,16 @@ const LoginPage = () => {
                 <p className="text-xs text-red-600 mt-1 ml-1">{formik.errors.password}</p>
               )}
             </div>
+
+              <div className="text-right">
+                  <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      className="text-sm text-red-600 hover:text-red-800 underline font-medium"
+                  >
+                      Lupa Password?
+                  </button>
+              </div>
 
             {loginError && (
               <p className="text-red-600 text-sm mt-2 text-center">

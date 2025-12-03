@@ -28,13 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final UserDetailsServiceImpl userDetailsService;
 
-    private static final List<String> WHITELIST = List.of(
-            "/public/auth/**",
-            "/req/signup/**"
-    );
-
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -47,12 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         log.debug(">>> Request {} {}", method, cleanPath);
 
-        if (isWhitelisted(cleanPath)) {
-            log.debug("Whitelisted path – skipping JWT check");
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             log.warn("Missing or invalid Authorization header | Header: {}", authHeader);
@@ -61,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String token = authHeader.substring(7);
-        log.debug("Token received (first 20 chars): {}", token.length() > 20 ? token.substring(0, 20) + "..." : token);
+        log.debug("Token received (first 20 chars): {}, email: {}", token.length() > 20 ? token.substring(0, 20) + "..." : token,jwtUtils.extractEmail(token));
 
         String email = null;
         try {
@@ -131,14 +118,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean isWhitelisted(String path) {
-        boolean matched = WHITELIST.stream()
-                .anyMatch(pattern -> pathMatcher.match(pattern, path));
-        if (matched) {
-            log.debug("Path {} matches whitelist pattern", path);
-        }
-        return matched;
-    }
 
     private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
         log.warn("Sending 401 – {}", message);

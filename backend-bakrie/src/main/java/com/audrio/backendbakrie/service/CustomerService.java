@@ -10,11 +10,22 @@ import java.util.UUID;
 
 public interface CustomerService {
     CustomerResponse add(CustomerRequest request);
+
     CustomerResponse update(UUID id, UpdateProfileCusRequest request, MultipartFile file);
+
     void delete(UUID id);
+
     List<CustomerResponse> getAll();
+
     ResponseEntity<String> verifyEmail(String token);
+
     AuthResponse login(CustomerAuthRequest request);
+
     CustomerResponse customerProfile(String token);
+
     UserDetails getCurrentCustomer();
+
+    ResponseEntity<String> forgotPassword(ForgotPasswordRequest request);
+    ResponseEntity<String> resetPassword(ResetPasswordRequest request);
+    boolean isResetTokenValid(String token);
 }

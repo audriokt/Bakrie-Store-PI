@@ -11,20 +11,46 @@ const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [registerError, setRegisterError] = useState(false);
+    const ALLOWED_DOMAINS = [
+        "gmail.com",
+        "yahoo.com",
+        "outlook.com",
+        "hotmail.com",
+    ];
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const validationSchema = yup.object().shape({
     username: yup.string()
       .min(5, "Username must be at least 8 characters")
       .max(30, "Username cannot exceed 32 characters")
       .required("Username is required"),
-    email: yup.string()
-      .email("Invalid email format")
-      .min(15, "Email must be at least 15 characters") 
-      .max(100, "Email cannot exceed 100 characters")
-      .required("Email is required"),
-    password: yup.string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
+      email: yup
+          .string()
+          .trim()
+          .lowercase()
+          .required("Email wajib diisi")
+          .matches(EMAIL_REGEX, "Format email tidak valid")
+          .test(
+              "allowed-domain",
+              "Maaf, hanya email dari domain tertentu yang diperbolehkan login (gmail, outlook, yahoo, hotmail)",
+              (value) => {
+                  if (!value) return false;
+                  const domain = value.split("@")[1];
+                  return domain ? ALLOWED_DOMAINS.includes(domain.toLowerCase()) : false;
+              }
+          )
+          .max(100, "Email tidak boleh lebih dari 100 karakter"),
+
+      password: yup
+          .string()
+          .required("Password wajib diisi")
+          .min(6, "Password minimal 6 karakter")
+          .max(100, "Password tidak boleh lebih dari 100 karakter")
+          .test(
+              "no-whitespace",
+              "Password tidak boleh mengandung spasi",
+              (value) => value && !/\s/.test(value)
+          ),
     phone_num: yup.string()
       .min(11, "Phone number must be at least 11 characters")
       .max(13, "Phone number cannot exceed 13 characters")
