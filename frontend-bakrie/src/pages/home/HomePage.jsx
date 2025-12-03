@@ -72,14 +72,37 @@ const HomePage = () => {
         </section>
 
       {/* About Us Section */}
-      <div className="flex justify-center items-center min-h-screen bg-white-100">
-        <DisclosureCard
-          title={aboutData.title}
-          description={aboutData.description}
-          image={aboutData.image}
-          details={aboutData.details}
-        />
-      </div>
+     {/* About Us Section */}
+<div className="min-h-screen bg-white py-20">
+  <div className="max-w-7xl mx-auto px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+    
+    {/* Left - About Card */}
+    <DisclosureCard
+      title={aboutData.title}
+      description={aboutData.description}
+      image={aboutData.image}
+      details={aboutData.details}
+    />
+
+    {/* Right - Text Beautiful */}
+    <div className="space-y-6 text-center lg:text-left">
+      <h2 className="text-5xl font-extrabold text-yes leading-tight">
+        We Bake Happiness,
+        <br />
+        One Bite at a Time 🍰
+      </h2>
+      <p className="text-gray-600 text-lg leading-relaxed">
+        Every pastry we make is crafted with passion — combining fine ingredients,
+        handcrafted dough, and the warmth of home baking.
+      </p>
+      <p className="text-gray-700 text-xl italic font-medium">
+        “Every bite tells a story — crafted with passion, served with love.”
+      </p>
+
+    </div>
+
+  </div>
+</div>
     </div>
   );
 };
