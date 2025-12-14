@@ -5,26 +5,73 @@ import { useCart } from "../../hooks/useCart";
 import { useAuth } from "../../hooks/useAuth";
 import { createOrder } from "../../services/orderService"
 import Swal from "sweetalert2";
+import axios from "axios"; // Import axios untuk fetching data profil
 
 const TransactionPage = () => {
     const navigate = useNavigate();
     const { cartItems, cartTotal, clearCart } = useCart();
-    const { user } = useAuth();
+    const { user } = useAuth(); // Data dasar user dari auth context
 
     const shippingFee = 15000;
     const serviceFee = 2000;
     const grandTotal = cartTotal + shippingFee + serviceFee;
 
+    // --- STATE UNTUK DATA PROFIL DAN ALAMAT ---
+    const [profile, setProfile] = useState({
+        name: user?.fullname || user?.username || "User",
+        phone: user?.phone_num || "-",
+        address: user?.address || "",
+    });
+    const [loadingProfile, setLoadingProfile] = useState(true);
+
+    // Alamat pengiriman (dapat diedit, diisi default dari profile)
     const [address, setAddress] = useState(user?.address || "");
     const [note, setNote] = useState("");
+
     const [isSnapLoaded, setIsSnapLoaded] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    // ---------------------------------------------
 
     const formatPrice = (price) =>
         price.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
 
-    // Load Midtrans Snap Script (dengan fallback & loading state)
+    // Load Midtrans Snap Script dan Fetch Profile
     useEffect(() => {
+        // --- 1. FETCH DATA PROFILE ---
+        const fetchProfile = async () => {
+            const token = localStorage.getItem("token"); // Asumsi token disimpan di localStorage
+            if (!user || !token) {
+                setLoadingProfile(false);
+                return;
+            }
+
+            try {
+                // Endpoint yang digunakan sama dengan OrderConfirmationPage
+                const res = await axios.get("http://localhost:9090/api/v1.0/customer/myprofile", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                const fetchedProfile = {
+                    name: res.data.username || res.data.fullname || "User",
+                    phone: res.data.phone_num || "-",
+                    address: res.data.address || "",
+                };
+
+                setProfile(fetchedProfile);
+                setAddress(fetchedProfile.address); // Set alamat default di input form
+
+            } catch (error) {
+                console.error("Gagal fetch profile:", error);
+            } finally {
+                setLoadingProfile(false);
+            }
+        };
+
+        fetchProfile();
+
+        // --- 2. LOAD MIDTRANS SNAP SCRIPT ---
         if (window.snap) {
             setIsSnapLoaded(true);
             return;
@@ -73,7 +120,7 @@ const TransactionPage = () => {
                 document.body.removeChild(script);
             }
         };
-    }, []);
+    }, [user]);
 
     const handlePayNow = async () => {
         if (isProcessing) return;
@@ -207,6 +254,15 @@ const TransactionPage = () => {
             </div>
         );
     }
+
+    if (loadingProfile) {
+        return (
+            <div className="min-h-screen bg-gray-50 pt-40 text-center">
+                <p className="text-2xl font-bold text-red-700">Loading Profile and Transaction Details...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 pt-28 pb-20 px-4 md:px-8">
             <div className="max-w-7xl mx-auto">
@@ -237,7 +293,7 @@ const TransactionPage = () => {
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Recipient Name</label>
                                     <input
                                         type="text"
-                                        value={user?.fullname || user?.username || "User"}
+                                        value={profile.name} // Menggunakan data profile yang di-fetch
                                         disabled
                                         className="w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-600 border border-gray-300"
                                     />
@@ -246,7 +302,7 @@ const TransactionPage = () => {
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
                                     <input
                                         type="text"
-                                        value={user?.phone_num || "-"}
+                                        value={profile.phone} // Menggunakan data profile yang di-fetch
                                         disabled
                                         className="w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-600 border border-gray-300"
                                     />
@@ -257,7 +313,7 @@ const TransactionPage = () => {
                                     </label>
                                     <textarea
                                         rows={4}
-                                        value={address}
+                                        value={address} // Default dari profile.address, tapi bisa diubah
                                         onChange={(e) => setAddress(e.target.value)}
                                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none resize-none"
                                         placeholder="Contoh: Jl. Sudirman No.10, RT 01/RW 02, Kel. Senayan, Jakarta Selatan"

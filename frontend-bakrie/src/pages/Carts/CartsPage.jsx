@@ -39,7 +39,7 @@ const CartsPage = () => {
             navigate("/login");
             return;
         }
-        navigate("/order");
+        navigate("/transaction");
     };
 
   const formatPrice = (price) =>

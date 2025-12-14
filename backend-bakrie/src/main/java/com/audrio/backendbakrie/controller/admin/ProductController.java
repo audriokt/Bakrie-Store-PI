@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,11 +42,14 @@ public class ProductController {
     }
 
     @GetMapping("/public/products/fetchProducts")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ProductResponse> fetchAllProducts(){
-        log.info("Method : GET | Endpoint : /public/products/fetchProducts | Payload : {}", HttpStatus.OK);
-        return productService.getAll();
+    public Page<ProductResponse> fetchAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+
+        log.info("Method : GET | Endpoint : /public/products/fetchProducts | page={} size={}", page, size);
+        return productService.getAll(page, size);
     }
+
 
     @DeleteMapping("/admin/product/delete/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

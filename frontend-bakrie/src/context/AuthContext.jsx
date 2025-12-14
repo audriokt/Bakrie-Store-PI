@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
             if (role === "CUSTOMER") {
                 const res = await profileCustomer();
                 setUser(res.data);
-            } else if (role === "ADMIN") {
+            } else if (role === "ADMIN" || role === "CASHIER") {
                 const res = await profileEmployee();
                 setUser(res.data);
             }

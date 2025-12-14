@@ -10,7 +10,9 @@ import com.audrio.backendbakrie.service.ProductService;
 import com.audrio.backendbakrie.utils.Exceptions.ImageInvalidExtentionException;
 import com.audrio.backendbakrie.utils.Exceptions.ImageSizeUnaproriateException;
 import com.audrio.backendbakrie.utils.Exceptions.ProductNotFoundException;
+import com.audrio.backendbakrie.utils.Exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,11 +40,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponse> getAll() {
-        return productRepository.findAll()
-                .stream()
-                .map(products -> convertToResponse(products))
-                .collect(Collectors.toList());
+    public Page<ProductResponse> getAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findAll(pageable)
+                .map(this::convertToResponse);
     }
 
     @Override
@@ -107,6 +108,20 @@ public class ProductServiceImpl implements ProductService {
         return products.stream()
                 .map(this::convertToResponse)
                 .toList();
+    }
+
+    public void reduceStock(UUID productId, int qty) {
+        Products product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        product.setProduct_stock(product.getProduct_stock() - qty);
+        productRepository.save(product);
+    }
+
+    public void restoreStock(UUID productId, int qty) {
+        Products product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        product.setProduct_stock(product.getProduct_stock() + qty);
+        productRepository.save(product);
     }
 
 

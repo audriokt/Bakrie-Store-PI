@@ -7,7 +7,7 @@ import Navbar from "./components/layout/navbar/Navbar";
 
 // Pages (semua di luar folder components)
 import HomePage from "./pages/home/HomePage";
-import AboutPage from "./pages/about/AboutSection.jsx";
+import AboutPage from "./pages/about/AboutPage.jsx";
 import ProductPage from "./pages/product/ProductPage";
 
 // Catalog & Cart
@@ -22,7 +22,8 @@ import EditProfilePage from "./pages/Profile/EditProfile/EditProfilePage";
 import EditPasswordPage from "./pages/Profile/EditProfile/EditPasswordPage";
 import LoginPageEmployee from "./pages/AuthPages/Login/LoginPageEmployee";
 import TransactionPage from "./pages/transaction/TransactionPage";
-import OrderConfirmationPage from "./pages/transaction/OrderConfirmationPage";
+import OrderHistoryPage from "./pages/transaction/OrderHistoryPage";
+import OrderHistoryDetailPage from "./pages/transaction/OrderHistoryDetailPage";
 
 // Admin Routes
 import AdminRoutes from "./routes/AdminRoutes";
@@ -57,8 +58,11 @@ function App() {
 
             {/* route untuk carts */}
             <Route path='/carts' element={<CartsPage/>}/>
+            <Route path='/transaction' element={<TransactionPage/>}/>
+            <Route path='/order-history' element={<OrderHistoryPage/>}/>
+            <Route path="/orders/:orderId" element={<OrderHistoryDetailPage />} />
 
-         {/* route untuk login sama sign up */}
+            {/* route untuk login sama sign up */}
           <Route path='/login' element={<LoginPage/>}/>
           <Route path="/login-employee" element={<LoginPageEmployee />}></Route>
           <Route path='/signup' element={<SignUpPage/>}/>

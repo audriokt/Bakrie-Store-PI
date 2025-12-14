@@ -5,6 +5,7 @@ import com.audrio.backendbakrie.io.*;
 import com.audrio.backendbakrie.io.admin.DashboardSummaryResponse;
 import com.audrio.backendbakrie.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -32,9 +33,12 @@ public class DashboardAdminController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<List<ProductResponse>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAll());
+    public Page<ProductResponse> fetchAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+        return productService.getAll(page, size);
     }
+
 
     @PostMapping(value = "/products", consumes = "multipart/form-data")
     public ResponseEntity<ProductResponse> addProduct(

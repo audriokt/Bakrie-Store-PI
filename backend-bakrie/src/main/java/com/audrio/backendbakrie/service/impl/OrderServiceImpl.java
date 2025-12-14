@@ -1,7 +1,9 @@
 package com.audrio.backendbakrie.service.impl;
 
 import com.audrio.backendbakrie.entity.*;
+import com.audrio.backendbakrie.events.OrderCancelledEvent;
 import com.audrio.backendbakrie.events.OrderPaidEvent;
+import com.audrio.backendbakrie.events.OrderPendingEvent;
 import com.audrio.backendbakrie.events.OrderStatusChangedEvent;
 import com.audrio.backendbakrie.io.OrderDetailRequest;
 import com.audrio.backendbakrie.io.OrderDetailResponse;
@@ -125,10 +127,11 @@ public class OrderServiceImpl implements OrderService {
 
         String emailCustomer = order.getCustomers().getEmail();
         String orderNumber = order.getOrderNumber();
-        // validasi transisi status (bisa pakai State Pattern kalau kompleks)
+
         if (!isValidStatusTransition(order.getOrderStatus(), newStatus)) {
             log.warn("TRANSISI STATUS DITOLAK → dari {} ke {}", order.getOrderStatus(), newStatus);
-            throw new RestrictionInOrderOperationException("Tidak bisa mengubah status dari " + order.getOrderStatus() + " ke " + newStatus);
+            throw new RestrictionInOrderOperationException(
+                    "Tidak bisa mengubah status dari " + order.getOrderStatus() + " ke " + newStatus);
         }
 
         Orders.OrderStatus oldStatus = order.getOrderStatus();
@@ -136,20 +139,33 @@ public class OrderServiceImpl implements OrderService {
 
         log.info("Status berhasil diubah → {} → {}", oldStatus, newStatus);
 
-//        mengurangi stok produk event akan di pub klo ststus pesannan paid
-        if (oldStatus != Orders.OrderStatus.PAID && newStatus == Orders.OrderStatus.PAID) {
-            log.info("PUBLISH OrderPaidEvent → stok akan segera dikurangi permanen untuk order {}", order.getOrderNumber());
-            publisher.publishEvent(new OrderPaidEvent(this, order));
-            log.info("Event OrderPaidEvent dipublish untuk order {}", order.getOrderNumber());
+        // === Tambahan logika stok ===
+        // Jika status berubah ke PENDING → kurangi stok sementara
+        if (oldStatus != Orders.OrderStatus.PENDING && newStatus == Orders.OrderStatus.PENDING) {
+            log.info("PUBLISH OrderPendingEvent → stok sementara dikurangi untuk order {}", order.getOrderNumber());
+            publisher.publishEvent(new OrderPendingEvent(this, order));
         }
 
-//        mengirim email pelanggan ketika status pesanan berubah
+        // Jika status berubah ke CANCEL dari PENDING → kembalikan stok
+        if (oldStatus == Orders.OrderStatus.PENDING && newStatus == Orders.OrderStatus.CANCELLED) {
+            log.info("PUBLISH OrderCancelledEvent → stok dikembalikan untuk order {}", order.getOrderNumber());
+            publisher.publishEvent(new OrderCancelledEvent(this, order));
+        }
+
+        // Jika status berubah ke PAID → kurangi stok permanen
+        if (oldStatus != Orders.OrderStatus.PAID && newStatus == Orders.OrderStatus.PAID) {
+            log.info("PUBLISH OrderPaidEvent → stok dikurangi permanen untuk order {}", order.getOrderNumber());
+            publisher.publishEvent(new OrderPaidEvent(this, order));
+        }
+
+        // Kirim email/notif status berubah
         publisher.publishEvent(new OrderStatusChangedEvent(
                 orderNumber,
                 emailCustomer,
                 newStatus.name()
         ));
         log.info("PUBLISH OrderStatusChangedEvent → email/notif dikirim ke {}", order.getCustomers().getEmail());
+
         return convertToResponse(order);
     }
 

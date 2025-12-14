@@ -17,9 +17,16 @@ export const fetchCustomers = async () => {
 export const fetchCustomerById = async (userId) => {
     return await axios.get(`${URL_BASE}/admin/customers/fetchCustomerById/${userId}`)
 }
+
 export const profileCustomer = async () => {
-    return await axios.get(`${URL_BASE}/customer/myprofile`)
-}
+    const token = localStorage.getItem("token");
+    return axios.get("http://localhost:9090/api/v1.0/customer/myprofile", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+};
+
 
 export const updateCustomerProfile = async (customer_id, formData) => {
     return await axios.put(`/customer/update/${customer_id}`, formData);
