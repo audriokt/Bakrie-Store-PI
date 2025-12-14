@@ -70,12 +70,12 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + itemReq.getProductId()));
 
             log.debug("Check stock → Product: {} (ID: {}), Stock saat ini: {}, Diminta: {}",
-                    product.getProduct_name(), product.getIdProduct(), product.getProduct_stock(), itemReq.getQuantity());
+                    product.getProductName(), product.getIdProduct(), product.getProduct_stock(), itemReq.getQuantity());
 
             if (product.getProduct_stock() < itemReq.getQuantity()) {
                 log.warn("INSUFFICIENT STOCK → Product: {} (ID: {}), Stock: {}, Requested: {}",
-                        product.getProduct_name(), product.getIdProduct(), product.getProduct_stock(), itemReq.getQuantity());
-                throw new InsufficientStockException("Stock tidak cukup untuk produk: " + product.getProduct_name());
+                        product.getProductName(), product.getIdProduct(), product.getProduct_stock(), itemReq.getQuantity());
+                throw new InsufficientStockException("Stock tidak cukup untuk produk: " + product.getProductName());
             }
 
             OrderDetail orderItem = OrderDetail.builder()
@@ -90,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
             totalAmount = totalAmount + orderItem.getSubtotal();
 
             log.info("Item ditambahkan → {} × {} (Rp {}, subtotal Rp {})",
-                    product.getProduct_name(), itemReq.getQuantity(), product.getProduct_price(), orderItem.getSubtotal());
+                    product.getProductName(), itemReq.getQuantity(), product.getProduct_price(), orderItem.getSubtotal());
         }
 
         order.setTotal(totalAmount);
@@ -202,7 +202,7 @@ public class OrderServiceImpl implements OrderService {
         for (OrderDetail oi : order.getOrderDetails()) {
             Products p = oi.getProduct();
             p.setProduct_stock(p.getProduct_stock() + oi.getQuantity());
-            log.info("Stok dikembalikan → {} +{} → total stok jadi {}", p.getProduct_name(), oi.getQuantity(), p.getProduct_stock());
+            log.info("Stok dikembalikan → {} +{} → total stok jadi {}", p.getProductName(), oi.getQuantity(), p.getProduct_stock());
         }
 
         order.setOrderStatus(Orders.OrderStatus.CANCELLED);
@@ -223,7 +223,7 @@ public class OrderServiceImpl implements OrderService {
         List<OrderDetailResponse> items = order.getOrderDetails().stream()
                 .map(oi -> OrderDetailResponse.builder()
                         .productId(oi.getProduct().getIdProduct())
-                        .productName(oi.getProduct().getProduct_name())
+                        .productName(oi.getProduct().getProductName())
                         .quantity(oi.getQuantity())
                         .unitPrice(oi.getUnitPrice())
                         .subtotal(oi.getSubtotal())
@@ -266,7 +266,7 @@ public class OrderServiceImpl implements OrderService {
             item.put("id", od.getProduct().getIdProduct().toString());
             item.put("price", od.getUnitPrice());
             item.put("quantity", od.getQuantity());
-            item.put("name", od.getProduct().getProduct_name());
+            item.put("name", od.getProduct().getProductName());
             itemDetails.add(item);
         }
 

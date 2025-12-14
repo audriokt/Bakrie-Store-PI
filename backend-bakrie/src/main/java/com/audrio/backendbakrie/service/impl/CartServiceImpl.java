@@ -68,7 +68,7 @@ public class CartServiceImpl implements CartService {
                         .itemCartId(item.getIdItemCarts())
                         .quantity(item.getQuantity())
                         .subPrice(item.getSubPrice())
-                        .productName(item.getProduct().getProduct_name())
+                        .productName(item.getProduct().getProductName())
                         .productImgUrl(item.getProduct().getImage_url())
                         .build())
                 .toList();

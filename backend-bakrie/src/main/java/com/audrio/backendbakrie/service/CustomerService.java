@@ -17,4 +17,5 @@ public interface CustomerService {
     AuthResponse login(CustomerAuthRequest request);
     CustomerResponse customerProfile(String token);
     UserDetails getCurrentCustomer();
+    long countTotalCustomers();
 }

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth.js"
 import Swal from "sweetalert2";
+import Loading from "../../../components/loader/Loading";
 
 const ProfilePage = () => {
   const { user, logout } = useAuth()
@@ -35,8 +36,9 @@ const ProfilePage = () => {
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-100px)] bg-[#FFF8F8] px-6 md:px-10 pt-28 pb-10 mt-10">
       {/* Main content */}
-      <main className="flex flex-col md:flex-row gap-10 w-full max-w-6xl">
+        <main className="flex flex-col md:flex-row gap-10 w-full max-w-6xl">
         {/* Left Card */}
+
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}

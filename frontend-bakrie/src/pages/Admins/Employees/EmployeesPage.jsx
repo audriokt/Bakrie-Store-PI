@@ -1,271 +1,338 @@
-import React, { useState, useMemo } from "react";
-import { motion } from "framer-motion";
-import { HiPlus, HiPencilAlt, HiTrash, HiSearch, HiUserCircle } from "react-icons/hi";
-import { Button, Badge } from "flowbite-react";
+// src/pages/admin/EmployeesPage.jsx
+import React, { useState, useEffect, useMemo } from "react";
+import { HiSearch, HiChevronUp, HiChevronDown, HiPlus, HiPencilAlt, HiTrash } from "react-icons/hi";
 import { Link } from "react-router-dom";
+import api from "../../../services/adminDashboardService.js";
 
-// data dummy (pake ini duls)
-const seedEmployees = [
-  {
-    id: 1,
-    name: "Anita S.",
-    email: "anita@patteserie.local",
-    role: "Cashier",
-    status: "active",
-    phone: "0812-3456-7890",
-    createdAt: "2025-10-01",
-  },
-  {
-    id: 2,
-    name: "Budi P.",
-    email: "budi@patteserie.local",
-    role: "Baker",
-    status: "active",
-    phone: "0813-1111-2222",
-    createdAt: "2025-09-10",
-  },
-  {
-    id: 3,
-    name: "Citra R.",
-    email: "citra@patteserie.local",
-    role: "Admin",
-    status: "inactive",
-    phone: "0812-9999-8888",
-    createdAt: "2025-08-25",
-  },
-];
+const ITEMS_PER_PAGE = 10;
 
-
-const EmployeeStats = ({ total, active }) => (
-  <motion.div
-    layout
-    initial={{ opacity: 0, y: 6 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="p-6 bg-gradient-to-br from-ookay to-white rounded-2xl shadow-lg border border-ookay/60"
-  >
-    <div className="flex items-center justify-between">
-      <div>
-        <h3 className="text-sm text-gray-600 font-medium">Total Employees</h3>
-        <p className="text-3xl font-bold text-yes mt-2">{total}</p>
-        <p className="text-xs text-gray-500 mt-1">{active} currently active</p>
-      </div>
-      <div className="w-14 h-14 rounded-xl bg-yes/10 flex items-center justify-center">
-        <HiUserCircle className="w-8 h-8 text-yes" />
-      </div>
-    </div>
-  </motion.div>
-);
-
-
-const EmployeesTable = ({ employees, onDelete, onToggleStatus }) => {
-  const [q, setQ] = useState("");
-  const [page, setPage] = useState(1);
-  const perPage = 6;
-
-  const filtered = useMemo(() => {
-    return employees.filter((e) => {
-      const s = `${e.name} ${e.email} ${e.role} ${e.phone}`.toLowerCase();
-      return s.includes(q.toLowerCase());
-    });
-  }, [employees, q]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  const current = filtered.slice((page - 1) * perPage, page * perPage);
-
-  return (
-    <div className="bg-white rounded-2xl border border-ookay shadow-md p-6">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-        <div className="relative w-full md:w-1/2">
-          <HiSearch className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-ookay/60" />
-          <input
-            className="w-full pl-10 pr-3 py-2 rounded-lg border border-ookay/60 focus:ring-2 focus:ring-yes/40 outline-none"
-            placeholder="Search employees..."
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
-        <span className="text-sm text-gray-500">
-          Showing {filtered.length} result(s)
-        </span>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left text-gray-700">
-          <thead className="bg-ookay/40 text-gray-800 uppercase text-xs">
-            <tr>
-              <th className="py-3 px-4">Name</th>
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">Role</th>
-              <th className="py-3 px-4">Phone</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {current.map((emp) => (
-              <tr
-                key={emp.id}
-                className="border-b last:border-b-0 hover:bg-ookay/10 transition"
-              >
-                <td className="py-3 px-4 font-medium">{emp.name}</td>
-                <td className="py-3 px-4">{emp.email}</td>
-                <td className="py-3 px-4">{emp.role}</td>
-                <td className="py-3 px-4">{emp.phone}</td>
-                <td className="py-3 px-4">
-                  <Badge
-                    color={emp.status === "active" ? "success" : "gray"}
-                    className="capitalize"
-                  >
-                    {emp.status}
-                  </Badge>
-                </td>
-                <td className="py-3 px-4 text-right">
-                  <div className="flex justify-end gap-2">
-                    <Link
-                      to={`edit/${emp.id}`}
-                      className="text-blue-600 flex items-center gap-1"
-                    >
-                      <HiPencilAlt />
-                    </Link>
-                    <Button
-                      size="xs"
-                      color="light"
-                      onClick={() => onToggleStatus(emp)}
-                    >
-                      {emp.status === "active" ? "Deactivate" : "Activate"}
-                    </Button>
-                    <Button
-                      size="xs"
-                      color="failure"
-                      onClick={() => onDelete(emp)}
-                    >
-                      <HiTrash />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {current.length === 0 && (
-              <tr>
-                <td
-                  colSpan={6}
-                  className="py-8 text-center text-ookay/60 italic"
-                >
-                  No employees found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex items-center justify-between mt-6 text-sm text-gray-600">
-        <div>
-          Page {page} of {totalPages}
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            size="xs"
-            color="light"
-            disabled={page === 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            Prev
-          </Button>
-          <Button
-            size="xs"
-            color="light"
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* -------------------------------
-   Main Page
---------------------------------*/
 const EmployeesPage = () => {
-  const [employees, setEmployees] = useState(seedEmployees);
+    const [employees, setEmployees] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [employeeToDelete, setEmployeeToDelete] = useState(null);
 
-  const total = employees.length;
-  const activeCount = employees.filter((e) => e.status === "active").length;
+    // Fetch employees
+    useEffect(() => {
+        const loadEmployees = async () => {
+            try {
+                const data = await api.get("/employees");
+                setEmployees(data || []);
+            } catch (error) {
+                console.error("Failed to fetch employees:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadEmployees();
+    }, []);
 
-  const handleDelete = (emp) => {
-    if (!confirm(`Delete ${emp.name}? This action cannot be undone.`)) return;
-    setEmployees((p) => p.filter((x) => x.id !== emp.id));
-  };
+    // Search filter
+    const filteredEmployees = useMemo(() => {
+        if (!searchQuery.trim()) return employees;
+        const q = searchQuery.toLowerCase();
+        return employees.filter((e) => {
+            const name = (e.username || "").toLowerCase();
+            const email = (e.email || "").toLowerCase();
+            return name.includes(q) || email.includes(q);
+        });
+    }, [employees, searchQuery]);
 
-  const handleToggleStatus = (emp) => {
-    setEmployees((p) =>
-      p.map((x) =>
-        x.id === emp.id
-          ? { ...x, status: x.status === "active" ? "inactive" : "active" }
-          : x
-      )
+    // Sorting
+    const sortedEmployees = useMemo(() => {
+        if (!sortConfig.key) return filteredEmployees;
+
+        return [...filteredEmployees].sort((a, b) => {
+            let aVal = a[sortConfig.key];
+            let bVal = b[sortConfig.key];
+
+            if (sortConfig.key === "created_at") {
+                aVal = new Date(a.created_at);
+                bVal = new Date(b.created_at);
+            }
+
+            if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+            if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+            return 0;
+        });
+    }, [filteredEmployees, sortConfig]);
+
+    // Pagination
+    const paginated = useMemo(() => {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        return sortedEmployees.slice(start, start + ITEMS_PER_PAGE);
+    }, [sortedEmployees, currentPage]);
+
+    const totalPages = Math.ceil(sortedEmployees.length / ITEMS_PER_PAGE);
+
+    const handleSort = (key) => {
+        setSortConfig((prev) => ({
+            key,
+            direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+        }));
+        setCurrentPage(1);
+    };
+
+    const getSortIcon = (key) => {
+        if (sortConfig.key !== key) return null;
+        return sortConfig.direction === "asc" ? (
+            <HiChevronUp className="inline w-4 h-4 ml-1" />
+        ) : (
+            <HiChevronDown className="inline w-4 h-4 ml-1" />
+        );
+    };
+
+    const handleDelete = (emp) => {
+        setEmployeeToDelete(emp);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!employeeToDelete) return;
+        try {
+            await api.delete(`/employees/${employeeToDelete.employee_id}`);
+            setEmployees((prev) =>
+                prev.filter((e) => e.employee_id !== employeeToDelete.employee_id)
+            );
+            setShowDeleteModal(false);
+            setEmployeeToDelete(null);
+        } catch (error) {
+            console.error("Failed to delete employee:", error);
+            alert("Gagal menghapus karyawan.");
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="pt-32 px-8 lg:px-12 min-h-screen bg-ookay/20 flex items-center justify-center">
+                <p className="text-lg text-gray-600">Loading employees...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="pt-32 px-8 lg:px-12 pb-10 bg-ookay/20 min-h-screen">
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-6">
+                <motion.h1
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-3xl lg:text-4xl font-extrabold text-yes"
+                >
+                    Employee Management
+                </motion.h1>
+
+                <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                    {/* Search */}
+                    <div className="relative w-full sm:w-96">
+                        <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-yes w-5 h-5" />
+                        <input
+                            type="text"
+                            placeholder="Search name or email..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setCurrentPage(1); // Fixed: arrow function tanpa parameter salah
+                            }}
+                            className="w-full pl-10 pr-10 py-3 rounded-lg border border-ookay bg-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-yes/40"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => {
+                                    setSearchQuery("");
+                                    setCurrentPage(1);
+                                }}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Add Button */}
+                    <Link to="/admin/employees/add">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            className="flex items-center justify-center gap-2 px-6 py-3 bg-yes text-white rounded-lg font-medium shadow hover:bg-yes/90 transition"
+                        >
+                            <HiPlus className="w-5 h-5" />
+                            Add Employee
+                        </motion.button>
+                    </Link>
+                </div>
+            </div>
+
+            {/* Search Info */}
+            {searchQuery && (
+                <p className="mb-4 text-sm text-gray-600">
+                    Showing <strong>{sortedEmployees.length}</strong> result(s) for "
+                    <span className="text-yes">{searchQuery}</span>"
+                </p>
+            )}
+
+            {/* Table */}
+            <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow border border-ookay overflow-hidden"
+            >
+                <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm text-left">
+                        <thead className="bg-ookay/40 text-yes text-xs uppercase tracking-wide">
+                        <tr>
+                            <th className="px-6 py-4">Avatar</th>
+                            <th
+                                className="px-6 py-4 cursor-pointer hover:bg-ookay/60 transition"
+                                onClick={() => handleSort("username")}
+                            >
+                                Name {getSortIcon("username")}
+                            </th>
+                            <th
+                                className="px-6 py-4 cursor-pointer hover:bg-ookay/60 transition"
+                                onClick={() => handleSort("email")}
+                            >
+                                Email {getSortIcon("email")}
+                            </th>
+                            <th
+                                className="px-6 py-4 cursor-pointer hover:bg-ookay/60 transition"
+                                onClick={() => handleSort("created_at")}
+                            >
+                                Joined {getSortIcon("created_at")}
+                            </th>
+                            <th className="px-6 py-4 text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {paginated.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-16 text-center text-gray-500 italic">
+                                    {searchQuery ? "No employees found." : "No employees yet."}
+                                </td>
+                            </tr>
+                        ) : (
+                            paginated.map((e) => (
+                                <motion.tr
+                                    key={e.employee_id}
+                                    whileHover={{ backgroundColor: "#FFF5F5" }}
+                                    className="border-t last:border-none"
+                                >
+                                    <td className="px-6 py-4">
+                                        <img
+                                            src={
+                                                e.img_url ||
+                                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                                    e.username || "E"
+                                                )}&background=FEE7E7&color=C31D1D&size=128`
+                                            }
+                                            alt={e.username}
+                                            className="w-12 h-12 rounded-full object-cover shadow-sm"
+                                        />
+                                    </td>
+                                    <td className="px-6 py-4 font-medium text-gray-900">
+                                        {e.username || "-"}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-700">{e.email}</td>
+                                    <td className="px-6 py-4 text-gray-600">
+                                        {e.created_at
+                                            ? new Date(e.created_at).toLocaleDateString("id-ID")
+                                            : "-"}
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <div className="flex justify-center gap-3">
+                                            <Link
+                                                to={`/admin/employees/edit/${e.employee_id}`}
+                                                state={{ employee: e }}  // PASS DATA LANGSUNG
+                                                className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+                                            >
+                                                <HiPencilAlt className="w-4 h-4" />
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDelete(e)}
+                                                className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition"
+                                            >
+                                                <HiTrash className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </motion.tr>
+                            ))
+                        )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-ookay/30 bg-ookay/10">
+                        <p className="text-sm text-gray-600">
+                            Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+                        </p>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                                className="px-4 py-2 rounded-lg bg-white border border-ookay text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-ookay/20 transition"
+                            >
+                                Previous
+                            </button>
+                            <button
+                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages}
+                                className="px-4 py-2 rounded-lg bg-white border border-ookay text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-ookay/20 transition"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </motion.div>
+
+            {/* Delete Modal */}
+            <AnimatePresence>
+                {showDeleteModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                        onClick={() => setShowDeleteModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.9 }}
+                            className="bg-white rounded-2xl p-8 shadow-2xl max-w-md w-full mx-4"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <h3 className="text-2xl font-bold text-yes mb-4">Delete Employee?</h3>
+                            <p className="text-gray-700 mb-6">
+                                Are you sure want to delete <strong>{employeeToDelete?.username}</strong>?
+                                <br />
+                                <span className="text-sm text-gray-500">This action cannot be undone.</span>
+                            </p>
+                            <div className="flex justify-end gap-4">
+                                <button
+                                    onClick={() => setShowDeleteModal(false)}
+                                    className="px-5 py-2.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="px-5 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
+                                >
+                                    Yes, Delete
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
-  };
-
-  return (
-   <div className="p-8 bg-ookay/20 min-h-screen">
-  <motion.div
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4 }}
-    className="mb-8"
-  >
-    {/* Bagian Judul dan Deskripsi */}
-    <div className="mb-6">
-      <h1 className="text-3xl font-bold text-yes">Employee Management</h1>
-      <p className="text-gray-600 mt-2">
-        Manage staff accounts, roles, and activity.
-      </p>
-    </div>
-
-    {/* EmployeeStats + Add Button */}
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      {/* EmployeeStats di kiri */}
-      <div className="w-full md:w-auto">
-        <EmployeeStats total={total} active={activeCount} />
-      </div>
-
-      {/* Tombol tambah di kanan - tampil seperti card */}
-      <motion.div
-        whileHover={{ scale: 1.05, y: -3 }}
-        transition={{ type: "spring", stiffness: 200 }}
-        className="cursor-pointer"
-      >
-        <Link
-          to="add"
-          className="flex flex-col items-center justify-center bg-white border border-red-200 hover:border-red-400 hover:shadow-md transition-all duration-300 rounded-2xl p-6 w-48"
-        >
-          <div className="bg-yes/10 p-3 rounded-full mb-3">
-            <HiPlus className="text-yes text-2xl" />
-          </div>
-          <span className="text-red-600 font-semibold text-sm tracking-wide">
-            Add Employee
-          </span>
-          <p className="text-xs text-gray-500 mt-1">Create new staff account</p>
-        </Link>
-      </motion.div>
-    </div>
-  </motion.div>
-
-  {/* Table di bawah */}
-  <EmployeesTable
-    employees={employees}
-    onDelete={handleDelete}
-    onToggleStatus={handleToggleStatus}
-  />
-</div>
-);
 };
 
 export default EmployeesPage;

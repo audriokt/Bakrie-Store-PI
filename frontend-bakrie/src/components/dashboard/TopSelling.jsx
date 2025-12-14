@@ -1,14 +1,13 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { HiShoppingBag } from "react-icons/hi";
 
-const TopSelling = () => {
-  const products = [
-    { name: "Luminiaire Giotto Headphones", sold: 252 },
-    { name: "Black Sneaker", sold: 186 },
-    { name: "Gray Hoodies", sold: 166 },
-    { name: "Blue Backpack", sold: 93 },
-  ];
+const TopSelling = ({ products }) => {
+  // const products = [
+  //   { name: "Luminiaire Giotto Headphones", sold: 252 },
+  //   { name: "Black Sneaker", sold: 186 },
+  //   { name: "Gray Hoodies", sold: 166 },
+  //   { name: "Blue Backpack", sold: 93 },
+  // ];
 
   return (
     <motion.div

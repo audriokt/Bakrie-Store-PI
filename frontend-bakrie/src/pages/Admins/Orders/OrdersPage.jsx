@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { HiEye, HiTrash, HiClipboardList } from "react-icons/hi";
 import OrdersHeader from "../../../components/Header/OrdersHeader";
 import { Link } from "react-router-dom";

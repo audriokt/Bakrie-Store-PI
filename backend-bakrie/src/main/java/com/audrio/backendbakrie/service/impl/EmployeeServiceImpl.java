@@ -1,5 +1,6 @@
 package com.audrio.backendbakrie.service.impl;
 
+import com.audrio.backendbakrie.entity.Customers;
 import com.audrio.backendbakrie.entity.Employees;
 import com.audrio.backendbakrie.events.EmailVerificationEvent;
 import com.audrio.backendbakrie.io.*;
@@ -277,6 +278,26 @@ public class EmployeeServiceImpl implements EmployeeService {
         log.info("EMPLOYEE LOGIN SUCCESS");
 
         return new AuthResponse(token, role, expirationTime);
+    }
+
+    @Override
+    public EmployeeResponse employeeProfile(String token) {
+        String pureToken = token.replace("Bearer ", "").trim();
+        String email = jwtUtils.extractEmail(pureToken);
+        try{
+            log.info("GET EMPLOYEE PROFILE START | EMAIL: {}", email);
+            System.out.println(email);
+            Employees employee = employeeRepository.findByEmail(email)
+                    .orElseThrow(() -> {
+                        log.warn("Employee not found for profile: {}", email);
+                        return new EmployeeNotFoundException("Employee tidak ditemukan: " + email);
+                    });
+            log.info("GET EMPLOYEE PROFILE SUCCESS");
+            return convertToResponse(employee);
+        } catch (Exception e) {
+            log.error("GET EMPLOYEE PROFILE FAILED {}", email);
+            throw new CustomerNotFoundException("Employee tidak ditemukan");
+        }
     }
 
     private EmployeeResponse convertToResponse(Employees newEmployee) {

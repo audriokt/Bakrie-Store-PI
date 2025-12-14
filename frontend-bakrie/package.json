@@ -26,7 +26,7 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.9.5",
     "sweetalert2": "^11.26.3",
-    "swiper": "^12.0.2",
+    "swiper": "^12.0.3",
     "yup": "^1.7.1"
   },
   "proxy": "http://localhost:9090",

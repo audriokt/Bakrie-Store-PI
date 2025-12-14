@@ -29,7 +29,7 @@ public class Products {
     @NotNull
     @Size(min = 2, max = 100)
     @Column(unique = true)
-    private String product_name;
+    private String productName;
 
     @NotNull
     @Min(0)

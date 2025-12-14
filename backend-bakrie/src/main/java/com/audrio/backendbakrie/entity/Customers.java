@@ -54,7 +54,7 @@ public class Customers implements UserDetails {
 
     @NotNull
     @Column(name = "password")
-    @Size(min = 6, message = "Password minimal 6 karakter")
+    @Size(min = 8, message = "Password minimal 8 karakter")
     private String password;
 
     @Column(name="image_url")

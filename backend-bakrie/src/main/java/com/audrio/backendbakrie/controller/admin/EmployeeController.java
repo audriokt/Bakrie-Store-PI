@@ -1,4 +1,4 @@
-package com.audrio.backendbakrie.controller;
+package com.audrio.backendbakrie.controller.admin;
 
 import com.audrio.backendbakrie.io.EmployeeRequest;
 import com.audrio.backendbakrie.io.EmployeeResponse;
@@ -77,6 +77,17 @@ public class EmployeeController {
     public void deleteCustomer(@Valid @PathVariable String id) {
         try {
             employeeService.delete(UUID.fromString(id));
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/employee/myprofile")
+    @ResponseStatus(HttpStatus.OK)
+    public EmployeeResponse myProfile(@Valid @RequestHeader("Authorization") String token){
+        try{
+            log.info("Method : GET | Endpoint : /employee/myprofile | Payload : {}", token);
+            return employeeService.employeeProfile(token);
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }

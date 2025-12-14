@@ -27,3 +27,7 @@ export const updateEmployeeProfile = async (employeeId, formData) => {
         },
     });
 };
+
+export const profileEmployee = async () => {
+    return await axios.get(`${URL_BASE}/employee/myprofile`)
+}

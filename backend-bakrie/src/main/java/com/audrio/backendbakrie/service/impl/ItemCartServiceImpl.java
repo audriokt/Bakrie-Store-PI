@@ -174,7 +174,7 @@ public class
                         .itemCartId(item.getIdItemCarts())
                         .quantity(item.getQuantity())
                         .subPrice(item.getSubPrice())
-                        .productName(p.getProduct_name())
+                        .productName(p.getProductName())
                         .productImgUrl(p.getImage_url())
                         .build();
                 })

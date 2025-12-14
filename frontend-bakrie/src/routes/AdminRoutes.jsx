@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import AdminLayout from "../components/layout/admin/AdminLayout";
-import DashBoardPage from "../pages/Admins/Dashboard/DashBoardPage";
+import AdminDashBoardPage from "../pages/Admins/Dashboard/AdminDashBoardPage.jsx";
 import ProductsPage from "../pages/Admins/Products/ProductsPage";
 import AddProductsPage from "../pages/Admins/Products/AddProductsPage";
 import EditProductPage from "../pages/Admins/Products/EditProductPage";
@@ -17,8 +17,8 @@ function AdminRoutes() {
             {/* Semua route admin di-wrap oleh AdminLayout */}
             <Route path="/admin" element={<AdminLayout />}>
                 {/* Dashboard */}
-                <Route index element={<DashBoardPage />} /> {/* /admin */}
-                <Route path="dashboard" element={<DashBoardPage />} /> {/* /admin/dashboard */}
+                <Route index element={<AdminLayout />} /> {/* /admin */}
+                <Route path="dashboard" element={<AdminLayout />} /> {/* /admin/dashboard */}
 
                 {/* Products */}
                 <Route path="products">

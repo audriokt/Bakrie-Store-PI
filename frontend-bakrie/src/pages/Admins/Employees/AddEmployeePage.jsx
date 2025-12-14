@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { HiUpload } from "react-icons/hi";
 import { addEmployee } from "../../../services/employeeService";
 

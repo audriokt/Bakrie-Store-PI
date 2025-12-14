@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("JvmTaintAnalysis")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -48,6 +49,7 @@ public class CustomerController {
         ObjectMapper mapper = new ObjectMapper();
         UpdateProfileCusRequest request = null;
         try{
+            //noinspection JvmTaintAnalysis
             request = mapper.readValue(customerString, UpdateProfileCusRequest.class);
             return customerService.update(UUID.fromString(custId), request, file);
         } catch(JsonProcessingException e) {

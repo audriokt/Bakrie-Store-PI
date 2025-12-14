@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
 import { HiUpload } from "react-icons/hi";
-import { addProduct } from "../../../services/productService";
+import api from "@/services/adminDashboardService.js";
+import {useNavigate} from "react-router-dom";
 
 
 const AddProductsPage = () => {
+    const navigate = useNavigate()
   const [preview, setPreview] = useState(null);
   const [file, setFile] = useState(null);
   const [form, setForm] = useState({
@@ -29,40 +30,33 @@ const AddProductsPage = () => {
   };
 
   // handle save button
-  const handleSave = async (e) => {
-    e.preventDefault();
-    if (!form.product_name || !file) {
-      alert("Please fill all required fields and select an image!");
-      return;
-    }
+    const handleSave = async (e) => {
+        e.preventDefault();
+        if (!form.product_name || !form.product_price || !form.product_stock || !file) {
+            alert("Please fill all required fields and upload an image!");
+            return;
+        }
 
-    // siapkan data product dalam bentuk JSON string
-    const productData = {
-      product_name: form.product_name,
-      product_price: parseFloat(form.product_price),
-      description: form.description,
-      product_stock: parseInt(form.product_stock),
+        const productData = {
+            product_name: form.product_name,
+            product_price: parseFloat(form.product_price),
+            description: form.description,
+            product_stock: parseInt(form.product_stock, 10),
+        };
+
+        const formData = new FormData();
+        formData.append("product", JSON.stringify(productData));
+        formData.append("file", file);
+
+        try {
+            await api.post("/products", formData);
+            alert("Product added successfully!");
+            navigate("/admin/products");
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Failed to add product.");
+        }
     };
-
-    // buat FormData untuk kirim file + data json
-    const formData = new FormData();
-    formData.append("product", JSON.stringify(productData));
-    formData.append("file", file);
-
-    try {
-      const response = await addProduct(formData);
-      alert("Product added successfully!");
-      console.log("Response:", response.data);
-
-      // reset form
-      setForm({ product_name: "", product_price: "", description: "", product_stock: "" });
-      setFile(null);
-      setPreview(null);
-    } catch (error) {
-      console.error("Error adding product:", error);
-      alert("Failed to add product. Check console for details.");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">

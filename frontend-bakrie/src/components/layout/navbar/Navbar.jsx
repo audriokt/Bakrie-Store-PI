@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth.js";
+import SearchBar from "../../core/SearchBar";
 import Swal from "sweetalert2";
 
 const Navbar = () => {
@@ -12,7 +13,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
+    useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) setIsScrolled(true);
       else setIsScrolled(false);
@@ -31,7 +32,7 @@ const Navbar = () => {
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    logout(); 
+    logout();
 
     Swal.fire({
       title: "Logout Successful",
@@ -41,11 +42,11 @@ const Navbar = () => {
       confirmButtonColor: "#C31D1D"
     }).then((result) => {
       if (result.isConfirmed) {
-        navigate("/"); 
+        navigate("/");
       }
     })
     if (isOpen) {
-      handleClick(); 
+      handleClick();
     }
   };
 
@@ -56,63 +57,72 @@ const Navbar = () => {
         location.pathname === "/" ? "transition-all duration-500" : ""
       } ${isScrolled ? "bg-ookay shadow-md backdrop-blur-sm" : "bg-transparent"}`}
     >
-      {/* Hamburger Menu */}
-      <div className="flex w-20">
-        <button
-          className="flex justify-center items-center gap-2 w-auto relative z-[999]"
-          onClick={handleClick}
-        >
-          <div className="flex flex-col gap-1">
-            <span
-              className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${
-                isOpen && "rotate-45 translate-y-2"
-              }`}
-            ></span>
-            <span
-              className={`w-7 h-[3px] bg-yes rounded-s transition-[width] ${
-                isOpen && "w-auto m-auto"
-              }`}
-            ></span>
-            <span
-              className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${
-                isOpen && "-rotate-45 -translate-y-1.5"
-              }`}
-            ></span>
-          </div>
-        </button>
-      </div>
+        {/* Hamburger Menu */}
+        <div className="flex w-20">
+            <button
+                className="flex justify-center items-center gap-2 w-auto relative z-[999] drop-shadow-lg"
+                onClick={handleClick}
+            >
+                <div className="flex flex-col gap-1">
+      <span
+          className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${
+              isOpen && "rotate-45 translate-y-2"
+          }`}
+      ></span>
+                    <span
+                        className={`w-7 h-[3px] bg-yes rounded-s transition-[width] ${
+                            isOpen && "w-auto m-auto"
+                        }`}
+                    ></span>
+                    <span
+                        className={`w-7 h-[3px] bg-yes rounded-s transition-transform duration-300 ${
+                            isOpen && "-rotate-45 -translate-y-1.5"
+                        }`}
+                    ></span>
+                </div>
+            </button>
+        </div>
 
-      {/* Logo */}
-      <div className="w-full flex justify-center">
-        <Link to="/">
-          <img src="./logo/Patteserie.svg" alt="Patteserie" className="w-48" />
-        </Link>
-      </div>
+        {/* Logo */}
+        <div className="w-full flex justify-center">
+            <Link to="/">
+                <img
+                    src="./logo/Patteserie.svg"
+                    alt="Patteserie"
+                    className="w-48 drop-shadow-md"
+                />
+            </Link>
+        </div>
 
-      {/* Profile + Cart Icons */}
-      <div className="flex gap-5 min-w-fit justify-end w-auto">
-        {user ? (
-          <>
-            <Link to="/profile">
-              <img
-                src={user.img_url || "/defaultProfile/default_profile.png"}
-                alt="user"
-                className="w-10 h-10 rounded-full object-cover border-2 border-yes shadow-md hover:scale-105 transition"
-              />
-            </Link>
-            <Link to="/carts">
-              <i className="bx bx-shopping-bag text-3xl text-yes hover:text-red-700 transition"></i>
-            </Link>
-          </>
-        ) : (
-          <Link
-            to="/login"
-            className="relative bg-red-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-red-700 transition shadow-md text-sm whitespace-nowrap"
-          >
-            <span className="relative top-[-1px]">Login</span>
-          </Link>
-        )}
-      </div>
+        {/* Profile + Cart Icons */}
+        <div className="flex gap-5 min-w-fit justify-end w-auto">
+
+            {user ? (
+                <>
+                    <div className="flex gap-5 items-center">
+                        <SearchBar />
+                        <Link to="/carts">
+                            <i className="bx bx-shopping-bag text-3xl text-yes hover:text-red-700 transition"></i>
+                        </Link>
+
+                        <Link to="/profile">
+                            <img
+                                src={user.img_url || "/defaultProfile/default_profile.png"}
+                                alt="user"
+                                className="w-10 h-10 rounded-full object-cover border-2 border-yes shadow-md hover:scale-105 transition drop-shadow-md"
+                            />
+                        </Link>
+                    </div>
+                </>
+            ) : (
+                <Link
+                    to="/login"
+                    className="relative bg-red-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-red-700 transition shadow-md text-sm whitespace-nowrap drop-shadow-md"
+                >
+                    <span className="relative top-[-1px]">Login</span>
+                </Link>
+            )}
+        </div>
 
       {/* Sidebar */}
       {isOpen && (

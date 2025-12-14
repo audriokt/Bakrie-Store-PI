@@ -11,5 +11,7 @@ public interface ProductService {
     ProductResponse add(ProductRequest request, MultipartFile file);
     List<ProductResponse> getAll();
     void delete(UUID product_id);
-    ProductResponse update(UUID product_id, ProductRequest request);
+    ProductResponse update(UUID product_id, ProductRequest request, MultipartFile file);
+    List<ProductResponse> getTopSellingProductsForHome();
+    List<ProductResponse> searchProductsByName(String keyword);
 }

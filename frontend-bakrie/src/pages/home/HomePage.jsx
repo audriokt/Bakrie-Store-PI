@@ -3,15 +3,32 @@ import Carousel from "../../components/layout/swiperComponent/Carousel";
 import ItemsCard from "../../components/layout/itemsCard/ItemsCard";
 import InfiniteSwiper from "../../components/core/InfiniteSwiper";
 import DisclosureCard from '../../components/core/DisclosureCard'
-import { aboutData } from '../about/AboutPage'
+import { aboutData } from '../about/AboutSection.jsx'
 import { useProduct } from "../../hooks/useProduct.js";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const HomePage = () => {
   const { products, setProducts, loading } = useProduct()
-  // const [loading, setLoading] = useState(true); ini bisa dipake kalo mau tambahin loading state
+    // const [query, setQuery] = useState("");
+    // const [results, setResults] = useState([]);
+    //
+    // const handleSearch = async () => {
+    //     if (!query.trim()) return;
+    //     setLoading(true);
+    //     try {
+    //         const res = await axios.get(`/api/products/search?name=${query}`);
+    //         setResults(res.data);
+    //     } catch (err) {
+    //         console.error("Error fetching products:", err);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
-  return (
+
+
+    return (
     <div className="min-h-[800px] w-full">
       {/* Carousel Section */}
       <Carousel />

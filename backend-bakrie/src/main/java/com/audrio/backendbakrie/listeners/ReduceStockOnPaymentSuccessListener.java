@@ -29,14 +29,14 @@ public class ReduceStockOnPaymentSuccessListener {
             // Validasi ulang stock (double safety)
             if (product.getProduct_stock() < qty) {
                 log.error("STOCK TIDAK CUKUP saat reduce permanent! Product: {} (ID: {}), Dibutuhkan: {}, Tersedia: {}",
-                        product.getProduct_name(), product.getIdProduct(), qty, product.getProduct_stock());
+                        product.getProductName(), product.getIdProduct(), qty, product.getProduct_stock());
                 // Bisa kirim notif ke admin / throw exception / kirim event gagal
                 continue;
             }
 
             product.setProduct_stock(product.getProduct_stock() - qty);
             log.info("Stok {} dikurangi {} → tersisa {}",
-                    product.getProduct_name(), qty, product.getProduct_stock());
+                    product.getProductName(), qty, product.getProduct_stock());
         }
     }
 }

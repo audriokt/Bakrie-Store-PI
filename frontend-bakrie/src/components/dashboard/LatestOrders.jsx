@@ -1,15 +1,14 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { HiClipboardList } from "react-icons/hi";
 
-const LatestOrders = () => {
-  const orders = [
-    { id: "#95954", status: "Paid", date: "10/08/2022", customer: "Ron Vargas", total: "$168.00", color: "text-green-500" },
-    { id: "#95423", status: "Paid", date: "30/07/2022", customer: "Carolyn Hanso", total: "$523.00", color: "text-green-500" },
-    { id: "#92903", status: "Pending", date: "18/07/2022", customer: "Gabriella May", total: "$81.00", color: "text-yellow-500" },
-    { id: "#92627", status: "Failed", date: "09/07/2022", customer: "Tara Fletcher", total: "$279.00", color: "text-red-500" },
-    { id: "#89332", status: "Paid", date: "02/06/2022", customer: "Eileen Horton", total: "$597.00", color: "text-green-500" },
-  ];
+const LatestOrders = ({ todayOrders }) => {
+  // const orders = [
+  //   { id: "#95954", status: "Paid", date: "10/08/2022", customer: "Ron Vargas", total: "$168.00", color: "text-green-500" },
+  //   { id: "#95423", status: "Paid", date: "30/07/2022", customer: "Carolyn Hanso", total: "$523.00", color: "text-green-500" },
+  //   { id: "#92903", status: "Pending", date: "18/07/2022", customer: "Gabriella May", total: "$81.00", color: "text-yellow-500" },
+  //   { id: "#92627", status: "Failed", date: "09/07/2022", customer: "Tara Fletcher", total: "$279.00", color: "text-red-500" },
+  //   { id: "#89332", status: "Paid", date: "02/06/2022", customer: "Eileen Horton", total: "$597.00", color: "text-green-500" },
+  // ];
 
   return (
     <motion.div
@@ -44,7 +43,7 @@ const LatestOrders = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order, i) => (
+            {todayOrders.map((order, i) => (
               <tr
                 key={i}
                 className="border-b border-ookay/60 hover:bg-ookay/20 transition"

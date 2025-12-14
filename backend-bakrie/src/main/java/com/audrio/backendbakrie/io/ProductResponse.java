@@ -1,11 +1,13 @@
 package com.audrio.backendbakrie.io;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import java.sql.Timestamp;
 
 @Builder
 @Data
+@AllArgsConstructor
 public class ProductResponse {
     private String id_product;
     private String product_name;

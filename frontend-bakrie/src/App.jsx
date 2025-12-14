@@ -7,7 +7,7 @@ import Navbar from "./components/layout/navbar/Navbar";
 
 // Pages (semua di luar folder components)
 import HomePage from "./pages/home/HomePage";
-import AboutPage from "./pages/about/AboutPage";
+import AboutPage from "./pages/about/AboutSection.jsx";
 import ProductPage from "./pages/product/ProductPage";
 
 // Catalog & Cart

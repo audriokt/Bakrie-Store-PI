@@ -28,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -180,17 +181,13 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerResponse> getAll() {
         log.info("GET ALL CUSTOMERS START");
-        List<Customers> customers = customerRepository.findAll();
-        log.debug("Found {} customers", customers.size());
-        List<CustomerResponse> responses = customers.stream()
+        return customerRepository.findAll().stream()
                 .map(this::convertToResponse)
-                .toList();
-        log.info("GET ALL CUSTOMERS SUCCESS | Count: {}", responses.size());
-        return responses;
+                .collect(Collectors.toList());
     }
 
     @Override
-    public ResponseEntity<String> verifyEmail(String token) {
+    public ResponseEntity<String> verifyEmail(String token) { 
         log.info("VERIFY EMAIL START");
         log.debug("Verification token (first 20 chars): {}", token != null && token.length() > 20 ? token.substring(0, 20) + "..." : token);
 
@@ -286,6 +283,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public long countTotalCustomers() {
+        log.debug("Counting total customers");
+        return customerRepository.count();
+    }
+
+    @Override
     public UserDetails getCurrentCustomer() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof UserDetails customer) {
@@ -343,9 +346,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         // Password
-        if (request.getPassword() == null || request.getPassword().length() < 6) {
+        if (request.getPassword() == null || request.getPassword().length() < 8) {
             log.warn("Password too short: {} chars", request.getPassword() != null ? request.getPassword().length() : 0);
-            throw new PasswordMinLengthException("Password minimal 6 karakter");
+            throw new PasswordMinLengthException("Password minimal 8 karakter");
         }
 
         // Username

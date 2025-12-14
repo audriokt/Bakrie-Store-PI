@@ -15,18 +15,29 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState(false);
 
-  const validationSchema = yup.object().shape({
-    email: yup.string()
-      .email("Invalid email format")
-      .min(15, "Email must be at least 15 characters") 
-      .max(100, "Email cannot exceed 100 characters") 
-      .required("Email is required"),
-    password: yup.string()
-      .min(6, "Password must be at least 6 characters") 
-      .required("Password is required"),
-  });
+    const validationSchema = yup.object().shape({
+        email: yup.string()
+            // Validasi format email (hanya karakter yang diizinkan)
+            .matches(
+                /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/,
+                "Email tidak valid"
+            )
+            .min(15, "Email harus minimal 15 karakter")
+            .max(100, "Email tidak boleh lebih dari 100 karakter")
+            // Validasi domain khusus gmail.com
+            .test(
+                "is-gmail",
+                "Email hanya boleh menggunakan domain gmail.com",
+                (value) => value ? value.toLowerCase().endsWith("@gmail.com") : false
+            )
+            .required("Email wajib diisi"),
 
-  const formik = useFormik({
+        password: yup.string()
+            .min(8, "Password harus minimal 8 karakter")
+            .required("Password wajib diisi"),
+    });
+
+    const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
@@ -60,9 +71,17 @@ const LoginPage = () => {
       } catch (err) {
         console.error("Login Failed:", err);
         setLoginError(true);
+          let message = err.response?.data
+        if (err.response?.status === 401) {
+            if(message instanceof Object){
+                message = "Invalid email or password"
+            } else {
+                message = err.response?.data
+            }
+        }
         Swal.fire({
             title: "Login Failed",
-            text: err.response?.data?.message || "Invalid email or password",
+            text: message,
             icon: "error",
             confirmButtonColor: "#C31D1D"
         });

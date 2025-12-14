@@ -14,4 +14,5 @@ public interface EmployeeService {
     List<EmployeeResponse> getAll();
     ResponseEntity<String> verifyEmail(String token);
     AuthResponse login(EmployeeAuthRequest request);
+    EmployeeResponse employeeProfile(String token);
 }
