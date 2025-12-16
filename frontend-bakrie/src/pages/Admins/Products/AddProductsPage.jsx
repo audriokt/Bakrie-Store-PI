@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { HiUpload } from "react-icons/hi";
-import api from "@/services/adminDashboardService.js";
 import {useNavigate} from "react-router-dom";
 
 

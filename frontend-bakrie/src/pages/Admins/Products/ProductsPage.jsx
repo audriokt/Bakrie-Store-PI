@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {  AnimatePresence } from "framer-motion";
 import { HiSearch, HiChevronUp, HiChevronDown, HiPlus, HiPencilAlt, HiTrash } from "react-icons/hi";
 import { Link } from "react-router-dom";
-import api from "../../../services/adminDashboardService.js";
+import { getProducts } from "../../../services/adminDashboardService.js";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -19,7 +19,7 @@ const ProductsPage = () => {
     useEffect(() => {
         const loadProducts = async () => {
             try {
-                const data = await api.get("/products");
+                const data = await getProducts();
                 setProducts(data || []);
             } catch (error) {
                 console.error("Failed to fetch products:", error);

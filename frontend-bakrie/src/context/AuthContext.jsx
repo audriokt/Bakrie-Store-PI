@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         const role = localStorage.getItem("role");
         if (token && role) {
             setAuth({ token, role });
-            fetchUser(role); // gunakan role dari localStorage, bukan dari state
+            fetchUser(role);
         }
     }, []);
 

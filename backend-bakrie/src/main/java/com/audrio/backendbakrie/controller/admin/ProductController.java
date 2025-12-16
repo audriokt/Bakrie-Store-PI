@@ -42,12 +42,13 @@ public class ProductController {
     }
 
     @GetMapping("/public/products/fetchProducts")
-    public Page<ProductResponse> fetchAllProducts(
+    public ResponseEntity<Page<ProductResponse>> fetchAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size) {
 
         log.info("Method : GET | Endpoint : /public/products/fetchProducts | page={} size={}", page, size);
-        return productService.getAll(page, size);
+        Page<ProductResponse> products = productService.getAll(page, size);
+        return ResponseEntity.ok(products);
     }
 
 

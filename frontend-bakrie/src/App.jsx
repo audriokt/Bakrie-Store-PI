@@ -26,14 +26,10 @@ import OrderHistoryPage from "./pages/transaction/OrderHistoryPage";
 import OrderHistoryDetailPage from "./pages/transaction/OrderHistoryDetailPage";
 
 // Admin Routes
-import AdminRoutes from "./routes/AdminRoutes";
+import AdminRoutes from "./routes/AdminRoutes.jsx";
 
 function App() {
   const location = useLocation();
-
-  // halaman yang tidak menampilkan navbar & footer
-  const hideLayoutPaths = ["/login", "/signup", "/login-employee"];
-  const shouldHideLayout = hideLayoutPaths.includes(location.pathname);
 
   // // deteksi halaman admin
   // const isAdminPage = location.pathname.startsWith("/admin");
@@ -44,10 +40,11 @@ function App() {
     location.pathname === "/signup" ||
     location.pathname === "/login-employee";
 
+  console.log("Current path:", location.pathname);
   return (
     <>
     {/* klo true di halaman login signup maka navbar dihilangin */}
-      {!shouldHideLayout && <Navbar />}
+      {!hideNavbarFooter && <Navbar />}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
@@ -73,7 +70,7 @@ function App() {
             {/* Route untuk halaman admin */}
             <Route path="/admin/*" element={<AdminRoutes />} />
         </Routes>
-      {!shouldHideLayout && <Footer />}
+      {!hideNavbarFooter && <Footer />}
     </>
   )
 }

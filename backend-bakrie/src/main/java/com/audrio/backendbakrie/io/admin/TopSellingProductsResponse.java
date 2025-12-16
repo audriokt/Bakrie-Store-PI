@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Data
@@ -13,7 +14,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class TopSellingProductsResponse {
     // Field sesuai entity Products
-    private String id_product;        // akan diisi dengan UUID.toString()
+    private String id_product;
     private String product_name;
     private double product_price;
     private String description;
@@ -23,5 +24,5 @@ public class TopSellingProductsResponse {
     private Timestamp updated_at;
 
     // Hasil agregasi penjualan
-    private Long totalSold;
+    private BigDecimal totalSold;
 }

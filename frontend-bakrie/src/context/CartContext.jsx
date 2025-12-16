@@ -26,12 +26,6 @@ export const CartProvider = ({ children }) => {
 
   // Debugging
   useEffect(() => {
-    if (user) {
-        console.group("🔍 DEBUG CART CONTEXT");
-        console.log("User from useAuth:", user);
-        console.log("Final Customer ID:", customerId);
-        console.groupEnd();
-    }
   }, [user, customerId]);
 
   // Update token jika user login/logout

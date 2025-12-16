@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { HiOutlineBell } from "react-icons/hi";
-import AdminSidebar from "./AdminSidebar";
+import { motion } from "framer-motion";
+import AdminSidebar from "./AdminSidebar.jsx";
 
 const AdminLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+    console.log("AdminLayout rendered");
     return (
         <div className="flex min-h-screen bg-gray-100"> {/* gunakan warna default dulu */}
             {/* Sidebar */}

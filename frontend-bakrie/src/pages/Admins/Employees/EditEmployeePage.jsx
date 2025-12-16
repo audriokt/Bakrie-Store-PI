@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HiUpload } from "react-icons/hi";
-import api from "../../../services/adminDashboardService.js";
+import { updateEmployee } from "../../../services/adminDashboardService.js";
 
 const EditEmployeePage = () => {
     const { state } = useLocation();
@@ -55,8 +55,8 @@ const EditEmployeePage = () => {
         }
 
         try {
-            // Backend kamu pakai POST/PUT? Dari kode sebelumnya sepertinya POST untuk update juga
-            await api.post(`/employees`, formData); // atau PUT jika ada
+            // Kirim id employee ke service
+            await updateEmployee(employee.id, formData);
             alert("Karyawan berhasil diperbarui!");
             navigate("/admin/employees");
         } catch (error) {

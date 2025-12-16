@@ -18,7 +18,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN')")
 @Controller
 public class DashboardAdminController {
     private final DashboardService dashboardService;
@@ -103,5 +102,21 @@ public class DashboardAdminController {
             @RequestPart(value = "file", required = false) MultipartFile file) {
         return ResponseEntity.ok(employeeService.add(request));
     }
+    @DeleteMapping("/employees/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable UUID id) {
+        employeeService.delete(id);
+        return ResponseEntity.ok().build();
+    }
+    @PutMapping(value = "/employees/{id}", consumes = "multipart/form-data")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EmployeeResponse> updateEmployee(
+            @PathVariable UUID id,
+            @RequestPart("employee") EmployeeRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        // Jika file null, update tanpa ganti foto
+        return ResponseEntity.ok(employeeService.update(id, request, file));
+    }
+
 
 }

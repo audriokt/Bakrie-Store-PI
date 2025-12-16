@@ -1,47 +1,45 @@
 // src/services/api.js
-const API_BASE = "http://localhost:9090/api/v1.0/admin";
+import api from "../utils/axiosConfig.js"; // ini adalah axios instance yang sudah kamu buat
 
-const api = {
-    get: async (endpoint) => {
-        const res = await fetch(`${API_BASE}${endpoint}`, {
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json();
-    },
+// Dashboard
+export const getDashboard = () => api.get("/admin/dashboard");
 
-    post: async (endpoint, data) => {
-        const res = await fetch(`${API_BASE}${endpoint}`, {
-            method: "POST",
-            credentials: "include",
-            body: data,
-        });
-        if (!res.ok) throw new Error("Failed to post");
-        return res.json();
-    },
+// Products
+export const getProducts = (page = 0, size = 8) =>
+    api.get(`/admin/products?page=${page}&size=${size}`);
 
-    patch: async (endpoint, data) => {
-        const res = await fetch(`${API_BASE}${endpoint}`, {
-            method: "PATCH",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
-        if (!res.ok) throw new Error("Failed to patch");
-        return res.json();
-    },
+export const addProduct = (formData) =>
+    api.post("/admin/products", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
 
-    delete: async (endpoint) => {
-        const res = await fetch(`${API_BASE}${endpoint}`, {
-            method: "DELETE",
-            credentials: "include",
-        });
-        if (!res.ok) throw new Error("Failed to delete");
-        return res;
-    },
-};
+export const updateProduct = (id, formData) =>
+    api.put(`/admin/products/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
 
-export default api;
+export const deleteProduct = (id) => api.delete(`/admin/products/${id}`);
+
+// Orders
+export const getOrders = () => api.get("/admin/orders");
+export const getOrderById = (id) => api.get(`/admin/orders/${id}`);
+export const updateOrderStatus = (id, status) =>
+    api.patch(`/admin/orders/${id}/status?status=${status}`);
+
+// Customers
+export const getCustomers = () => api.get("/admin/customers");
+export const deleteCustomer = (id) => api.delete(`/admin/customers/${id}`);
+
+// Employees
+export const getEmployees = () => api.get("/admin/employees");
+export const addEmployee = (formData) =>
+    api.post("/admin/employees", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+
+export const updateEmployee = (id, formData) =>
+    api.put(`/admin/employees/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+
+export const deleteEmployee = (id) => api.delete(`/admin/employees/${id}`);

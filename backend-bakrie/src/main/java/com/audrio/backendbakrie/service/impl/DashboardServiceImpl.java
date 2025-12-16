@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.audrio.backendbakrie.entity.Orders;
 import com.audrio.backendbakrie.io.ProductResponse;
 import com.audrio.backendbakrie.io.admin.TopSellingProductsResponse;
 import com.audrio.backendbakrie.repository.CustomerRepository;
@@ -37,7 +38,10 @@ public class DashboardServiceImpl implements DashboardService {
         long totalProducts = productRepository.count();
 
         BigDecimal todayRevenue = orderRepository.sumTotalAmountByStatusAndDateRange(
-                "PAID", startOfDay, endOfDay).orElse(BigDecimal.ZERO);
+                Orders.OrderStatus.PAID,  // Use enum, not string
+                startOfDay,
+                endOfDay
+        ).orElse(BigDecimal.ZERO);
 
         long todayOrders = orderRepository.countByOrderDateBetween(startOfDay, endOfDay);
         long totalOrders = orderRepository.count();

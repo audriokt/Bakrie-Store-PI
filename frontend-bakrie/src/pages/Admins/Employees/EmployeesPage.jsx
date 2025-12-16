@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { HiSearch, HiChevronUp, HiChevronDown, HiPlus, HiPencilAlt, HiTrash } from "react-icons/hi";
 import { Link } from "react-router-dom";
-import api from "../../../services/adminDashboardService.js";
+import { getEmployees } from "../../../services/adminDashboardService.js";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -19,7 +19,7 @@ const EmployeesPage = () => {
     useEffect(() => {
         const loadEmployees = async () => {
             try {
-                const data = await api.get("/employees");
+                const data = await getEmployees();
                 setEmployees(data || []);
             } catch (error) {
                 console.error("Failed to fetch employees:", error);

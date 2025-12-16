@@ -24,37 +24,36 @@ public interface OrderRepository extends JpaRepository<Orders, UUID> {
 
     @Query("SELECT COALESCE(SUM(o.total), 0) FROM Orders o WHERE o.orderStatus = :status AND o.orderDate BETWEEN :start AND :end")
     Optional<BigDecimal> sumTotalAmountByStatusAndDateRange(
-            @Param("status") String status,
+            @Param("status") Orders.OrderStatus status,
             @Param("start") LocalDateTime start,
-            @Param("end")   LocalDateTime end);
+            @Param("end") LocalDateTime end);
 
     @Query("SELECT COUNT(o) FROM Orders o WHERE o.orderDate BETWEEN :start AND :end")
     long countByOrderDateBetween(
             @Param("start") LocalDateTime start,
             @Param("end")   LocalDateTime end);
 
-    @Query("""
-        SELECT 
-            p.idProduct     AS id_product,
-            p.productName             AS product_name,
-            p.product_price            AS product_price,
-            p.description              AS description,
-            p.product_stock            AS product_stock,
-            p.image_url                AS image_url,
-            p.created_at               AS created_at,
-            p.updated_at              AS updated_at,
-            SUM(od.quantity)           AS totalSold
-        FROM OrderDetail od
-        JOIN od.product p
-        JOIN od.orders o
-        WHERE o.orderStatus IN ('PENDING', 'PAID')  
-        GROUP BY p.idProduct, p.productName, p.product_price, p.description, 
-                 p.product_stock, p.image_url, p.created_at, p.updated_at
-        ORDER BY totalSold DESC
-        LIMIT 10
-        """)
+    @Query(value = """
+    SELECT
+        BIN_TO_UUID(p.id_product) AS id_product,
+        p.product_name AS product_name,
+        p.product_price AS product_price,
+        p.description AS description,
+        p.product_stock AS product_stock,
+        p.image_url AS image_url,
+        p.created_at AS created_at,
+        p.updated_at AS updated_at,
+        COALESCE(SUM(od.quantity), 0) AS totalSold
+    FROM order_details od
+    JOIN products p ON od.id_product = p.id_product
+    JOIN orders o ON od.id_order = o.id_order
+    WHERE o.order_status IN ('PENDING', 'PAID')
+    GROUP BY p.id_product, p.product_name, p.product_price, p.description,
+             p.product_stock, p.image_url, p.created_at, p.updated_at
+    ORDER BY totalSold DESC
+    LIMIT 10
+    """, nativeQuery = true)
     List<TopSellingProductsResponse> findTop10SellingProducts();
-
 
     long countByOrderStatus(Orders.OrderStatus status);
 

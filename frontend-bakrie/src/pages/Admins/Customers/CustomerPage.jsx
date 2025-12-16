@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { HiSearch, HiChevronUp, HiChevronDown } from "react-icons/hi";
-import api from "../../../services/adminDashboardService";
+import { getCustomers } from "../../../services/adminDashboardService";
 import CustomerStats from "../../../components/dashboard/CustomerStat";
 import CustomerDetailSidebar from "./CustomerDetailSidebar";
 
@@ -18,7 +18,7 @@ const CustomerPage = () => {
     useEffect(() => {
         const loadCustomers = async () => {
             try {
-                const data = await api.get("/customers");
+                const data = await getCustomers();
                 setCustomers(data || []);
             } catch (error) {
                 console.error("Failed to fetch customers:", error);

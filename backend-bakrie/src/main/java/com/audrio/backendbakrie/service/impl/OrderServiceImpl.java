@@ -111,6 +111,7 @@ public class OrderServiceImpl implements OrderService {
         String snapToken = paymentService.createTransactionToken(midtransParams);
 
         transaction.setPaymentToken(snapToken);
+        Transactions savedTransaction = transactionsRepository.save(transaction);
 
         OrdersResponse response = convertToResponse(savedOrder);
         response.setTransactionToken(snapToken);

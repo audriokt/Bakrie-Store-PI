@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { HiUpload } from "react-icons/hi";
-import api from "../../../services/adminDashboardService.js";
+import {getProducts} from "../../../services/adminDashboardService.js";
 
 const EditProductPage = () => {
     const { id } = useParams(); // id_product dari URL
@@ -21,7 +21,7 @@ const EditProductPage = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const data = await api.get(`/products`); // ambil semua dulu, lalu filter
+                const data = await getProducts(); // ambil semua dulu, lalu filter
                 const product = data.find((p) => p.id_product === id);
                 if (!product) throw new Error("Product not found");
 

@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const handleClick = () => setIsOpen(!isOpen);
+    const { user, logout } = useAuth();
 
     const [isScrolled, setIsScrolled] = useState(false);
     const location = useLocation();
@@ -28,8 +29,6 @@ const Navbar = () => {
 
         return () => window.removeEventListener("scroll", handleScroll);
     }, [location]);
-
-    const { user, logout } = useAuth();
 
     const handleLogout = () => {
         logout();
