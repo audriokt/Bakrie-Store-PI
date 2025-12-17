@@ -1,132 +1,204 @@
-import React from "react";
-import { HiEye, HiTrash, HiClipboardList } from "react-icons/hi";
-import OrdersHeader from "../../../components/Header/OrdersHeader";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { 
+  Eye, 
+  Trash2, 
+  Search,
+  Download
+} from "lucide-react";
+import { Link, useParams } from "react-router-dom";
 
-const dummyOrders = [
-  {
-    id_order: "1",
-    orderNumber: "BK-1001",
-    orderDate: "2024-11-01T09:30:00",
-    orderStatus: "Paid",
-    customers: { customerName: "Alya Nirmala" },
-    transaction: { paymentMethod: "VISA", total: 185.0 },
-    items: ["Cheese Croissant", "Chocolate Muffin", "Vanilla Cake Slice"]
-  },
-  {
-    id_order: "2",
-    orderNumber: "BK-1002",
-    orderDate: "2024-11-03T14:10:00",
-    orderStatus: "Pending",
-    customers: { customerName: "Riko Pratama" },
-    transaction: { paymentMethod: "MasterCard", total: 92.5 },
-    items: ["Red Velvet Cupcake", "Blueberry Danish"]
-  },
-  {
-    id_order: "3",
-    orderNumber: "BK-1003",
-    orderDate: "2024-11-05T08:15:00",
-    orderStatus: "Paid",
-    customers: { customerName: "Nadia Wijaya" },
-    transaction: { paymentMethod: "PayPal", total: 240.0 },
-    items: ["Tiramisu Cake", "Strawberry Tart", "Cinnamon Roll"]
-  },
-];
-
+// ===============================
+// ORDERS PAGE
+// ===============================
 const OrdersPage = () => {
-  return (
-    <div className="min-h-screen w-full bg-ookay p-6 md:p-10">
-      {/* header */}
-    <OrdersHeader/>
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
 
-      {/* ===== Tabel ===== */}
+  const dummyOrders = [
+    {
+      id_order: "1",
+      orderNumber: "BK-1001",
+      orderDate: "2024-11-01T09:30:00",
+      orderStatus: "Paid",
+      customers: { customerName: "Alya Nirmala" },
+      transaction: { total: 185 },
+      items: ["Cheese Croissant", "Chocolate Muffin"],
+    },
+    {
+      id_order: "2",
+      orderNumber: "BK-1002",
+      orderDate: "2024-11-03T14:10:00",
+      orderStatus: "Pending",
+      customers: { customerName: "Riko Pratama" },
+      transaction: { total: 92.5 },
+      items: ["Red Velvet Cupcake"],
+    },
+    {
+      id_order: "3",
+      orderNumber: "BK-1003",
+      orderDate: "2024-11-05T11:20:00",
+      orderStatus: "Completed",
+      customers: { customerName: "Siti Aminah" },
+      transaction: { total: 250 },
+      items: ["Birthday Cake", "Macarons"],
+    },
+    {
+      id_order: "4",
+      orderNumber: "BK-1004",
+      orderDate: "2024-11-07T16:45:00",
+      orderStatus: "Cancelled",
+      customers: { customerName: "Budi Santoso" },
+      transaction: { total: 75 },
+      items: ["Baguette"],
+    },
+  ];
+
+  const getStatusColor = (status) => {
+    const colors = {
+      Paid: 'bg-green-100 text-green-700',
+      Pending: 'bg-yellow-100 text-yellow-700',
+      Completed: 'bg-blue-100 text-blue-700',
+      Cancelled: 'bg-red-100 text-red-700',
+    };
+    return colors[status] || 'bg-gray-100 text-gray-700';
+  };
+
+  const filteredOrders = dummyOrders.filter(order => {
+    const matchesSearch = order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         order.customers.customerName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'All' || order.orderStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+ 
+  return (
+    <div className="p-8 bg-gray-50 min-h-screen">
+      {/* Header Section */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-red-600 mb-2">Orders List</h1>
+        <p className="text-gray-600">Track and manage customer orders</p>
+      </div>
+
+     
+      {/* Action Bar */}
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search orders or customers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
+          />
+        </div>
+
+        <div className="flex gap-3">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-6 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent"
+          >
+            <option value="All">All Status</option>
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-6 py-3 bg-white border-2 border-gray-200 rounded-full hover:border-red-400 transition-all flex items-center space-x-2"
+          >
+            <Download size={20} />
+            <span>Export</span>
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Orders Table */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="bg-ookay border border-red-100 shadow-md rounded-2xl overflow-hidden"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="bg-white rounded-3xl shadow-lg border-2 border-red-100 overflow-hidden"
       >
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-left">
-            <thead className="text-red-600 uppercase bg-red-50 text-xs">
-              <tr>
-                <th className="px-6 py-3">Order</th>
-                <th className="px-6 py-3">Date</th>
-                <th className="px-6 py-3">Customer</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Items</th>
-                <th className="px-6 py-3">Total</th>
-                <th className="px-6 py-3 text-center">Action</th>
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gradient-to-r from-red-50 to-pink-50 border-b-2 border-red-100">
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Order #</th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Date</th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Customer</th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Items</th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Status</th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Total</th>
+                <th className="px-6 py-4 text-center text-sm font-bold text-gray-700">Actions</th>
               </tr>
             </thead>
-
-            <tbody className="bg-white">
-              {dummyOrders.map((order, index) => (
+            <tbody>
+              {filteredOrders.map((order, index) => (
                 <motion.tr
                   key={order.id_order}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: index * 0.05 }}
-                  whileHover={{ backgroundColor: "#FFF5F5" }}
-                  className="border-b last:border-none"
+                  whileHover={{ backgroundColor: '#fff5f5' }}
+                  className="border-b border-gray-100 hover:shadow-sm transition-all"
                 >
-                  {/* Order Number */}
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    #{order.orderNumber}
+                  <td className="px-6 py-4">
+                    <span className="font-semibold text-gray-800">#{order.orderNumber}</span>
                   </td>
-
-                  {/* Date */}
-                  <td className="px-6 py-4 text-gray-700">
-                    {new Date(order.orderDate).toLocaleDateString("id-ID")}
+                  <td className="px-6 py-4 text-gray-600">
+                    {new Date(order.orderDate).toLocaleDateString("id-ID", { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
                   </td>
-
-                  {/* Customer */}
-                  <td className="px-6 py-4 text-gray-800">
-                    {order.customers.customerName}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                        {order.customers.customerName.charAt(0)}
+                      </div>
+                      <span className="font-medium text-gray-800">{order.customers.customerName}</span>
+                    </div>
                   </td>
-
-                  {/* Status */}
-                  <td className="px-6 py-4 font-semibold">
-                    <span
-                      className={`${
-                        order.orderStatus === "Paid"
-                          ? "text-green-600"
-                          : order.orderStatus === "Pending"
-                          ? "text-orange-500"
-                          : "text-red-600"
-                      }`}
-                    >
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600">
+                      {order.items.slice(0, 2).join(", ")}
+                      {order.items.length > 2 && ` +${order.items.length - 2} more`}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.orderStatus)}`}>
                       {order.orderStatus}
                     </span>
                   </td>
-
-                  {/* Items */}
-                  <td className="px-6 py-4 text-gray-700">
-                    {order.items.join(", ")}
+                  <td className="px-6 py-4">
+                    <span className="font-bold text-red-600 text-lg">
+                      ${order.transaction.total}
+                    </span>
                   </td>
-
-                  {/* Total */}
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    ${order.transaction.total.toFixed(2)}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-6 py-4 text-center">
-                    <div className="flex justify-center gap-3">
-
-                      {/* VIEW BUTTON */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-center space-x-2">
                       <Link to={`/admin/orders/detail/${order.id_order}`}>
-                        <button className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full transition">
-                          <HiEye size={18} />
-                        </button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          className="p-2 bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition-colors"
+                        >
+                          <Eye size={18} />
+                        </motion.button>
                       </Link>
-
-
-                      {/* DELETE BUTTON */}
-                      <button className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-full transition">
-                        <HiTrash size={18} />
-                      </button>
-
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="p-2 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </motion.button>
                     </div>
                   </td>
                 </motion.tr>
@@ -134,9 +206,17 @@ const OrdersPage = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Empty State */}
+        {filteredOrders.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">📦</div>
+            <p className="text-gray-500 text-lg">No orders found</p>
+            <p className="text-gray-400 text-sm">Try adjusting your search or filters</p>
+          </div>
+        )}
       </motion.div>
     </div>
   );
 };
-
 export default OrdersPage;

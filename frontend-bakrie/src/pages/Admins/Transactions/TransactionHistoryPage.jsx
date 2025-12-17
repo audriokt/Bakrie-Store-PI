@@ -1,120 +1,112 @@
-import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function TransactionDetailPage() {
+// ===============================
+// 🟢 DUMMY DATA
+import dummyTransactions from "../../../data/dummyTransactions";
+
+// ===============================
+// 🔴 API ASLI (JANGAN DIHAPUS)
+// import { fetchTransactions } from "../../../services/transactionService";
+
+const TransactionHistoryPage = () => {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const transaction = state?.transaction;
+  const [transactions, setTransactions] = useState([]);
 
-  if (!transaction) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Transaction not found.</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    // ===============================
+    // 🟢 DUMMY MODE
+    setTransactions(dummyTransactions);
+    // ===============================
+
+    /*
+    // 🔴 API MODE
+    const fetchTransactions = async () => {
+      const res = await fetch("/api/admin/transactions");
+      const data = await res.json();
+      setTransactions(data);
+    };
+    fetchTransactions();
+    */
+  }, []);
 
   return (
-    <div className="w-full min-h-screen bg-[#F9F9FC] px-4 md:px-8 py-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="p-8 bg-gray-50 min-h-screen">
+      {/* header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-red-600 mb-2">
+          Transaction History
+        </h1>
+        <p className="text-gray-600">
+          View all customer transactions
+        </p>
+      </div>
 
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow p-6 flex justify-between items-center"
-        >
-          <h1 className="text-2xl font-semibold text-gray-700">
-            Transaction Detail
-          </h1>
+      {/* table */}
+      <div className="bg-white rounded-3xl shadow border overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-red-50">
+            <tr>
+              <th className="px-6 py-4 text-left">ID</th>
+              <th className="px-6 py-4 text-left">Customer</th>
+              <th className="px-6 py-4 text-center">Total</th>
+              <th className="px-6 py-4 text-center">Status</th>
+              <th className="px-6 py-4 text-center">Date</th>
+              <th className="px-6 py-4 text-center">Action</th>
+            </tr>
+          </thead>
 
-          <button
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
-          >
-            Back
-          </button>
-        </motion.div>
-
-        {/* Transaction Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl shadow p-6 grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          <Info label="Transaction ID" value={transaction.id} />
-          <Info label="Customer" value={transaction.customer_name} />
-          <Info label="Date" value={transaction.date} />
-          <Info label="Payment Method" value={transaction.payment_method} />
-          <Info
-            label="Status"
-            value={transaction.status}
-            highlight
-          />
-          <Info
-            label="Total"
-            value={`Rp ${Number(transaction.total).toLocaleString("id-ID")}`}
-          />
-        </motion.div>
-
-        {/* Products */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow overflow-hidden"
-        >
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold text-gray-700">
-              Purchased Products
-            </h2>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-gray-600">
-                <tr>
-                  <th className="px-6 py-4 text-left">Product</th>
-                  <th className="px-6 py-4 text-center">Qty</th>
-                  <th className="px-6 py-4 text-right">Price</th>
-                  <th className="px-6 py-4 text-right">Subtotal</th>
+          <tbody>
+            {transactions.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="py-10 text-center text-gray-500">
+                  No transactions found
+                </td>
+              </tr>
+            ) : (
+              transactions.map((trx) => (
+                <tr
+                  key={trx.id}
+                  className="border-t hover:bg-red-50 transition"
+                >
+                  <td className="px-6 py-4 font-semibold">{trx.id}</td>
+                  <td className="px-6 py-4">{trx.customer}</td>
+                  <td className="px-6 py-4 text-center font-bold text-red-600">
+                    Rp {(trx.total ?? 0).toLocaleString("id-ID")}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium
+                        ${
+                          trx.status === "Paid"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                    >
+                      {trx.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {trx.date}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      onClick={() =>
+                        navigate(`/admin/transactions/${trx.id}`)
+                      }
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      Detail
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {transaction.items.map((item, i) => (
-                  <tr key={i} className="border-t">
-                    <td className="px-6 py-4">{item.name}</td>
-                    <td className="px-6 py-4 text-center">{item.qty}</td>
-                    <td className="px-6 py-4 text-right">
-                      Rp {item.price.toLocaleString("id-ID")}
-                    </td>
-                    <td className="px-6 py-4 text-right font-semibold">
-                      Rp {(item.qty * item.price).toLocaleString("id-ID")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
-
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
-}
+};
 
-/* Reusable Info Item */
-const Info = ({ label, value, highlight }) => (
-  <div>
-    <p className="text-sm text-gray-500">{label}</p>
-    <p
-      className={`text-base font-semibold ${
-        highlight ? "text-[#FF6781]" : "text-gray-700"
-      }`}
-    >
-      {value}
-    </p>
-  </div>
-);
+export default TransactionHistoryPage;

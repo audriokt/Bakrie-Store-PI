@@ -1,35 +1,38 @@
 import React from "react";
 
 const TopSelling = ({ products }) => {
+  if (!Array.isArray(products) || products.length === 0) {
     return (
-        <div>
-            <h2 className="text-lg font-semibold mb-4">Top Selling Products</h2>
-            <div className="space-y-4">
-                {products.map((p) => (
-                    <div
-                        key={p.id_product}
-                        className="flex gap-4 bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition"
-                    >
-                        <img
-                            src={p.image_url}
-                            alt={p.product_name}
-                            className="w-20 h-20 object-cover rounded-md"
-                        />
-                        <div>
-                            <h3 className="font-semibold text-gray-800">{p.product_name}</h3>
-                            <p className="text-sm text-gray-500">{p.description}</p>
-                            <p className="text-sm text-red-600 font-bold">
-                                Rp {p.product_price.toLocaleString("id-ID")}
-                            </p>
-                            <p className="text-xs text-gray-400">
-                                Terjual: {p.totalSold} | Stok: {p.product_stock}
-                            </p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <h2 className="text-base font-semibold mb-3">Top Selling Products</h2>
+        <p className="text-gray-500 text-sm">No data available.</p>
+      </div>
     );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-4">
+      <h2 className="text-base font-semibold mb-3">Top Selling Products</h2>
+
+      <div className="space-y-2">
+        {products.map((p, index) => (
+          <div
+            key={p.id ?? index}
+            className="flex gap-3 bg-gray-50 rounded-md p-3"
+          >
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm text-gray-800">
+                {p.product_name || "Unnamed Product"}
+              </h3>
+              <p className="text-xs text-gray-400">
+                Terjual: {Number(p.totalSold ?? 0)}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default TopSelling;

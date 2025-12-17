@@ -1,12 +1,14 @@
 import React from "react";
 
 const CustomerStats = ({ customers }) => {
-    return (
-        <div>
-            <h2 className="text-lg font-semibold mb-4">Customer Stats</h2>
-            <p className="text-gray-700">Total Customers: {customers}</p>
-        </div>
-    );
+  return (
+    <div className="bg-white rounded-lg p-4 shadow-sm border">
+      <p className="text-xs text-gray-500">Total Customers</p>
+      <p className="text-xl font-bold text-red-600">
+        {customers.length}
+      </p>
+    </div>
+  );
 };
 
 export default CustomerStats;

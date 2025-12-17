@@ -1,112 +1,86 @@
 import { motion } from "framer-motion";
-import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Sidebar,
-  SidebarItems,
-  SidebarItem,
-  SidebarItemGroup,
-} from "flowbite-react";
-import {
-  HiShoppingBag,
-  HiUserGroup,
-  HiUsers,
-  HiTable,
-  HiUserCircle,
-  HiChartPie,
-  HiInbox,
-  HiMenu,
-  HiX,
-} from "react-icons/hi";
+  Home,
+  Package,
+  ShoppingBag,
+  Users,
+  UserCheck,
+  Clock,
+} from "lucide-react";
+import { NavLink } from "react-router-dom";
 
-const AdminSidebar = ({ isOpen, onToggle }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
+const menuItems = [
+  { path: "/admin/dashboard", icon: Home, label: "Dashboard" },
+  { path: "/admin/products", icon: Package, label: "Products" },
+  { path: "/admin/orders", icon: ShoppingBag, label: "Orders" },
+  { path: "/admin/customers", icon: Users, label: "Customers" },
+  { path: "/admin/employees", icon: UserCheck, label: "Employees" },
+  { path: "/admin/transactions", icon: Clock, label: "Transaction History" },
+];
 
-  const baseItemClass =
-    "!bg-ookay !text-yes hover:!bg-ookay/80 hover:!text-yes transition-all duration-200";
-  const activeItemClass = "!bg-yes !text-white";
-  const isActive = (path) => location.pathname.includes(path);
-
-  const navItems = [
-    { to: "/admin/dashboard", icon: HiChartPie, label: "Dashboard" },
-    { to: "/admin/products", icon: HiShoppingBag, label: "Products" },
-    { to: "/admin/orders", icon: HiInbox, label: "Order List" },
-    { to: "/admin/employees", icon: HiUserGroup, label: "Employees" },
-    { to: "/admin/customers", icon: HiUsers, label: "Customers" },
-    { to: "/admin/transactions", icon: HiTable, label: "Transaction Report" },
-    { to: "/admin/profile", icon: HiUserCircle, label: "Profile" },
-  ];
-
-  const handleNavClick = (to) => navigate(to);
-
+const AdminSidebar = () => {
   return (
-    <>
+    <motion.aside
+      initial={{ x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      className="w-72 bg-gradient-to-b from-pink-200 via-pink-100 to-pink-50 flex flex-col shadow-lg"
+    >
+      {/* Logo */}
+      <div className="p-8 flex justify-center">
+        <img
+          src="/logo/Patteserie.svg"
+          alt="Patteserie Logo"
+          className="w-40 h-auto"
+        />
+      </div>
 
-      <motion.div
-        initial={false}
-        animate={{ width: isOpen ? 288 : 80 }}
-        transition={{ duration: 0.3 }}
-        className="hidden lg:flex flex-col bg-ookay border-r border-ookay/30 shadow-lg fixed z-[997] overflow-hidden pt-16"
-        style={{
-          top: 0,
-          height: "100vh",
-        }}
-      >
-        {/* hamburger dalam sidebarnya */}
-        <div className="hidden lg:flex items-center justify-center p-4 bg-ookay border-b border-ookay/30 fixed top-0 left-0 w-20 z-50">
-          <button
-            onClick={onToggle}
-            className="text-yes hover:bg-yes/10 p-2 rounded-lg transition"
-          >
-            {isOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
-          </button>
-        </div>
+      {/* Menu */}
+      <nav className="flex-1 px-4 py-6 space-y-2">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink key={item.label} to={item.path}>
+              {({ isActive }) => (
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`w-full flex items-center space-x-4 px-6 py-4 rounded-3xl transition-all
+                    ${
+                      isActive
+                        ? "bg-white text-red-600 shadow-lg"
+                        : "text-gray-600 hover:bg-pink-200/50"
+                    }
+                  `}
+                >
+                  <Icon size={24} />
+                  <span className="text-base font-semibold">
+                    {item.label}
+                  </span>
+                </motion.div>
+              )}
+            </NavLink>
+          );
+        })}
+      </nav>
 
-        {/* navigation */}
-        <div className="flex-1 py-4">
-          <Sidebar
-            aria-label="Admin Sidebar"
-            className="!bg-transparent !border-none [&>*]:!bg-transparent"
-          >
-            <SidebarItems className="!bg-transparent">
-              <SidebarItemGroup className="!border-0 !space-y-1 !px-2 !bg-transparent">
-                {navItems.map((item) => (
-                  <SidebarItem
-                    key={item.to}
-                    icon={item.icon}
-                    onClick={() => handleNavClick(item.to)}
-                    active={isActive(item.to)}
-                    className={`${baseItemClass} ${
-                      isActive(item.to) ? activeItemClass : ""
-                    } ${isOpen ? "" : "!justify-center"} !rounded-lg !py-3 !bg-ookay`}
-                  >
-                    {isOpen && item.label}
-                  </SidebarItem>
-                ))}
-              </SidebarItemGroup>
-            </SidebarItems>
-          </Sidebar>
-        </div>
-
-        {/* Footer */}
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="p-4 border-t border-ookay/30 bg-ookay/60"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-yes rounded-full flex items-center justify-center">
-                <HiUserCircle className="text-white text-lg" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-yes">Admin</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </motion.div>
-    </>
+      {/* Profile */}
+      <div className="p-4">
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="w-full flex items-center space-x-3 p-4 rounded-3xl bg-white/50 hover:bg-pink-200/50 transition-all"
+        >
+          <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center text-white font-bold">
+            A
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-700">Admin</p>
+            <p className="text-xs text-gray-500">
+              admin@patteserie.com
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    </motion.aside>
   );
 };
 
